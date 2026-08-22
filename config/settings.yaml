@@ -1,0 +1,178 @@
+# AI Quality & Model-Risk Platform (A4) : runtime configuration.
+#
+# Four deployment profiles, selected by AI_QUALITY_PROFILE (or profile: below):
+#   gcp    : Google Cloud managed services (lazy SDK imports). Production sets
+#            AI_QUALITY_PROFILE=gcp explicitly (e.g. in the Dockerfile / runbook).
+#   local  : a WORKING offline laptop stack (SQLite FTS5 + deterministic scorer / judge,
+#            SDK-free, no API key, no emulator required). What dev / test / CI name
+#            explicitly (Makefile, ci.yaml).
+#   platform: thin HTTP clients to the sibling horizontal-platform services (A2/A3/A5).
+#   onprem : fail-fast Google Distributed Cloud migration placeholders.
+# Nothing in src/model_quality_gate/domain changes between profiles.
+#
+# The profile has NO default here, deliberately. An unset variable means nobody chose one; a
+# configured-empty variable is rejected before interpolation. config.resolve_profile keeps the
+# unset state distinct from a chosen `local`: the adapter family still falls back to the SDK-free
+# stack, but the three relaxations `local` is granted are all withheld.
+
+project_id: ${GOOGLE_CLOUD_PROJECT:-your-gcp-project}
+region: ${GCP_REGION:-us-central1}     # selected at deploy; must match Terraform
+profile: ${AI_QUALITY_PROFILE:-}       # gcp | local | platform | onprem; unset = nobody chose
+kms_key: ${AI_QUALITY_KMS_KEY:-}       # regional Cloud KMS key for CMEK
+
+# Residency allowlist (P-03). The SAME list as infra/terraform var.allowed_regions, enforced
+# twice: Terraform rejects an unapproved region at plan time and the app refuses to start on
+# one. Comma-separated env override; extend only after governance review, in both places.
+allowed_regions: ${AI_QUALITY_ALLOWED_REGIONS:-us-central1}
+
+# ----------------------------------------------------------------------------- #
+# Bank-owned promotion policy (practice B4). These are the numbers a model-risk function
+# owns and retunes under its own governance, NOT engineering constants. The values below
+# reproduce the reference constants in src/model_quality_gate/domain/thresholds.py exactly, so the
+# shipped default behaviour is unchanged; an institution retunes a bar here instead of
+# editing code. Overrides are fail-closed: an unknown bundle or metric name, a
+# non-numeric value, or a bar outside [0.0, 1.0] is rejected at load.
+#
+# `bundles:` overrides are partial: naming one metric retunes only that bar. Adding a NEW
+# vertical bundle is still a code change in thresholds.py (it also needs metric scorers).
+#
+# The bars below gate the DECISION. The bar for the NARRATIVE a model writes lives next door in
+# config/quality-floors.toml, per vertical, and is what decides whether a reduced (laptop /
+# on-prem) profile is degraded or unfit for a vertical. Same kind of number, same owner.
+# ----------------------------------------------------------------------------- #
+policy:
+  borderline_margin: 0.02   # a pass within this band of its bar is routed to a human (P-06)
+  bundles:
+    default:
+      groundedness: 0.80
+      citation_accuracy: 0.90
+      faithfulness: 0.80
+      safety: 0.99          # safety-family bars are the strictest (practice E2)
+
+models:
+  reasoning: gemini-3.5-flash          # GA : judge / reasoning model (thinking=high)
+  triage: gemini-3.1-flash-lite        # GA : routing / cheap triage
+  hard_reasoning: gemini-3.1-pro       # Preview : OFF unless use_hard_reasoning=true
+  use_hard_reasoning: false
+
+eval:
+  location: ${GCP_REGION:-us-central1}
+  judge_model: gemini-3.5-flash
+  experiment: ai-quality-promotion-gate
+
+bigquery:
+  dataset: model_quality_gate
+  metrics_table: eval_metrics
+  drift_table: model_drift
+  prompts_table: prompt_versions
+
+storage:
+  golden_bucket: ai-quality-golden-datasets
+  model_cards_bucket: ai-quality-model-cards
+  mrm_evidence_bucket: ai-quality-mrm-evidence
+
+logging:
+  log_name: ai-quality-audit
+  bucket: ai-quality-worm
+  retention_days: 2557               # ~7 years; bucket is locked (irreversible) in prod
+
+agent_engine:
+  resource_name: ${AI_QUALITY_AGENT_ENGINE:-}
+  display_name: model-quality-gate
+
+# SDK-free 'local' profile stores. Unset environment variables yield per-package defaults under
+# ~/.model_quality_gate/; exported empty values refuse during interpolation. Tests pass ':memory:' for
+# ephemeral, deterministic stores. No Google Cloud here.
+local:
+  db_path: ${AI_QUALITY_LOCAL_DB:-}                  # SQLite FTS5 knowledge-base index
+  audit_path: ${AI_QUALITY_LOCAL_AUDIT:-}            # append-only local audit store
+  registry_path: ${AI_QUALITY_LOCAL_REGISTRY:-}      # prompt registry store (agent registry is in-memory)
+  model_cards_path: ${AI_QUALITY_LOCAL_MODEL_CARDS:-}  # model-card store
+  metrics_path: ${AI_QUALITY_LOCAL_METRICS:-}        # metrics / drift store
+  datasets_path: ${AI_QUALITY_LOCAL_DATASETS:-}      # golden-dataset store
+
+# ----------------------------------------------------------------------------- #
+# Port -> adapter bindings. The documented hybrid 'platform' profile delegates the four
+# explicitly bound ports and uses gcp for the rest. Every other unknown/missing profile
+# fails closed. These dotted paths are the build contract:
+# each adapter class takes a single Settings argument.
+#
+# Under 'local', every port binds to a real, SDK-free in-process implementation
+# (SQLite FTS5 retrieval, deterministic scorer / judge, heuristic red-team), so the
+# whole gate runs offline. Platform-client ports (knowledge_base, registry) use
+# in-process local implementations, NOT HTTP to siblings (a laptop runs one app).
+# ----------------------------------------------------------------------------- #
+adapters:
+  # End-user identity (authentication). local = seeded dev personas, NO IdP/AD/LDAP, so
+  # demos and tests run offline; gcp/platform = verify the IAP-injected signed assertion
+  # (auth configured ON the GCP service); onprem = client IdP placeholder. The resolved
+  # Principal supplies the audit actor recorded on every eval / red-team / gate event,
+  # replacing any client-asserted actor.
+  identity:
+    gcp: model_quality_gate.adapters.gcp.iap_identity:IapIdentityAdapter
+    platform: model_quality_gate.adapters.gcp.iap_identity:IapIdentityAdapter
+    local: model_quality_gate.adapters.local.identity:LocalPersonaIdentityAdapter
+    onprem: model_quality_gate.adapters.onprem.identity:OnPremIdentityAdapter
+  evaluation:
+    gcp: model_quality_gate.adapters.gcp.genai_eval:GenAiEvalAdapter
+    platform: model_quality_gate.adapters.gcp.genai_eval:GenAiEvalAdapter
+    local: model_quality_gate.adapters.local.evaluation:LocalDeterministicEvalAdapter
+    onprem: model_quality_gate.adapters.onprem.evaluation:OnPremEvalAdapter
+  redteam:
+    gcp: model_quality_gate.adapters.gcp.gemini_redteam:GeminiRedTeamAdapter
+    platform: model_quality_gate.adapters.gcp.gemini_redteam:GeminiRedTeamAdapter
+    local: model_quality_gate.adapters.local.redteam:LocalHeuristicRedTeamAdapter
+    onprem: model_quality_gate.adapters.onprem.redteam:OnPremRedTeamAdapter
+  # Golden-dataset ingest/resolve store (DatasetStorePort). gcp = CMEK Cloud Storage golden
+  # bucket; local = SQLite; onprem = placeholder. Lets a caller publish a golden set
+  # (POST /v1/datasets) instead of only reading a repo-bundled JSONL file.
+  dataset_store:
+    gcp: model_quality_gate.adapters.gcp.gcs_datasets:GcsDatasetStoreAdapter
+    platform: model_quality_gate.adapters.gcp.gcs_datasets:GcsDatasetStoreAdapter
+    local: model_quality_gate.adapters.local.dataset_store:LocalDatasetStoreAdapter
+    onprem: model_quality_gate.adapters.onprem.dataset_store:OnPremDatasetStoreAdapter
+  prompt_registry:
+    gcp: model_quality_gate.adapters.gcp.bigquery_prompts:BigQueryPromptRegistryAdapter
+    platform: model_quality_gate.adapters.gcp.bigquery_prompts:BigQueryPromptRegistryAdapter
+    local: model_quality_gate.adapters.local.prompt_registry:LocalPromptRegistryAdapter
+    onprem: model_quality_gate.adapters.onprem.prompt_registry:OnPremPromptRegistryAdapter
+  model_card_store:
+    gcp: model_quality_gate.adapters.gcp.gcs_model_cards:GcsModelCardStoreAdapter
+    platform: model_quality_gate.adapters.gcp.gcs_model_cards:GcsModelCardStoreAdapter
+    local: model_quality_gate.adapters.local.model_card_store:LocalModelCardStoreAdapter
+    onprem: model_quality_gate.adapters.onprem.model_card_store:OnPremModelCardStoreAdapter
+  metrics_store:
+    gcp: model_quality_gate.adapters.gcp.bigquery_metrics:BigQueryMetricsStoreAdapter
+    platform: model_quality_gate.adapters.gcp.bigquery_metrics:BigQueryMetricsStoreAdapter
+    local: model_quality_gate.adapters.local.metrics_store:LocalMetricsStoreAdapter
+    onprem: model_quality_gate.adapters.onprem.metrics_store:OnPremMetricsStoreAdapter
+  knowledge_base:
+    gcp: model_quality_gate.adapters.platform.remote_knowledge_base:RemoteKnowledgeBaseAdapter
+    platform: model_quality_gate.adapters.platform.remote_knowledge_base:RemoteKnowledgeBaseAdapter
+    local: model_quality_gate.adapters.local.knowledge_base:LocalFtsKnowledgeBaseAdapter
+    onprem: model_quality_gate.adapters.onprem.knowledge_base:OnPremKnowledgeBaseAdapter
+  llm:
+    gcp: model_quality_gate.adapters.gcp.gemini_llm:GeminiLLMAdapter
+    platform: model_quality_gate.adapters.gcp.gemini_llm:GeminiLLMAdapter
+    local: model_quality_gate.adapters.local.llm:LocalDeterministicLLMAdapter
+    onprem: model_quality_gate.adapters.onprem.llm:OnPremLLMAdapter
+  audit:
+    gcp: model_quality_gate.adapters.gcp.cloud_logging_audit:CloudLoggingAuditAdapter
+    platform: model_quality_gate.adapters.platform.remote_audit:RemoteAuditAdapter
+    local: model_quality_gate.adapters.local.audit:LocalAppendOnlyAuditAdapter
+    onprem: model_quality_gate.adapters.onprem.audit:OnPremAuditAdapter
+  tracer:
+    gcp: model_quality_gate.adapters.gcp.cloud_trace_tracer:CloudTraceTracerAdapter
+    platform: model_quality_gate.adapters.gcp.cloud_trace_tracer:CloudTraceTracerAdapter
+    local: model_quality_gate.adapters.local.tracer:LocalNoopTracerAdapter
+    onprem: model_quality_gate.adapters.onprem.tracer:OnPremTracerAdapter
+  registry:
+    gcp: model_quality_gate.adapters.gcp.a2a_registry:A2ARegistryAdapter
+    platform: model_quality_gate.adapters.platform.remote_registry:RemoteRegistryAdapter
+    local: model_quality_gate.adapters.local.registry:LocalRegistryAdapter
+    onprem: model_quality_gate.adapters.onprem.registry:OnPremRegistryAdapter
+  tool_catalog:
+    gcp: model_quality_gate.adapters.gcp.mcp_tool_catalog:McpToolCatalogAdapter
+    platform: model_quality_gate.adapters.gcp.mcp_tool_catalog:McpToolCatalogAdapter
+    local: model_quality_gate.adapters.local.tool_catalog:LocalToolCatalogAdapter
+    onprem: model_quality_gate.adapters.onprem.tool_catalog:OnPremToolCatalogAdapter

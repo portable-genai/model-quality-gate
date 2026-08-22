@@ -1,0 +1,32 @@
+# terraform.tfvars.example : concrete sample values for a Singapore-resident deploy.
+#
+# Copy to terraform.tfvars and fill in your own ids. Do NOT commit terraform.tfvars.
+# Region/zone are already Singapore : leave them.
+
+project_id = "acme-ai-quality-sg-prod"
+
+# Singapore residency (P-03) : these are already the secure defaults; shown for clarity.
+region          = "us-central1"
+allowed_regions = ["us-central1"]
+
+# ~7-year WORM retention for the audit log (P-08). Bucket lock is irreversible.
+retention_days = 2557
+
+# Org / Access Context Manager. access_policy_id is the numeric policy id.
+org_id           = "123456789012"
+billing_account  = "01ABCD-2345EF-67890A"
+access_policy_id = "987654321098"
+
+# Sovereignty perimeter on by default.
+enable_vpc_sc = true
+
+# VPC-SC is DRY RUN by default: violations are logged, nothing is blocked. Flip to true
+# only after the dry-run violation logs are clean (P-03).
+vpc_sc_enforce = false
+
+# Project-level Org Policy: gcp.resourceLocations residency allowlist +
+# iam.disableServiceAccountKeyCreation. Needs orgpolicy.policyAdmin.
+enable_org_policy = true
+
+# Where the residency / perimeter posture alerts go. Empty = alert exists, no destination.
+alert_notification_channels = []

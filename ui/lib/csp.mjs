@@ -1,0 +1,167 @@
+// The console's Content-Security-Policy, in one module so it is built once and read twice.
+//
+// Emitting it inline in `next.config.mjs` through the static `headers()` table is what this
+// module avoids. That
+// table cannot express a per-request value, which is exactly what a script nonce is, and the
+// policy it emitted carried `script-src 'self'` under a comment asserting "the console ships no
+// inline scripts". That assertion was false: Next serves its hydration bootstrap as an INLINE
+// script carrying the Flight payload, so the browser blocked it, `__next_f` never filled and
+// React never attached. The console rendered its six controls and none of them did anything,
+// while the headers, the type-check, the build and every test stayed green.
+//
+// So the policy moved here, the nonce is minted per request in `proxy.ts`, and `next.config.mjs`
+// no longer emits a `Content-Security-Policy` at all. Two layers both setting it would give the
+// browser two policies to intersect, and the stricter one wins, which would quietly reinstate the
+// defect this module exists to remove.
+
+import { apiOrigin } from "./api-base.mjs";
+
+/** Raised when an embedding variable names a wildcard instead of the origins it should allow. */
+export class WildcardOriginError extends Error {}
+
+/**
+ * Exact tokens that must never be accepted as a framing ancestor.
+ *
+ * `'*'` is what a quoted Terraform variable or a YAML string renders. `*.*` is a host pattern
+ * matching every name with a dot in it. `null` is the one that reads as harmless and is not: it
+ * is not a wildcard by spelling and behaves as one, because a SANDBOXED iframe presents the
+ * origin `null`, so a policy naming it hands framing rights to any page that can open one.
+ */
+const WILDCARD_TOKENS = new Set(["*", "'*'", "null", "*.*"]);
+
+/**
+ * True when an entry may not be a framing ancestor.
+ *
+ * Exact matching alone is not enough. `https://*.client.example` is in no token set, and CSP
+ * honours a host-source wildcard: every subdomain may frame the console, including one an
+ * attacker obtains by takeover or on a user-content subdomain. So ANY entry containing an
+ * asterisk is refused, which turns away nothing a deployment could correctly hold, since a real
+ * origin never contains the character.
+ *
+ * @param {string} entry
+ * @returns {boolean}
+ */
+function isWildcard(entry) {
+  return WILDCARD_TOKENS.has(entry) || entry.includes("*");
+}
+
+/**
+ * Refuse an allowlist that names a wildcard, before the value can reach a response header.
+ *
+ * `src/model_quality_gate/api/app.py::_refuse_wildcard` does this for the API surface, and it was the only half that
+ * did. There are two `frame-ancestors` emitters, and the one a browser consults before framing
+ * this console is the header on the DOCUMENT, which Next serves under the policy this module
+ * builds. This resolver passed its configured value straight through, so a deployment whose
+ * variable rendered a wildcard refused to start the API and still served a document any origin
+ * could frame. The half that was closed is not the half that governs.
+ *
+ * Tokens are split on commas as well as whitespace. CSP source lists are space separated, so a
+ * comma form never names a valid origin anyway; splitting on it here means
+ * `*,https://portal.example` is seen as the wildcard it contains rather than as one opaque token
+ * that merely fails to equal `*`.
+ *
+ * @param {string} raw the configured value, before it is normalised
+ * @param {string} envName the variable it came from, for the message
+ * @throws {WildcardOriginError}
+ */
+function refuseWildcards(raw, envName) {
+  for (const piece of String(raw).split(/[\s,]+/)) {
+    const entry = piece.trim();
+    if (entry && isWildcard(entry)) {
+      throw new WildcardOriginError(
+        `${envName} contains ${JSON.stringify(entry)}, which lets ANY origin frame this ` +
+          "console: a wildcard frame-ancestors is the clickjacking control switched off, not " +
+          `configured. Name the exact parent origins that may frame it, or unset ${envName} to ` +
+          "keep the restrictive default.",
+      );
+    }
+  }
+}
+
+/** Who may frame this console. Unset means the same origin and nobody else. */
+export function frameAncestors(env) {
+  const raw = env.NEXT_PUBLIC_FRAME_ANCESTORS;
+  if (raw === undefined || raw === null) return "'self'";
+  refuseWildcards(raw, "NEXT_PUBLIC_FRAME_ANCESTORS");
+  // Three states, matching the service half, which refuses an emptied value at boot. This
+  // returned `raw` verbatim after a truthiness check, so the two states that name no origin
+  // both went wrong and in different ways. An empty string was falsy and silently took the
+  // restrictive default, which reads a deliberate blanking as consent and makes a deployment
+  // that LOST the variable indistinguishable from one locked down on purpose. A whitespace-only
+  // value is truthy in JavaScript, so it was emitted verbatim as `frame-ancestors    `: an
+  // empty directive, which browsers discard as a parse error, taking the framing restriction
+  // with it. The document CSP is the only emitter here, so nothing else was left standing.
+  const named = raw.split(/[\s,]+/).filter(Boolean);
+  if (named.length === 0) {
+    throw new WildcardOriginError(
+      "NEXT_PUBLIC_FRAME_ANCESTORS is set but names no origin. An empty frame-ancestors " +
+        "directive is a parse error browsers discard, which removes the framing restriction " +
+        "altogether, and inheriting the 'self' default would hide that the variable was " +
+        "deliberately emptied. Unset it to keep the default, or name the parent origins.",
+    );
+  }
+  return named.join(" ");
+}
+
+/**
+ * The full default-deny policy.
+ *
+ * `style-src` carries `'unsafe-inline'` because the Next runtime injects critical CSS and there
+ * is no nonce path for it. `script-src` does NOT: it takes the per-request nonce plus
+ * `'strict-dynamic'`, so the nonced bootstrap may load its own chunks and nothing else may run.
+ * Passing no nonce yields the strict `'self'` form, which is correct for any response that is not
+ * a Next-rendered document and wrong for one that is.
+ *
+ * @param {Record<string, string | undefined>} env
+ * @param {string} [nonce]
+ */
+export function contentSecurityPolicy(env, nonce) {
+  const connectSrc = ["'self'", apiOrigin(env)].filter(Boolean).join(" ");
+  const scriptSrc = nonce
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`
+    : "script-src 'self'";
+  return [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+    scriptSrc,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data:",
+    "font-src 'self' data:",
+    `connect-src ${connectSrc}`,
+    `frame-ancestors ${frameAncestors(env)}`,
+  ].join("; ");
+}
+
+/** A fresh per-request nonce. Base64 of 16 random bytes from the Web Crypto global. */
+export function generateNonce() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes));
+}
+
+/** Raised when the nonce policy and the rendering mode disagree, which serves un-hydratable HTML. */
+export class UnhydratableCspError extends Error {}
+
+/**
+ * Refuse a build whose CSP mints a nonce the rendered HTML can never carry.
+ *
+ * Next can only stamp a per-request nonce onto the scripts of a DYNAMICALLY rendered route. A
+ * statically prerendered page was built before the nonce existed, so it emits bare script tags
+ * while the header advertises a nonce, and because `'strict-dynamic'` switches off the `'self'`
+ * fallback, that combination blocks strictly MORE than the unfixed policy did. The failure is
+ * invisible to every check that does not execute the page, so it is refused at build time.
+ *
+ * @param {string} layoutSource contents of `app/layout.tsx`
+ */
+export function assertHydratableCsp(layoutSource) {
+  if (!/export\s+const\s+dynamic\s*=\s*["']force-dynamic["']/.test(layoutSource)) {
+    throw new UnhydratableCspError(
+      'app/layout.tsx must set `export const dynamic = "force-dynamic"`. The CSP mints a ' +
+        "per-request nonce, and Next can only stamp it onto script tags for a dynamically " +
+        "rendered route. Statically prerendered HTML was built before the nonce existed, so " +
+        "every script is blocked and the page never hydrates.",
+    );
+  }
+}

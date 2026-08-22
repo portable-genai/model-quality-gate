@@ -1,0 +1,105 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "model-quality-gate"
+version = "0.0.1"
+description = "A4 AI Quality & Model-Risk Platform — the production-promotion eval / red-team gate and model-risk (MRM) evidence system, built ports-and-adapters on the Gemini Enterprise Agent Platform."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Ashish Awasthi" }]
+keywords = ["model-risk", "mrm", "evaluation", "red-team", "promotion-gate", "gemini", "adk", "gcp", "bfsi"]
+
+# Core deps are framework-light so the domain + on-prem/test profile install without
+# any Google Cloud SDK. The managed-service adapters live in the [gcp] extra.
+dependencies = [
+  # Shared commons, pinned by tag; no build-time coupling. Public repo, so CI
+  # installs it with zero credentials. hex-service-kit: inbound S2S verification (web), outbound
+  # S2S headers, fail-closed net defaults, StrEnum base, to_jsonable, hash-chained WORM audit.
+  "hex-service-kit @ git+https://github.com/portable-genai/hex-service-kit@v0.0.1",
+  "pydantic>=2.7",
+  "pyyaml>=6.0",
+  "httpx>=0.27",
+  "tenacity>=8.3",
+  "typer>=0.12",
+  "fastapi>=0.111",
+  "uvicorn[standard]>=0.30",
+  "python-dateutil>=2.9",
+]
+
+[project.optional-dependencies]
+# Pinned per mid-2026 research. ADK 2.0 was a breaking release => pin exactly.
+gcp = [
+  "google-adk==2.3.0",
+  "google-genai>=1.21",
+  "google-cloud-aiplatform[agent_engines,adk,evaluation]>=1.158.0",
+  "google-cloud-bigquery>=3.25",
+  "google-cloud-storage>=2.18",
+  "google-cloud-logging>=3.11",
+  "opentelemetry-sdk>=1.27",
+  "opentelemetry-exporter-gcp-trace>=1.7",
+  "a2a-sdk>=0.2",
+  "mcp>=1.2",
+]
+dev = [
+  "pytest>=8.2",
+  "pytest-asyncio>=0.23",
+  "pytest-cov>=5.0",
+  # Pinned exactly: ruff's formatter output changes between releases, so an unpinned
+  # version drifts from CI and fails `ruff format --check`. Bump deliberately.
+  "ruff==0.15.18",
+  "mypy>=1.10",
+  "types-PyYAML",
+  "respx>=0.21",
+  # agent-eval-kit: TEST-AND-EVAL only here (tests/ and eval/, neither of which ships in the
+  # wheel), for two things. First assert_can_go_red: Hrz4 IS the promotion authority, so it
+  # cannot call its own gate client and does not adopt the smoke/gate scaffold; its offline gate
+  # validates the gate logic instead, and a gate-logic metric goes falsely green as easily as a
+  # judge score. Second the offline judge harness and the quality floors, which eval/
+  # run_narrative_eval.py uses to measure NARRATIVE quality with no model server, no network and
+  # no credentials. Importing the package imports neither of its HTTP clients.
+  "agent-eval-kit @ git+https://github.com/portable-genai/agent-eval-kit@v0.0.1",
+]
+
+[project.scripts]
+ai-quality = "model_quality_gate.cli.main:app"
+
+# Required for the hex-service-kit git+https pin (a direct reference).
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/model_quality_gate"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+# Vendored only: `.agents/skills/` is a verbatim resync of the maintainer's shared agent skills, not this
+# repo's source, so reformatting it here would fork it from upstream. Scoped to that one path so
+# the gate keeps covering every file this repo owns; tests/unit/test_gate_scope.py enforces it.
+extend-exclude = [".agents/skills/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# Demo scripts are presenter aids, outside the CI gate (which lints only src/tests). They
+# embed long narration and HTML strings, so the line-length rule is relaxed for them.
+"scripts/*" = ["E501"]
+
+[tool.pytest.ini_options]
+# "." makes the eval scorers importable as ``eval.run_eval``, so the not-falsely-green proof
+# drives the shipped metric rather than a copy of it.
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+markers = [
+  "integration: requires live Google Cloud credentials (deselect with -m 'not integration')",
+]
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+ignore_missing_imports = true

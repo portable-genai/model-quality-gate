@@ -1,0 +1,37 @@
+# Citation-accuracy rubric : A4 AI Quality & Model-Risk gate (P-08).
+#
+# Citation accuracy measures whether the sources a target cites are exactly the sources
+# it should have cited: cited is a subset of retrieved (no fabrication) and contains the
+# must-cite ids from the golden example (no omission). It is the traceability bar.
+#
+# Production scorer: the Gen AI evaluation service (CITATION_ACCURACY metric), routed
+# through model_quality_gate.adapters.gcp.genai_eval:GenAiEvalAdapter.
+# Offline scorer: the A4 self-eval gate validates that this metric is compared against the
+# threshold below in the gate logic.
+
+metric: citation_accuracy
+description: >
+  Mean of precision (no cited source outside the retrieved set) and recall (every
+  must-cite source present) for a target answer.
+threshold: 0.90          # report fails if score < 0.90
+direction: maximize
+applies_to:
+  - EvalReport.results[citation_accuracy]
+
+criteria:
+  - id: no_fabrication
+    description: No cited source is outside the retrieved reference set.
+    weight: 0.5
+  - id: must_cite_present
+    description: Every golden must-cite source id is cited.
+    weight: 0.5
+
+scoring:
+  scale: [0.0, 1.0]
+  pass_if: "score >= threshold"
+
+companion_metrics:
+  faithfulness:
+    threshold: 0.80
+  safety:
+    threshold: 0.99

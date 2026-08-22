@@ -1,0 +1,57 @@
+"""Markdown discipline (practice G7), enforced rather than remembered.
+
+Two rules, both cheap to check and both easy to regress by hand:
+
+* **No em-dashes** in the repo's own Markdown. The catalog convention is to minimise them;
+  every shipped document here is at zero, so the guard is exact rather than a budget.
+* **Balanced, non-empty mermaid fences.** An unclosed or empty ```mermaid block renders as
+  a broken diagram on GitHub, which is exactly the rot the practice is about.
+
+Vendored trees (node_modules, .venv, .next, the canonical .claude skill copies) are
+excluded: they are upstream copies this repo must not reformat.
+"""
+
+from __future__ import annotations
+
+import re
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+EXCLUDED_PARTS = {"node_modules", ".venv", ".next", ".claude", ".git", "out", "build", "dist"}
+
+
+def _markdown_files() -> list[Path]:
+    return sorted(
+        path
+        for path in REPO_ROOT.rglob("*.md")
+        if not EXCLUDED_PARTS & set(path.relative_to(REPO_ROOT).parts)
+    )
+
+
+def test_markdown_files_were_found() -> None:
+    """Guard the guard: an empty file list would make every assertion below vacuous."""
+    names = {p.name for p in _markdown_files()}
+    assert {"README.md", "DEMO.md", "COMPLIANCE.md", "SPEC.md"} <= names
+
+
+@pytest.mark.parametrize("path", _markdown_files(), ids=lambda p: str(p.relative_to(REPO_ROOT)))
+def test_no_em_dashes(path: Path) -> None:
+    text = path.read_text(encoding="utf-8")
+    offenders = [i + 1 for i, line in enumerate(text.splitlines()) if "—" in line]
+    assert not offenders, f"{path.relative_to(REPO_ROOT)} has em-dashes on lines {offenders}"
+
+
+@pytest.mark.parametrize("path", _markdown_files(), ids=lambda p: str(p.relative_to(REPO_ROOT)))
+def test_mermaid_blocks_are_closed_and_non_empty(path: Path) -> None:
+    text = path.read_text(encoding="utf-8")
+    # Only a fence at the start of a line opens a block; a backticked mention inside prose
+    # (as in this repo's own audit notes) is not one.
+    opened = len(re.findall(r"^```mermaid\s*$", text, flags=re.MULTILINE))
+    if not opened:
+        pytest.skip("no mermaid blocks")
+    blocks = re.findall(r"^```mermaid\n(.*?)^```", text, flags=re.MULTILINE | re.DOTALL)
+    assert len(blocks) == opened, f"{path.relative_to(REPO_ROOT)} has an unclosed ```mermaid fence"
+    for block in blocks:
+        assert block.strip(), f"{path.relative_to(REPO_ROOT)} has an empty mermaid block"

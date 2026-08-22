@@ -1,0 +1,49 @@
+# A4 narrative-quality floors: how good a model's NARRATIVE has to be, per vertical.
+#
+# The gate logic in eval/run_eval.py checks the DECISION core. This file is the other half: the
+# bar the narrative itself must clear, which is what a reduced (laptop / on-prem) profile
+# actually loses when it swaps a managed model for a local one. Until this file existed, the
+# portability story said a reduced profile serves "visibly lower narrative quality", which is an
+# adjective standing where a threshold should be, and the profile running the weaker model was
+# also the profile with no quality measurement at all.
+#
+# Two numbers per vertical, and the band between them is the honest home for "degraded":
+#
+#   score >= target  ->  FIT       the narrative is at full quality
+#   floor <= score   ->  DEGRADED  usable, and visibly worse. Disclose it, do not refuse it.
+#   score <  floor   ->  UNFIT     this profile must NOT serve this vertical. Not a caveat.
+#
+# These are BANK-OWNED policy numbers (practice B4), like the promotion thresholds in
+# config/settings.yaml `policy:`. A model-risk function retunes them under its own governance;
+# they are not engineering constants. They are read by agent_eval_kit.floors, which fails closed
+# on a missing vertical, an empty table, a floor of zero, or a target below its floor.
+#
+# ONE RULE FOR ADDING A VERTICAL: a vertical gets a floor only once it has narrative cases in
+# eval/datasets/narrative_golden.jsonl. A floor with nothing measured against it is decoration,
+# and tests/unit/test_narrative_floor.py fails the build if the two ever drift apart.
+#
+# Vertical names match the metric bundles in src/model_quality_gate/domain/thresholds.py, so a floor and
+# a bundle name the same thing.
+
+schema = "quality-floors/v1"
+owner = "model risk (A4 promotion authority)"
+
+[verticals.default]
+floor = 0.70
+target = 0.90
+note = "Generic model-risk narrative: findings, evidence, and the limits of what was checked."
+
+[verticals.doc1-cdd-sow]
+floor = 0.72
+target = 0.90
+note = "CDD escalation narrative. Cited policy and an unhedged finding are what a reviewer acts on."
+
+[verticals.doc2-credit-memo]
+floor = 0.72
+target = 0.90
+note = "Credit memo narrative: covenant terms and headroom, never a lending recommendation."
+
+[verticals.mkt6-compliance]
+floor = 0.80
+target = 0.92
+note = "Marketing compliance findings are published to customers, so the floor is the strictest."
