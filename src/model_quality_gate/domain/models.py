@@ -392,6 +392,33 @@ class DriftSignal:
     status: str = "stable"  # "stable" | "warning" | "alert"
 
 
+@dataclass(frozen=True, slots=True)
+class DriftEscalation:
+    """What a drift reading OWES a human. It never promotes and never demotes.
+
+    The promotion gate is the only thing that decides a promotion, and a person runs it.
+    This artifact only ever RAISES the bar: it can require a re-gate and a model-risk
+    review, and it carries no field a caller could read as an approval. There is
+    deliberately no ``passed`` here, and no verdict of any kind: a drift reading is
+    evidence that the gate's answer may be stale, not a new answer.
+
+    ``status`` is the worst status across :attr:`signals`, and two of its values exist
+    because an absent or unreadable measurement must not be reported as a calm one:
+    ``unmeasured`` when nothing was recorded at all, and ``unrecognised`` when a signal
+    carries a status this deployment's policy does not know. Both escalate. See
+    :mod:`model_quality_gate.domain.drift`.
+    """
+
+    model: str
+    status: str
+    requires_re_gate: bool
+    requires_human_review: bool
+    signals: tuple[DriftSignal, ...] = ()
+    escalating_metrics: tuple[str, ...] = ()
+    reasons: tuple[str, ...] = ()
+    schema_version: str = "drift-escalation/v1"
+
+
 # --------------------------------------------------------------------------- #
 # Audit & observability : A5 Observability, Audit & FinOps concerns
 # --------------------------------------------------------------------------- #
@@ -410,7 +437,7 @@ class AuditEvent:
     prompt/response fields carry the target ref and a verdict summary, not user data.
     """
 
-    action: str  # "evaluate" | "redteam" | "gate" | "version_prompt" | "model_card"
+    action: str  # "evaluate" | "redteam" | "gate" | "drift" | "version_prompt" | "model_card"
     actor: str  # authenticated user / service identity
     decision: Decision
     redacted_prompt: str  # short, already-safe description of the action / verdict

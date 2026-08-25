@@ -5,6 +5,11 @@ table that records every eval report and computes per-metric drift (latest score
 the mean baseline) for the model-risk dashboards, seedable and deterministic. SDK-free
 and unconditional.
 
+The adapter owns the QUERY (which rows, which baseline). The BANDS that turn a movement
+into ``stable`` / ``warning`` / ``alert`` are a promotion judgement and live in
+:func:`model_quality_gate.domain.drift.classify_drift`, so this profile and the managed one
+cannot drift apart from each other while both look green.
+
 Default DB path is under a per-package local dir (``~/.model_quality_gate/metrics.db``); tests
 pass ``:memory:`` for an ephemeral, deterministic store.
 """
@@ -17,11 +22,8 @@ import threading
 from pathlib import Path
 
 from ...config import Settings
+from ...domain.drift import classify_drift
 from ...domain.models import DriftSignal, EvalReport, utcnow
-
-# Drift status bands (absolute drift magnitude); mirrors the BigQuery adapter.
-_WARNING_BAND = 0.05
-_ALERT_BAND = 0.10
 
 _DEFAULT_DB_DIR = Path.home() / ".model_quality_gate"
 _DEFAULT_METRICS_PATH = _DEFAULT_DB_DIR / "metrics.db"
@@ -150,24 +152,5 @@ class LocalMetricsStoreAdapter:
         for metric, scores in by_metric.items():
             baseline = sum(scores) / len(scores)
             current = scores[-1]
-            signals.append(_drift_signal(model, metric, baseline, current))
+            signals.append(classify_drift(model, metric, baseline, current))
         return signals
-
-
-def _drift_signal(model: str, metric: str, baseline: float, current: float) -> DriftSignal:
-    drift = round(current - baseline, 4)
-    magnitude = abs(drift)
-    if magnitude >= _ALERT_BAND:
-        status = "alert"
-    elif magnitude >= _WARNING_BAND:
-        status = "warning"
-    else:
-        status = "stable"
-    return DriftSignal(
-        model=model,
-        metric=metric,
-        baseline=round(baseline, 4),
-        current=round(current, 4),
-        drift=drift,
-        status=status,
-    )

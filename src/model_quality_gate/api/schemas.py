@@ -252,6 +252,52 @@ class GateStatusResponse(BaseModel):
     passed: bool
 
 
+class DriftSignalModel(BaseModel):
+    """One metric's movement away from its baseline (mirror of DriftSignal)."""
+
+    model: str
+    metric: str
+    baseline: float
+    current: float
+    drift: float
+    status: str
+
+    @classmethod
+    def from_domain(cls, signal: m.DriftSignal) -> DriftSignalModel:
+        return cls(**to_jsonable(signal))
+
+
+class DriftEscalationModel(BaseModel):
+    """What a drift reading owes a human (mirror of DriftEscalation).
+
+    There is no verdict field here and there is not meant to be one. The response states a
+    requirement (re-gate, review) and never an approval, so a consumer cannot read a calm
+    drift reading as a promotion.
+    """
+
+    model: str
+    status: str
+    requires_re_gate: bool
+    requires_human_review: bool
+    signals: list[DriftSignalModel] = Field(default_factory=list)
+    escalating_metrics: list[str] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
+    schema_version: str = "drift-escalation/v1"
+
+    @classmethod
+    def from_domain(cls, escalation: m.DriftEscalation) -> DriftEscalationModel:
+        return cls(
+            model=escalation.model,
+            status=escalation.status,
+            requires_re_gate=escalation.requires_re_gate,
+            requires_human_review=escalation.requires_human_review,
+            signals=[DriftSignalModel.from_domain(s) for s in escalation.signals],
+            escalating_metrics=list(escalation.escalating_metrics),
+            reasons=list(escalation.reasons),
+            schema_version=escalation.schema_version,
+        )
+
+
 class PromptVersionModel(BaseModel):
     name: str
     version: str

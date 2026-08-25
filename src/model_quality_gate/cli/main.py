@@ -25,7 +25,7 @@ import typer
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from ..config import Container
-    from ..domain.models import EvalReport, GateDecision, RedTeamReport
+    from ..domain.models import DriftEscalation, EvalReport, GateDecision, RedTeamReport
 
 app = typer.Typer(
     add_completion=False,
@@ -118,6 +118,32 @@ def _print_redteam_report(report: RedTeamReport) -> None:
         )
 
 
+def _print_drift(escalation: DriftEscalation) -> None:
+    calm = not escalation.requires_human_review
+    typer.secho(
+        f"Quality drift : {escalation.model}  [{escalation.status.upper()}]",
+        bold=True,
+        fg=typer.colors.GREEN if calm else typer.colors.YELLOW,
+    )
+    for signal in escalation.signals:
+        mark = "ok " if signal.status == "stable" else signal.status.upper()
+        typer.secho(
+            f"  [{mark}] {signal.metric:<18} {signal.current:6.3f}  "
+            f"(baseline {signal.baseline:.3f}, drift {signal.drift:+.3f})",
+            fg=typer.colors.GREEN if signal.status == "stable" else typer.colors.YELLOW,
+        )
+    if escalation.requires_re_gate:
+        typer.secho(
+            "  [RE-GATE REQUIRED] a model-risk officer must re-run the promotion gate "
+            "before this model's last verdict may still be relied on. Nothing was "
+            "promoted or demoted by this command.",
+            fg=typer.colors.YELLOW,
+            bold=True,
+        )
+    for reason in escalation.reasons:
+        typer.echo(f"  {reason}")
+
+
 def _print_gate_decision(decision: GateDecision) -> None:
     verdict = "PASS" if decision.passed else "FAIL"
     color = typer.colors.GREEN if decision.passed else typer.colors.RED
@@ -199,6 +225,25 @@ def gate(
     decision = _run("gate", _do)
     _print_gate_decision(decision)
     raise typer.Exit(0 if decision.passed else 1)
+
+
+@app.command()
+def drift(
+    model: str = typer.Argument(..., help="Model whose recorded quality drift to read."),
+) -> None:
+    """Report a model's recorded quality drift and what it owes a model-risk officer.
+
+    Exits 1 when a re-gate is required, so a monitor can page on it. The non-zero exit is
+    a SIGNAL: this command runs no gate, promotes nothing and demotes nothing.
+    """
+
+    def _do() -> DriftEscalation:
+        svc = _deps().build_drift_service(_container())
+        return svc.assess(model, actor=_CLI_ACTOR)
+
+    escalation = _run("drift", _do)
+    _print_drift(escalation)
+    raise typer.Exit(1 if escalation.requires_re_gate else 0)
 
 
 @app.command(name="version-prompt")

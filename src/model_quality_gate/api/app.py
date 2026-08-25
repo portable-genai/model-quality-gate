@@ -7,6 +7,8 @@ pass A4 before promotion, rule R5):
 * ``POST /v1/redteam``      -> RedTeamReport
 * ``POST /v1/gate``         -> GateDecision
 * ``GET  /v1/gate``         -> {passed}  (the cheap promotion check)
+* ``GET  /v1/drift/{model}`` -> DriftEscalation (the online-quality read; an ``alert``
+  requires a re-gate, and this route never runs one)
 * ``GET/POST /v1/prompts/{name}/versions``
 * ``GET  /v1/model-cards/{model}/{version}``
 * ``GET  /healthz`` and ``GET /.well-known/agent-card.json``
@@ -37,6 +39,7 @@ from ..domain.errors import EmptyDatasetError, UnknownMetricError
 from ..domain.models import PromptVersion
 from ..domain.serialization import mrm_evidence_jsonable
 from ..domain.services import (
+    DriftMonitorService,
     EvaluationService,
     ModelCardService,
     PromotionGateService,
@@ -56,6 +59,7 @@ from .schemas import (
     CapabilityModel,
     DatasetIngestRequest,
     DatasetSummaryModel,
+    DriftEscalationModel,
     EvalReportModel,
     EvaluateRequest,
     GateDecisionModel,
@@ -455,6 +459,35 @@ def get_mrm_evidence(
     if evidence is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="MRM evidence not found")
     return mrm_evidence_jsonable(evidence)
+
+
+# --------------------------------------------------------------------------- #
+# Online quality drift (the read an operator or a model-risk dashboard makes)
+# --------------------------------------------------------------------------- #
+@app.get(
+    "/v1/drift/{model}",
+    response_model=DriftEscalationModel,
+    tags=["mrm"],
+    dependencies=[ServiceCaller],
+)
+def model_drift(
+    model: str,
+    principal: CurrentPrincipal,
+    service: Annotated[DriftMonitorService, Depends(deps.get_drift_service)],
+) -> DriftEscalationModel:
+    """Report ``model``'s recorded quality drift and what it now owes a human.
+
+    This is the read that makes ``MetricsStorePort.drift`` reachable: before it, the
+    signals were computed for a dashboard the reader had to build, so an ``alert`` reached
+    nobody. An ``alert`` here sets ``requires_re_gate``, which is a REQUIREMENT and not an
+    action: this route holds no gate service and promotes nothing.
+
+    A model with nothing recorded against it is **not** a 404 and **not** a calm reading.
+    It answers 200 with ``status: "unmeasured"`` and ``requires_re_gate: true``, because a
+    poller must be able to tell "no evidence" from "evidence that looks fine", and because
+    an absent measurement is never a pass.
+    """
+    return DriftEscalationModel.from_domain(service.assess(model, principal.actor))
 
 
 # --------------------------------------------------------------------------- #

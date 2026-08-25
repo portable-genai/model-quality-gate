@@ -4,6 +4,11 @@ Backs the domain ``MetricsStorePort`` with BigQuery tables that record every eva
 and compute per-metric drift for the model-risk dashboards (current score versus a
 baseline). The ``google-cloud-bigquery`` import is lazy so the on-prem and test profiles
 import without it.
+
+The adapter owns the QUERY. The BANDS that turn a movement into ``stable`` / ``warning`` /
+``alert`` are a promotion judgement and live in
+:func:`model_quality_gate.domain.drift.classify_drift`, which the SQLite profile calls too,
+so a re-tuned band cannot mean one thing on a laptop and another in production.
 """
 
 from __future__ import annotations
@@ -11,11 +16,8 @@ from __future__ import annotations
 from typing import Any
 
 from ...config import Settings
+from ...domain.drift import classify_drift
 from ...domain.models import DriftSignal, EvalReport, utcnow
-
-# Drift status bands (absolute drift magnitude).
-_WARNING_BAND = 0.05
-_ALERT_BAND = 0.10
 
 
 class BigQueryMetricsStoreAdapter:
@@ -111,24 +113,5 @@ class BigQueryMetricsStoreAdapter:
         for row in client.query(query, job_config=job_config).result():
             baseline = float(row["baseline"])
             current = float(row["current"])
-            signals.append(_drift_signal(model, str(row["metric"]), baseline, current))
+            signals.append(classify_drift(model, str(row["metric"]), baseline, current))
         return signals
-
-
-def _drift_signal(model: str, metric: str, baseline: float, current: float) -> DriftSignal:
-    drift = round(current - baseline, 4)
-    magnitude = abs(drift)
-    if magnitude >= _ALERT_BAND:
-        status = "alert"
-    elif magnitude >= _WARNING_BAND:
-        status = "warning"
-    else:
-        status = "stable"
-    return DriftSignal(
-        model=model,
-        metric=metric,
-        baseline=round(baseline, 4),
-        current=round(current, 4),
-        drift=drift,
-        status=status,
-    )
