@@ -26,7 +26,7 @@ Wrap and deploy with the Agent Platform SDK (configured GCP region)::
 
     remote = agent_engines.create(
         build_root_agent(Settings.load()),
-        requirements=["google-adk==2.3.0", "model-quality-gate"],
+        requirements=["google-adk==2.7.1", "model-quality-gate"],
     )  # -> reasoningEngine resource; record it in settings.agent_engine.resource_name
 
 Exposing over A2A: ``to_a2a(build_root_agent(settings))`` produces an A2A app that serves
