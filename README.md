@@ -126,7 +126,7 @@ sequence diagram, and the runtime topology.
 
 | Concern | Service (current name) | Identifier |
 |---------|------------------------|------------|
-| Agent framework | ADK (Python) | `google-adk==2.3.0` |
+| Agent framework | ADK (Python) | `google-adk==2.7.1` |
 | Reasoning / judge model | Gemini 3.5 Flash | `gemini-3.5-flash` (thinking=high) |
 | Triage model | Gemini 3.1 Flash-Lite | `gemini-3.1-flash-lite` |
 | Eval backend | Gen AI evaluation service | `vertexai.Client(...).evals` |
@@ -137,7 +137,7 @@ sequence diagram, and the runtime topology.
 | Audit (WORM) | Cloud Logging locked bucket | retention 2557 days (~7y) |
 | Tracing | Cloud Trace via OpenTelemetry | content capture **OFF** |
 | Promotion CI | Cloud Build trigger | the P-08 gate |
-| Interop | A2A v1.0 + MCP 2025-11-25 | AgentCard `/.well-known/agent-card.json` |
+| Interop | A2A v1.0 + MCP 2026-07-28 | AgentCard `/.well-known/agent-card.json` |
 | Sovereignty | VPC-SC, regional CMEK, Org Policy | `us-central1` |
 
 **Gotchas honoured by the build** (SPEC §3): regional endpoints + per-service CMEK for
