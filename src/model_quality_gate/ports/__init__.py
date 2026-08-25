@@ -9,7 +9,7 @@ from .dataset_store import DatasetStorePort
 from .evaluation import EvaluationPort, RedTeamPort
 from .generation import LLMPort
 from .governance import AgentRegistryPort, ToolCatalogPort
-from .identity import IdentityPort
+from .identity import EndUserAuthUnavailableError, IdentityPort
 from .knowledge import KnowledgeBaseClientPort
 from .observability import AuditSinkPort, ObservabilityTracerPort, TokenUsage
 from .registry_store import (
@@ -33,4 +33,5 @@ __all__ = [
     "AgentRegistryPort",
     "ToolCatalogPort",
     "IdentityPort",
+    "EndUserAuthUnavailableError",
 ]
