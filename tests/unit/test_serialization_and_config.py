@@ -98,8 +98,8 @@ def test_to_jsonable_gate_decision_roundtrips_through_json():
         eval_report=eval_report,
         redteam_report=redteam_report,
         passed=True,
-        model_card_ref="gemini-3.5-flash@v3",
-        mrm_evidence_ref="mrm/gemini-3.5-flash@v3",
+        model_card_ref="gemini-3.7-flash@v3",
+        mrm_evidence_ref="mrm/gemini-3.7-flash@v3",
     )
     out = to_jsonable(decision)
     text = json.dumps(out)  # must not raise
@@ -115,7 +115,7 @@ def test_to_jsonable_audit_event_is_worm_serialisable():
         action="gate",
         actor="model-risk",
         decision=Decision.ALLOWED,
-        redacted_prompt="gate PASS for gemini-3.5-flash@v3:compliance-qa-golden",
+        redacted_prompt="gate PASS for gemini-3.7-flash@v3:compliance-qa-golden",
     )
     out = to_jsonable(event)
     reloaded = json.loads(json.dumps(out))
@@ -185,7 +185,7 @@ def test_gcp_region_is_configurable_from_one_selector(monkeypatch):
     settings = Settings.load(CONFIG_PATH)
     assert settings.region == "europe-west4"
     assert settings.eval.location == "europe-west4"
-    assert settings.models.reasoning == "gemini-3.5-flash"
+    assert settings.models.reasoning == "gemini-3.7-flash"
     assert settings.models.triage == "gemini-3.1-flash-lite"
     assert settings.logging.retention_days == 2557
     assert set(PORT_PROTOCOLS) <= set(settings.adapters)

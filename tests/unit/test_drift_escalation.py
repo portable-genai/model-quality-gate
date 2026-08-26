@@ -60,7 +60,7 @@ from model_quality_gate.domain.models import (
     EvalTarget,
 )
 
-MODEL = "gemini-3.5-flash"
+MODEL = "gemini-3.7-flash"
 
 
 def signal(metric: str, status: str, drift: float = 0.0) -> DriftSignal:

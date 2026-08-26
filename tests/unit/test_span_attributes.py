@@ -58,7 +58,7 @@ _CONTENT = (
 )
 
 _CARD = ModelCard(
-    model="gemini-3.5-flash",
+    model="gemini-3.7-flash",
     version="v3",
     intended_use="Compliance Q&A grounding evaluation.",
     metrics={"groundedness": 0.91},

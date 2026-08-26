@@ -74,7 +74,7 @@ def test_resolve_prefers_store_over_bundled_disk():
 # --------------------------------------------------------------------------- #
 # API flow
 # --------------------------------------------------------------------------- #
-_TARGET = {"model": "gemini-3.5-flash", "prompt_version": "v3", "dataset_id": "ingested-golden"}
+_TARGET = {"model": "gemini-3.7-flash", "prompt_version": "v3", "dataset_id": "ingested-golden"}
 
 
 @pytest.fixture()

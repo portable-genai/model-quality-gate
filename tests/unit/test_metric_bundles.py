@@ -139,7 +139,7 @@ def test_evaluate_honours_a_bundle_and_resolves_its_thresholds(
 # WP-D : API hygiene (dataset-id divergence, GET-gate 404, unknown metric 422)
 # --------------------------------------------------------------------------- #
 _TARGET = {
-    "model": "gemini-3.5-flash",
+    "model": "gemini-3.7-flash",
     "prompt_version": "v3",
     "dataset_id": "compliance-qa-golden",
 }
@@ -208,7 +208,7 @@ def test_divergent_dataset_id_is_422(client):
 def test_get_gate_unknown_dataset_is_404_not_silent_false(client):
     resp = client.get(
         "/v1/gate",
-        params={"model": "gemini-3.5-flash", "prompt_version": "v3", "dataset": "no-such-dataset"},
+        params={"model": "gemini-3.7-flash", "prompt_version": "v3", "dataset": "no-such-dataset"},
     )
     assert resp.status_code == 404
 

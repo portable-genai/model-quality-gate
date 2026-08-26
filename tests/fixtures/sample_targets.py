@@ -22,7 +22,7 @@ from model_quality_gate.domain.models import (
 # A target under evaluation: a model + prompt version + dataset.
 # --------------------------------------------------------------------------- #
 SAMPLE_TARGET: EvalTarget = EvalTarget(
-    model="gemini-3.5-flash",
+    model="gemini-3.7-flash",
     prompt_version="v3",
     dataset_id="compliance-qa-golden",
     system="C1",
