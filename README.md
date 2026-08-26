@@ -36,7 +36,12 @@ blocks every probe. A consuming vertical names its own **metric bundle** (`doc1-
 `mkt6-compliance`, `domain/thresholds.py`) so its four-metric gate stays intact, with
 per-bundle thresholds; an unrecognised metric/bundle is a hard 422, never a silent PASS.
 Golden datasets can be published at runtime (`POST /v1/datasets`, `DatasetStorePort`) or
-read from the bundled JSONL. Every non-health route requires a verified service caller
+read from the bundled JSONL. Afterwards, `GET /v1/drift/{model}` and `ai-quality drift`
+read a model's recorded quality drift and return a `DriftEscalation`
+(`DriftMonitorService`): an `alert` requires a re-gate and a model-risk review, and an
+absent measurement escalates rather than reading as calm. It states the requirement and
+executes nothing, and the live-traffic sampler behind it is deliberately absent
+([runbook](docs/runbook.md#drift-monitoring)). Every non-health route requires a verified service caller
 (`api/security.py`; shared-secret in `local`, OIDC in `gcp`). Catalog identity: **Hrz4**,
 group **`hrz`** (shared platform services), priority **P0**, buyer **Model Risk / MLOps**.
 Hrz4 does **not** process customer PII (it evaluates models against datasets), so rule R1 /
@@ -238,7 +243,7 @@ Everything is keyed off [`config/settings.yaml`](config/settings.yaml), which re
 | Surface | Command | Notes |
 |---------|---------|-------|
 | **API** (FastAPI) | `make run-api` | REST gate + the A2A AgentCard at `/.well-known/agent-card.json`; OpenAPI at `/docs`. Port 8084. |
-| **CLI** (Typer) | `ai-quality gate gemini-3.5-flash v3 compliance-qa-golden` | Entry point `ai-quality`. Sub-commands `evaluate`, `redteam`, `gate`, `version-prompt`, `serve`, `eval`. |
+| **CLI** (Typer) | `ai-quality gate gemini-3.5-flash v3 compliance-qa-golden` | Entry point `ai-quality`. Sub-commands `evaluate`, `redteam`, `gate`, `drift`, `version-prompt`, `serve`, `eval`. |
 | **UI** (React / Next.js) | `make run-ui` | Talks to the API; renders the EvalReport, RedTeamReport and GateDecision. |
 
 The CLI runs the **full gate end to end against the `local` profile** with no cloud access,

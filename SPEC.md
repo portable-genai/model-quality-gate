@@ -155,6 +155,12 @@ Each service takes explicit port instances in its constructor (no service locato
 - `RedTeamService(redteam, tracer, audit)` `.run(target, cases, actor) -> RedTeamReport`.
 - `PromotionGateService(evaluation_service, redteam_service, model_card_store, tracer,
   audit, review_policy=None)` `.gate(target, dataset, cases, actor, thresholds=None) -> GateDecision`.
+- `DriftMonitorService(metrics_store, tracer, audit, policy=None)`
+  `.assess(model, actor) -> DriftEscalation`. Reads the recorded drift signals and applies
+  `DriftRegatePolicy` (`domain/drift.py`): an `alert` requires a re-gate and a review, a
+  `warning` requires a review, and both an absent measurement and an unrecognised status
+  escalate rather than resolving to `stable`. It is given no gate service and no evidence
+  store, so it can state a requirement and cannot act on one.
 - `PromptVersioningService(prompt_registry, tracer, audit)`.
 - `ModelCardService(model_card_store, tracer, audit)`.
 
@@ -204,6 +210,13 @@ any score as a false PASS.
   set; refuses an empty one); `GET /v1/datasets` -> `[id...]`; `GET /v1/datasets/{id}` ->
   `{dataset_id, n_examples}` (404 if absent). A published set is preferred over the
   repo-bundled JSONL when scoring.
+- `GET /v1/drift/{model}` -> DriftEscalation
+  `{model, status, requires_re_gate, requires_human_review, signals[], escalating_metrics[],
+  reasons[]}`. The online-quality read. `status` is `stable` / `warning` / `alert`, plus
+  `unmeasured` (nothing recorded) and `unrecognised` (a status the policy does not know),
+  both of which escalate: a model with no evidence answers **200 with
+  `requires_re_gate: true`**, never a 404 and never a silent `stable`. An `alert` requires a
+  re-gate; the route holds no gate service and executes nothing.
 - `GET/POST /v1/prompts/{name}/versions` -> PromptVersion / PromptVersion[].
 - `GET /v1/model-cards/{model}/{version}` -> ModelCard.
 - `GET /healthz`; `GET /.well-known/agent-card.json`.

@@ -18,6 +18,7 @@ from functools import lru_cache
 from ..config import Container, Settings, build_container
 from ..domain.policy import PromotionPolicy
 from ..domain.services import (
+    DriftMonitorService,
     EvaluationService,
     ModelCardService,
     PromotionGateService,
@@ -100,6 +101,19 @@ def build_gate_service(container: Container) -> PromotionGateService:
     )
 
 
+def build_drift_service(container: Container) -> DriftMonitorService:
+    """DriftMonitorService(metrics_store, tracer, audit).
+
+    Deliberately NOT given the gate service or the model-card store. The escalation path
+    states that a re-gate is owed; it must not be able to run one.
+    """
+    return DriftMonitorService(
+        metrics_store=container.metrics_store,
+        tracer=container.tracer,
+        audit=container.audit,
+    )
+
+
 def build_prompt_service(container: Container) -> PromptVersioningService:
     """PromptVersioningService(prompt_registry, tracer, audit)."""
     return PromptVersioningService(
@@ -133,6 +147,10 @@ def get_redteam_service() -> RedTeamService:
 
 def get_gate_service() -> PromotionGateService:
     return build_gate_service(get_container())
+
+
+def get_drift_service() -> DriftMonitorService:
+    return build_drift_service(get_container())
 
 
 def get_prompt_service() -> PromptVersioningService:
