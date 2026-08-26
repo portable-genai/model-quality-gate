@@ -40,7 +40,7 @@ _SETTINGS_YAML = _SRC.parents[1] / "config" / "settings.yaml"
 
 _EVAL_BODY = {
     "target": {
-        "model": "gemini-3.5-flash",
+        "model": "gemini-3.7-flash",
         "prompt_version": "v3",
         "dataset_id": "compliance-qa-golden",
     },

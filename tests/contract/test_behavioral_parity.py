@@ -144,8 +144,8 @@ def test_audit_parity_identical_payload_at_every_sink():
         action="gate",
         actor="eval-bot@bank.test (FICTIONAL)",
         decision=Decision.ESCALATED,
-        redacted_prompt="promotion gate on gemini-3.5-flash@v3:compliance-qa-golden (FICTIONAL)",
-        redacted_response="gemini-3.5-flash@v3:compliance-qa-golden",
+        redacted_prompt="promotion gate on gemini-3.7-flash@v3:compliance-qa-golden (FICTIONAL)",
+        redacted_response="gemini-3.7-flash@v3:compliance-qa-golden",
         citations=(
             Citation(
                 source_id="kb-cloud-outsourcing",
@@ -153,7 +153,7 @@ def test_audit_parity_identical_payload_at_every_sink():
                 page=12,
             ),
         ),
-        metadata={"target": "gemini-3.5-flash@v3:compliance-qa-golden", "n_examples": "2"},
+        metadata={"target": "gemini-3.7-flash@v3:compliance-qa-golden", "n_examples": "2"},
         event_id="audit-parity-event",
     )
     expected = to_jsonable(event)

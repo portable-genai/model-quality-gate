@@ -34,7 +34,7 @@ from model_quality_gate.domain.serialization import (
 )
 
 TARGET = EvalTarget(
-    model="gemini-3.5-flash",
+    model="gemini-3.7-flash",
     prompt_version="v3",
     dataset_id="compliance-qa-golden",
     system="C1",
@@ -109,7 +109,7 @@ def test_gate_decision_jsonable_carries_both_sub_report_verdicts() -> None:
         eval_report=_eval_report(),
         redteam_report=_redteam_report(),
         passed=False,
-        model_card_ref="gemini-3.5-flash@v3",
+        model_card_ref="gemini-3.7-flash@v3",
         mrm_evidence_ref="/v1/mrm-evidence/run-1",
         requires_human_review=True,
         caveats=("local evaluator is not attested",),
@@ -133,7 +133,7 @@ def test_mrm_evidence_jsonable_carries_both_sub_report_verdicts() -> None:
         passed=False,
         requires_human_review=True,
         caveats=(),
-        model_card_ref="gemini-3.5-flash@v3",
+        model_card_ref="gemini-3.7-flash@v3",
         audit_event_id="evt-1",
         threshold_policy_digest="sha256:abc",
     )
@@ -157,7 +157,7 @@ def test_persisted_encoding_stays_free_of_derived_keys() -> None:
         passed=True,
         requires_human_review=False,
         caveats=(),
-        model_card_ref="gemini-3.5-flash@v3",
+        model_card_ref="gemini-3.7-flash@v3",
         audit_event_id="evt-1",
         threshold_policy_digest="sha256:abc",
     )

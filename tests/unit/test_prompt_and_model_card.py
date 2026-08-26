@@ -54,7 +54,7 @@ def test_list_returns_every_version_of_a_named_prompt(prompt_service):
 # --------------------------------------------------------------------------- #
 def test_put_stores_and_audits_a_model_card(model_card_service, model_card_store, audit):
     card = ModelCard(
-        model="gemini-3.5-flash",
+        model="gemini-3.7-flash",
         version="v3",
         intended_use="Compliance Q&A grounding evaluation.",
         metrics={"groundedness": 0.91},
@@ -62,8 +62,8 @@ def test_put_stores_and_audits_a_model_card(model_card_service, model_card_store
     )
     stored = model_card_service.put(card, actor=ACTOR)
 
-    assert stored.ref == "gemini-3.5-flash@v3"
-    assert model_card_service.get("gemini-3.5-flash", "v3") is not None
+    assert stored.ref == "gemini-3.7-flash@v3"
+    assert model_card_service.get("gemini-3.7-flash", "v3") is not None
     assert any(e.action == "model_card" for e in audit.events)
 
 

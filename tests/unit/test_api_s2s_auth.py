@@ -29,7 +29,7 @@ from model_quality_gate.api.security import _TOKEN_ENV
 from model_quality_gate.config import Container, LocalSettings, Settings
 
 _TARGET = {
-    "model": "gemini-3.5-flash",
+    "model": "gemini-3.7-flash",
     "prompt_version": "v3",
     "dataset_id": "compliance-qa-golden",
 }
@@ -104,7 +104,7 @@ def test_correct_token_is_accepted(client: TestClient, token_env: str) -> None:
 def test_read_route_is_also_guarded(client: TestClient, token_env: str) -> None:
     # A guarded GET (the cheap promotion poll) is 401 without a service token when enforced.
     params = {
-        "model": "gemini-3.5-flash",
+        "model": "gemini-3.7-flash",
         "prompt_version": "v3",
         "dataset": "compliance-qa-golden",
     }

@@ -25,7 +25,7 @@ from model_quality_gate.api.app import app
 from model_quality_gate.config import Container, LocalSettings, Settings
 
 _TARGET = {
-    "model": "gemini-3.5-flash",
+    "model": "gemini-3.7-flash",
     "prompt_version": "v3",
     "dataset_id": "compliance-qa-golden",
 }

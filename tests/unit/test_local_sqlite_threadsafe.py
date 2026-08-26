@@ -115,7 +115,7 @@ def test_metrics_store_adapter_is_thread_safe() -> None:
 
     def work(i: int) -> object:
         report = EvalReport(
-            target=EvalTarget(model="gemini-3.5-flash", prompt_version=f"v{i}", dataset_id="ds"),
+            target=EvalTarget(model="gemini-3.7-flash", prompt_version=f"v{i}", dataset_id="ds"),
             results=(
                 EvalMetricResult(metric="groundedness", score=0.9, threshold=0.8, passed=True),
             ),
@@ -123,12 +123,12 @@ def test_metrics_store_adapter_is_thread_safe() -> None:
         )
         adapter.record(report)
         # Interleave a drift read on the same connection from the worker thread.
-        return adapter.drift("gemini-3.5-flash")
+        return adapter.drift("gemini-3.7-flash")
 
     _drive(work)
 
     # One metric ("groundedness") recorded _TOTAL times for the model.
-    signals = adapter.drift("gemini-3.5-flash")
+    signals = adapter.drift("gemini-3.7-flash")
     assert len(signals) == 1
     assert signals[0].metric == "groundedness"
 
@@ -138,7 +138,7 @@ def test_model_card_store_adapter_is_thread_safe() -> None:
 
     def work(i: int) -> object:
         card = ModelCard(
-            model="gemini-3.5-flash",
+            model="gemini-3.7-flash",
             version=f"v{i}",
             intended_use="grounded compliance QA",
             metrics={"groundedness": 0.9},
@@ -150,7 +150,7 @@ def test_model_card_store_adapter_is_thread_safe() -> None:
 
     # Every put/get round-tripped without a cross-thread error.
     assert all(r is not None for r in results)
-    assert adapter.get("gemini-3.5-flash", "v0") is not None
+    assert adapter.get("gemini-3.7-flash", "v0") is not None
 
 
 def test_prompt_registry_adapter_is_thread_safe() -> None:
