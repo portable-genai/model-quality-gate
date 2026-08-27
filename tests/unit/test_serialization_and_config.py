@@ -185,8 +185,8 @@ def test_gcp_region_is_configurable_from_one_selector(monkeypatch):
     settings = Settings.load(CONFIG_PATH)
     assert settings.region == "europe-west4"
     assert settings.eval.location == "europe-west4"
-    assert settings.models.reasoning == "gemini-3.7-flash"
-    assert settings.models.triage == "gemini-3.1-flash-lite"
+    assert settings.models.reasoning == "gemini-3.5-flash"
+    assert settings.models.triage == "gemini-3.5-flash"
     assert settings.logging.retention_days == 2557
     assert set(PORT_PROTOCOLS) <= set(settings.adapters)
 
