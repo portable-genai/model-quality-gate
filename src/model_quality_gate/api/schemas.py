@@ -330,7 +330,7 @@ class HealthResponse(BaseModel):
 
     status: str = "ok"
     profile: str = "local"
-    region: str = "us-central1"
+    region: str = "asia-southeast1"
     production_ready: bool = False
     demo_only: bool = True
 
