@@ -70,7 +70,7 @@ resource "google_storage_bucket" "mrm_evidence" {
 
   retention_policy {
     retention_period = var.retention_days * 86400
-    is_locked        = true
+    is_locked        = var.evidence_bucket_locked
   }
 
   versioning {
