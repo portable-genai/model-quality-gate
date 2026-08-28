@@ -48,6 +48,32 @@ variable "retention_days" {
   }
 }
 
+variable "evidence_bucket_locked" {
+  type        = bool
+  default     = true
+  description = <<-EOT
+    Lock the model-risk evidence bucket's retention policy (WORM). Default true.
+
+    #########################################################################
+    # WARNING: LOCKING IS IRREVERSIBLE. Once applied, neither the policy    #
+    # nor the bucket can be removed until every object ages out (2557 days  #
+    # by default), not even with project-owner rights.                      #
+    #########################################################################
+
+    true is REQUIRED for a compliant deployment: promotion evidence is Write-Once-Read-Many
+    only when the policy is locked. Set false ONLY for an evaluation or reference stack that
+    must remain destroyable, and say so in that deployment's tfvars rather than leaving it
+    unset -- an unlocked stack is not a compliant one.
+
+    This was a literal `true` until 2026-08-28, which meant a reference deployment could not
+    decline it at all: a stack applied to try the promotion gate out acquired a seven-year
+    commitment on its first apply, with no input anywhere that could say otherwise. A sibling
+    stack in this fleet is still carrying exactly that, because its tfvars said nothing and
+    the default said true. The default is unchanged and correct; what changes is that
+    declining it is now something a deployment can express.
+  EOT
+}
+
 variable "org_id" {
   description = "Organization id : required for Org Policy and Access Context Manager."
   type        = string
