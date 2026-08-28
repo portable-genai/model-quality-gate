@@ -149,6 +149,17 @@ export function codeOnly(source) {
 /** `process.env.NAME`, and the bracket form, wherever they appear in real code. */
 const DIRECT_READ = /process\.env(?:\.([A-Za-z_$][\w$]*)|\[\s*["'`]([^"'`]+)["'`]\s*\])/g;
 
+/**
+ * The client-read relaxation: the raw value handed straight to the shared `apiBase` contract,
+ * which decides all three states itself (undefined takes the documented default, blank returns
+ * "", a value is validated). A browser bundle REQUIRES the literal `process.env.NEXT_PUBLIC_X`
+ * here, because that is the only form a bundler can substitute; passing `process.env` itself
+ * left the browser reading undefined, taking the loopback default, and calling a port its own
+ * policy refused. So the read stays literal and the decision still happens in one place.
+ */
+const CLIENT_API_BASE_READ =
+  /apiBase\(\s*\{\s*NEXT_PUBLIC_API_BASE:\s*process\.env\.NEXT_PUBLIC_API_BASE\s*,?\s*\}\s*\)/;
+
 /** The exact-match relaxation: the raw read compared against a literal, with no default. */
 const EXACT_MATCH =
   /process\.env(?:\.[A-Za-z_$][\w$]*|\[\s*["'`][^"'`]+["'`]\s*\])\s*(?:===|!==|==|!=)\s*["'`]/;
@@ -159,7 +170,8 @@ export function findings(sources = scannedSources()) {
   for (const file of sources) {
     const relativePath = relative(UI_ROOT, file);
     if (relativePath === THREE_STATE_READER_MODULE) continue;
-    const lines = codeOnly(readFileSync(file, "utf8")).split("\n");
+    const code = codeOnly(readFileSync(file, "utf8"));
+    const lines = code.split("\n");
     lines.forEach((text, index) => {
       for (const match of text.matchAll(DIRECT_READ)) {
         const variable = match[1] ?? match[2];
@@ -167,6 +179,8 @@ export function findings(sources = scannedSources()) {
         // The exact-match escape is judged on the line, because that is the whole expression:
         // a comparison against a literal has no default to inherit.
         if (EXACT_MATCH.test(text)) continue;
+        // Judged on the whole file: the formatter wraps the call across lines.
+        if (variable === "NEXT_PUBLIC_API_BASE" && CLIENT_API_BASE_READ.test(code)) continue;
         out.push({ file: relativePath, line: index + 1, variable, text: text.trim() });
       }
     });

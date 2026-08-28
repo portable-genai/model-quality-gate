@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -136,4 +137,13 @@ test("unset keeps the restrictive default, and a named allowlist still resolves"
     }),
     "https://portal.bank.example https://ops.bank.example",
   );
+});
+
+test("the browser build receives the configured base, not the loopback default", () => {
+  // The defect this guards: `apiBase(process.env)` cannot be substituted by a bundler, so
+  // the browser read undefined and every console called its own loopback port, which its
+  // own connect-src then refused. The call site must hand over the VALUE.
+  const source = readFileSync(new URL("../lib/api.ts", import.meta.url), "utf8");
+  assert.match(source, /apiBase\(\{\s*NEXT_PUBLIC_API_BASE:\s*process\.env\.NEXT_PUBLIC_API_BASE\s*\}\)/);
+  assert.doesNotMatch(source, /apiBase\(process\.env\)/);
 });

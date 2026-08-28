@@ -24,7 +24,12 @@ import type {
 } from "./types";
 import { apiBase } from "./api-base.mjs";
 
-export const API_BASE = apiBase(process.env);
+// The literal member expression is required. A bundler substitutes a public variable only
+// where it sees exactly `process.env.NEXT_PUBLIC_X`; handing this helper the whole
+// `process.env` object leaves nothing to substitute, so the browser read undefined, took the
+// loopback default below, and called a port its own page is not allowed to reach. The page
+// rendered in full and reported its backend unreachable.
+export const API_BASE = apiBase({ NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE });
 
 // Dev-only identity selection. In LOCAL mode the backend resolves identity from the
 // X-Dev-Persona header; in secure profiles this is ignored (identity comes from the
