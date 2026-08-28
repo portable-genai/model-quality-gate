@@ -18,7 +18,7 @@ Design constraints:
 * **Import-safe.** Building the :class:`~model_quality_gate.config.Container` is deferred to
   request time via the ``deps`` factories, so importing this module never touches Google
   Cloud. The on-prem/test profile imports it with no GCP SDK installed.
-* **Region selected at deploy time**, defaulting to ``us-central1`` (SPEC §2).
+* **Region selected at deploy time**, defaulting to ``asia-southeast1`` (SPEC §2).
 
 Run locally with ``python -m model_quality_gate.api.app`` (uvicorn on :8084).
 """

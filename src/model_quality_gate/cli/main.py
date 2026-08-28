@@ -33,7 +33,7 @@ app = typer.Typer(
     help=(
         "A4 AI Quality & Model-Risk Platform : the production-promotion eval / red-team "
         "gate and model-risk (MRM) evidence system, on the Gemini Enterprise Agent "
-        "Platform (GCP region configurable; default us-central1)."
+        "Platform (GCP region configurable; default asia-southeast1)."
     ),
 )
 
