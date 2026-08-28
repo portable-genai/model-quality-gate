@@ -129,7 +129,7 @@ def test_to_jsonable_audit_event_is_worm_serialisable():
 # --------------------------------------------------------------------------- #
 def test_settings_load_parses_yaml():
     settings = Settings.load(CONFIG_PATH)
-    assert settings.region == "us-central1"
+    assert settings.region == "asia-southeast1"
 
 
 def test_interpolation_defaults_only_when_the_variable_is_unset(monkeypatch):
@@ -181,7 +181,7 @@ def test_gcp_region_is_configurable_from_one_selector(monkeypatch):
     # region must ALSO be on the reviewed allowlist, or the service refuses to start
     # (P-03; see tests/unit/test_residency_posture.py).
     monkeypatch.setenv("GCP_REGION", "europe-west4")
-    monkeypatch.setenv("AI_QUALITY_ALLOWED_REGIONS", "us-central1,europe-west4")
+    monkeypatch.setenv("AI_QUALITY_ALLOWED_REGIONS", "asia-southeast1,europe-west4")
     settings = Settings.load(CONFIG_PATH)
     assert settings.region == "europe-west4"
     assert settings.eval.location == "europe-west4"

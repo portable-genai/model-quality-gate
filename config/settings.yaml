@@ -16,14 +16,14 @@
 # stack, but the three relaxations `local` is granted are all withheld.
 
 project_id: ${GOOGLE_CLOUD_PROJECT:-your-gcp-project}
-region: ${GCP_REGION:-us-central1}     # selected at deploy; must match Terraform
+region: ${GCP_REGION:-asia-southeast1}     # selected at deploy; must match Terraform
 profile: ${AI_QUALITY_PROFILE:-}       # gcp | local | platform | onprem; unset = nobody chose
 kms_key: ${AI_QUALITY_KMS_KEY:-}       # regional Cloud KMS key for CMEK
 
 # Residency allowlist (P-03). The SAME list as infra/terraform var.allowed_regions, enforced
 # twice: Terraform rejects an unapproved region at plan time and the app refuses to start on
 # one. Comma-separated env override; extend only after governance review, in both places.
-allowed_regions: ${AI_QUALITY_ALLOWED_REGIONS:-us-central1}
+allowed_regions: ${AI_QUALITY_ALLOWED_REGIONS:-asia-southeast1}
 
 # ----------------------------------------------------------------------------- #
 # Bank-owned promotion policy (practice B4). These are the numbers a model-risk function
@@ -74,7 +74,7 @@ models:
   use_hard_reasoning: false
 
 eval:
-  location: ${GCP_REGION:-us-central1}
+  location: ${GCP_REGION:-asia-southeast1}
   judge_model: gemini-3.7-flash
   experiment: ai-quality-promotion-gate
 

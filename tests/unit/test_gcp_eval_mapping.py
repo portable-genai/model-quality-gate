@@ -26,7 +26,7 @@ def test_managed_eval_result_preserves_redacted_row_evidence() -> None:
                 "trace_id": "trace-123",
             }
         ],
-        "resource_name": "projects/p/locations/us-central1/evaluations/run-1",
+        "resource_name": "projects/p/locations/asia-southeast1/evaluations/run-1",
     }
 
     assert _extract_summary_scores(result, ["groundedness", "safety"]) == {
@@ -41,7 +41,9 @@ def test_managed_eval_result_preserves_redacted_row_evidence() -> None:
     assert evidence[0].detail == "managed-rationale-available-in-governed-artifact"
     assert evidence[0].trace_ref == "trace-123"
     assert all("must not be copied" not in repr(item) for item in evidence)
-    assert _extract_artifact_refs(result) == ("projects/p/locations/us-central1/evaluations/run-1",)
+    assert _extract_artifact_refs(result) == (
+        "projects/p/locations/asia-southeast1/evaluations/run-1",
+    )
 
 
 def test_managed_rationale_content_is_never_copied_into_portable_evidence():

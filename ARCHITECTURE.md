@@ -167,11 +167,11 @@ Key invariants:
 ## 4. Runtime topology on Agent Runtime
 
 In the `gcp` profile, the ADK agent is hosted on **Agent Runtime** (ex-Agent Engine, a
-`reasoningEngine` resource) inside a VPC-SC perimeter in `us-central1`.
+`reasoningEngine` resource) inside a VPC-SC perimeter in `asia-southeast1`.
 
 ```mermaid
 flowchart TB
-    subgraph perimeter["VPC Service Controls perimeter : us-central1"]
+    subgraph perimeter["VPC Service Controls perimeter : asia-southeast1"]
         subgraph runtime["Agent Runtime (reasoningEngine)"]
             ROOT["Root ADK agent<br/>gemini-3.5-flash (thinking=high)"]
             TOOLS["FunctionTools:<br/>evaluate · red_team · promotion_gate · version_prompt"]
@@ -198,7 +198,7 @@ flowchart TB
     KMS -. encrypts .-> LOG
 ```
 
-- **One region for everything** (`us-central1`); regional endpoints + per-service CMEK
+- **One region for everything** (`asia-southeast1`); regional endpoints + per-service CMEK
   give the residency guarantee a global endpoint would not.
 - **The gate is a promotion-time check**, not an inline request dependency of other agents:
   they call `GET /v1/gate` to confirm a target passed before promoting it (rule R5).

@@ -6,8 +6,8 @@
 project_id = "acme-ai-quality-sg-prod"
 
 # Singapore residency (P-03) : these are already the secure defaults; shown for clarity.
-region          = "us-central1"
-allowed_regions = ["us-central1"]
+region          = "asia-southeast1"
+allowed_regions = ["asia-southeast1"]
 
 # ~7-year WORM retention for the audit log (P-08). Bucket lock is irreversible.
 retention_days = 2557

@@ -25,6 +25,7 @@ from ..domain.services import (
     PromptVersioningService,
     RedTeamService,
 )
+from ..ports.dataset_store import DatasetStorePort
 
 
 @lru_cache(maxsize=1)
@@ -48,7 +49,7 @@ def get_promotion_policy() -> PromotionPolicy:
     return PromotionPolicy.from_policy(get_settings().policy)
 
 
-def get_dataset_store() -> object:
+def get_dataset_store() -> DatasetStorePort:
     """Return the active DatasetStorePort adapter (golden-set ingest/resolve)."""
     return get_container().dataset_store
 

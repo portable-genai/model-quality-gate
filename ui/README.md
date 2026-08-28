@@ -101,6 +101,6 @@ flowchart LR
 
 - Pure presentation: no secrets, no direct cloud calls. All data comes from the Hrz4 backend
   over the documented routes.
-- Region/branding reflects runtime deployment configuration (default `us-central1`).
+- Region/branding reflects runtime deployment configuration (default `asia-southeast1`).
 - The UI is delivered as **source only**: do not commit `.next/` or `node_modules/` (both
   are gitignored).

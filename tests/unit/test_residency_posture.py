@@ -40,19 +40,19 @@ def test_region_outside_the_allowlist_is_rejected_at_load(tmp_path: Path) -> Non
     """A region not on the allowlist must fail the service closed, not warn."""
     settings_file = tmp_path / "settings.yaml"
     settings_file.write_text(
-        "project_id: p\nregion: europe-west4\nallowed_regions: [us-central1]\nprofile: local\n"
+        "project_id: p\nregion: europe-west4\nallowed_regions: [asia-southeast1]\nprofile: local\n"
     )
     with pytest.raises(ResidencyError) as exc:
         Settings.load(settings_file)
     assert "europe-west4" in str(exc.value)
-    assert "us-central1" in str(exc.value)
+    assert "asia-southeast1" in str(exc.value)
 
 
 def test_allowlisted_region_loads(tmp_path: Path) -> None:
     settings_file = tmp_path / "settings.yaml"
     settings_file.write_text(
         "project_id: p\nregion: europe-west4\n"
-        "allowed_regions: [us-central1, europe-west4]\nprofile: local\n"
+        "allowed_regions: [asia-southeast1, europe-west4]\nprofile: local\n"
     )
     assert Settings.load(settings_file).region == "europe-west4"
 
@@ -62,10 +62,10 @@ def test_comma_separated_allowlist_from_env_is_parsed(tmp_path: Path) -> None:
     settings_file = tmp_path / "settings.yaml"
     settings_file.write_text(
         "project_id: p\nregion: asia-southeast1\n"
-        "allowed_regions: us-central1, asia-southeast1\nprofile: local\n"
+        "allowed_regions: asia-southeast1, asia-southeast1\nprofile: local\n"
     )
     settings = Settings.load(settings_file)
-    assert settings.allowed_regions == ["us-central1", "asia-southeast1"]
+    assert settings.allowed_regions == ["asia-southeast1", "asia-southeast1"]
 
 
 def test_empty_allowlist_is_rejected() -> None:

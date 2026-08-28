@@ -47,7 +47,7 @@ data. Dependency rule R1 / Hrz1 (customer-PII guardrail) is therefore **N/A** fo
 
 ## 2. Locked decisions
 
-- **Region** selected at deployment, allowlist-validated, and defaulted to `us-central1`.
+- **Region** selected at deployment, allowlist-validated, and defaulted to `asia-southeast1`.
   No global endpoints.
 - **Profiles**: `gcp` (managed), `local` (a WORKING offline laptop stack: SQLite FTS5
   retrieval, a deterministic offline scorer, a heuristic red-team harness, a deterministic
@@ -82,7 +82,7 @@ data. Dependency rule R1 / Hrz1 (customer-PII guardrail) is therefore **N/A** fo
 | Tracing | Cloud Trace via OpenTelemetry | content capture **OFF** |
 | Promotion CI | Cloud Build trigger | the P-08 gate |
 | Interop | A2A v1.0 + MCP 2026-07-28 | AgentCard `/.well-known/agent-card.json` |
-| Sovereignty | VPC-SC, regional CMEK, Org Policy, Assured Workloads | `us-central1` |
+| Sovereignty | VPC-SC, regional CMEK, Org Policy, Assured Workloads | `asia-southeast1` |
 
 Models are never the floating ADK default or `gemini-2.0-flash` (discontinued). One
 built-in tool per agent.
