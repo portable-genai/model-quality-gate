@@ -35,7 +35,7 @@ def test_healthz_reports_profile_and_region(client):
     assert resp.status_code == 200
     body = resp.json()
     assert body["status"] == "ok"
-    assert body["region"] == "us-central1"
+    assert body["region"] == "asia-southeast1"
     assert body["demo_only"] is True
     assert body["production_ready"] is False
 
@@ -59,7 +59,7 @@ def test_partial_managed_configuration_never_fans_one_attestation_across_control
     monkeypatch.setattr(deps, "get_settings", lambda: settings)
     monkeypatch.setenv(
         "AI_QUALITY_EVALUATION_ATTESTATION_REF",
-        "projects/demo/locations/us-central1/evaluations/attestation-1",
+        "projects/demo/locations/asia-southeast1/evaluations/attestation-1",
     )
     monkeypatch.delenv("HRZ_OBSERVABILITY_URL", raising=False)
     monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)

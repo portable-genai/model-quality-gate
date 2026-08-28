@@ -33,7 +33,7 @@ from hex_service_kit.netdefaults import EnvSetting, read_env_setting
 from .envread import setting_or_default
 
 _ENV_PATTERN = re.compile(r"\$\{([A-Z0-9_]+)(?::-(.*?))?\}")
-DEFAULT_GCP_REGION = "us-central1"
+DEFAULT_GCP_REGION = "asia-southeast1"
 
 #: The one environment variable that names the profile. Only :func:`resolve_profile` may read
 #: it; ``tests/unit/test_profile_single_source.py`` fails the build if another module does.

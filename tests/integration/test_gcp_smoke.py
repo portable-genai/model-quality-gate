@@ -28,7 +28,7 @@ def gcp_settings():
     settings = Settings.load("config/settings.yaml")
     return Settings(
         project_id=os.environ["GOOGLE_CLOUD_PROJECT"],
-        region="us-central1",
+        region="asia-southeast1",
         profile="gcp",
         kms_key=settings.kms_key,
         models=settings.models,
@@ -49,7 +49,7 @@ def container(gcp_settings):
 
 
 def test_region_uses_configured_default(gcp_settings):
-    assert gcp_settings.region == "us-central1"
+    assert gcp_settings.region == "asia-southeast1"
 
 
 def test_evaluation_adapter_constructs(container):

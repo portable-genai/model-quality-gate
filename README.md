@@ -5,7 +5,7 @@
 > The production-promotion **eval / red-team gate** and **model-risk (MRM)** evidence
 > system for APAC banking. Every B and C agent in the catalog must pass Hrz4 before
 > promotion (dependency rule R5). Built ports-and-adapters on the **Gemini Enterprise
-> Agent Platform**, with a configurable deployment region defaulting to `us-central1`.
+> Agent Platform**, with a configurable deployment region defaulting to `asia-southeast1`.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](pyproject.toml)
@@ -126,7 +126,7 @@ sequence diagram, and the runtime topology.
 
 > Platform note: the product is **Gemini Enterprise Agent Platform**; the API host is
 > still `aiplatform.googleapis.com`. Everything is pinned to
-> the selected deployment region (default `us-central1`). The authoritative source for
+> the selected deployment region (default `asia-southeast1`). The authoritative source for
 > the stack is [`SPEC.md`](SPEC.md) §3.
 
 | Concern | Service (current name) | Identifier |
@@ -143,7 +143,7 @@ sequence diagram, and the runtime topology.
 | Tracing | Cloud Trace via OpenTelemetry | content capture **OFF** |
 | Promotion CI | Cloud Build trigger | the P-08 gate |
 | Interop | A2A v1.0 + MCP 2026-07-28 | AgentCard `/.well-known/agent-card.json` |
-| Sovereignty | VPC-SC, regional CMEK, Org Policy | `us-central1` |
+| Sovereignty | VPC-SC, regional CMEK, Org Policy | `asia-southeast1` |
 
 **Gotchas honoured by the build** (SPEC §3): regional endpoints + per-service CMEK for
 residency; message-content capture is **OFF** in spans; the locked log bucket is
@@ -219,14 +219,14 @@ ai-quality gate gemini-3.5-flash v3 compliance-qa-golden   # exits 2 with the mi
 
 See [`docs/onprem-migration.md`](docs/onprem-migration.md) for the migration checklist.
 
-### 4.3 `gcp` profile: real managed stack in `us-central1`
+### 4.3 `gcp` profile: real managed stack in `asia-southeast1`
 
 ```bash
 pip install -e ".[gcp,dev]"      # adds google-adk, google-genai, bigquery, storage, ...
 
 export GOOGLE_CLOUD_PROJECT=your-sg-project
 export AI_QUALITY_PROFILE=gcp                 # always set explicitly; there is no default
-export AI_QUALITY_KMS_KEY="projects/.../locations/us-central1/keyRings/.../cryptoKeys/..."
+export AI_QUALITY_KMS_KEY="projects/.../locations/asia-southeast1/keyRings/.../cryptoKeys/..."
 gcloud auth application-default login
 
 make tf-plan                      # review, then terraform apply (see docs/runbook.md)
@@ -349,7 +349,7 @@ and one UNFIT row, and the judge itself is proven able to go red per vertical.
 
 | Control | How it is enforced |
 |---------|--------------------|
-| **Region pin** (default `us-central1`) | Every service and SDK call targets `var.region`; Terraform fails fast when it is not in `allowed_regions`. No global endpoints. |
+| **Region pin** (default `asia-southeast1`) | Every service and SDK call targets `var.region`; Terraform fails fast when it is not in `allowed_regions`. No global endpoints. |
 | **VPC Service Controls** | All managed services sit inside a service perimeter so eval metrics, golden datasets, model cards and audit cannot egress. |
 | **CMEK** (regional) | Customer-managed Cloud KMS keys encrypt BigQuery, Cloud Storage, and the log bucket (CMEK does not cascade, P-09). |
 | **WORM audit** (**P-07**) | `CloudLoggingAuditAdapter` writes every gate / eval / red-team `AuditEvent` to a **locked** Cloud Logging bucket (retention 2557 days, irreversible). |
@@ -400,7 +400,7 @@ flowchart LR
     srcconfig["config.py<br/>Settings + Container (DI for the hexagon)"]
     config["config/settings.yaml (bindings, region, models, retention)<br/>config/quality-floors.toml (per-vertical narrative floors)"]
     eval["eval/<br/>run_eval.py (gate logic) + run_narrative_eval.py (quality floors) + golden sets"]
-    terraform["infra/terraform/<br/>us-central1 infra (BigQuery, GCS, WORM bucket)"]
+    terraform["infra/terraform/<br/>asia-southeast1 infra (BigQuery, GCS, WORM bucket)"]
     ui["ui/<br/>React / Next.js app"]
     tests["tests/<br/>contract + unit tests (run under the local profile)"]
     docs["docs/<br/>onprem-migration.md, runbook.md"]

@@ -9,7 +9,7 @@ Step-by-step scripts for demoing Hrz4 two ways:
   **fully offline** (no cloud, no API key) on the deterministic `local` stack.
 - **Demo B: the same gate on the managed GCP stack**: the identical contract running
   against the real Gen AI evaluation service, Gemini judge, BigQuery, Cloud Storage (CMEK)
-  and the WORM log bucket in `us-central1`, exposed over REST and the Next.js console.
+  and the WORM log bucket in `asia-southeast1`, exposed over REST and the Next.js console.
 
 > The golden datasets and red-team probes are **fictional / synthetic**. Do not gate a
 > model against live regulated workloads without your own legal, security and model-risk
@@ -25,14 +25,14 @@ Step-by-step scripts for demoing Hrz4 two ways:
 | **Python 3.12+** | yes | yes | the package pins `>=3.12` |
 | Node.js 18+ and npm | for the UI / Playwright | for the UI | only if you show the browser console |
 | **Playwright** (`pip install playwright` + `playwright install chromium`) | for the guided walkthrough | not needed | Demo A's presenter walkthrough only |
-| A GCP project + `gcloud` | not needed | yes | billing enabled; `us-central1` available |
+| A GCP project + `gcloud` | not needed | yes | billing enabled; `asia-southeast1` available |
 | Terraform | not needed | yes | provisions BigQuery, GCS, the WORM log bucket, CMEK |
 | Cloud KMS key (regional) | not needed | yes | CMEK; set `AI_QUALITY_KMS_KEY` |
 
 Install/setup references (read these once):
 
 - Local install and profiles -> [README 4.1 `local`](README.md#41-local-profile-a-working-offline-gate-no-gcp-runs-anywhere)
-- GCP install and deploy -> [README 4.3 `gcp`](README.md#43-gcp-profile-real-managed-stack-in-us-central1) and [`docs/runbook.md`](docs/runbook.md)
+- GCP install and deploy -> [README 4.3 `gcp`](README.md#43-gcp-profile-real-managed-stack-in-asia-southeast1) and [`docs/runbook.md`](docs/runbook.md)
 - Running the surfaces (API / CLI / UI) -> [README 5](README.md#5-running-the-three-surfaces)
 - Deployment profiles explained -> [SPEC](SPEC.md)
 - The demo scripts -> [`scripts/README.md`](scripts/README.md)
@@ -121,7 +121,7 @@ make run-ui
 
 Open `http://localhost:3000`, keep the defaults (`gemini-3.5-flash` / `v3` /
 `compliance-qa-golden`) and click **Run promotion gate**. The header pill shows
-`local · us-central1`. The same form also runs **Evaluate only** and **Red-team only**.
+`local · asia-southeast1`. The same form also runs **Evaluate only** and **Red-team only**.
 
 ### 2.3 Static artifacts (slides / screenshots)
 
@@ -154,7 +154,7 @@ wraps it as an assertion-backed successful demo self-test. `ai-quality evaluate 
 ## 3. Demo B: the promotion gate on the managed GCP stack
 
 Shows the same gate contract producing the same artifacts against **real managed services**
-in `us-central1`. Follow [`docs/runbook.md`](docs/runbook.md) for the authoritative
+in `asia-southeast1`. Follow [`docs/runbook.md`](docs/runbook.md) for the authoritative
 deploy steps; the short version:
 
 ### 3.1 GCP setup
@@ -165,7 +165,7 @@ pip install -e ".[gcp,dev]"                 # adds google-adk, google-genai, big
 
 export GOOGLE_CLOUD_PROJECT=your-sg-project
 export AI_QUALITY_PROFILE=gcp
-export AI_QUALITY_KMS_KEY="projects/.../locations/us-central1/keyRings/.../cryptoKeys/..."
+export AI_QUALITY_KMS_KEY="projects/.../locations/asia-southeast1/keyRings/.../cryptoKeys/..."
 gcloud auth application-default login
 ```
 
@@ -215,7 +215,7 @@ make run-ui           # http://localhost:3000
 (maker-checker, P-06); every gate / eval / red-team action is written to the **WORM** log
 bucket (P-07); tracing captures structure and token usage but **never** prompt/response
 content; an empty golden dataset is a hard error, never a vacuous PASS; everything stays in
-`us-central1` with CMEK + VPC-SC ([README 7](README.md#7-security--residency-posture)).
+`asia-southeast1` with CMEK + VPC-SC ([README 7](README.md#7-security--residency-posture)).
 
 > **Note.** Hrz4 does **not** process customer PII (it evaluates models against datasets), so
 > rule R1 / the Hrz1 redaction step is N/A here: the audit records carry the target ref and a

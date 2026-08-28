@@ -1,6 +1,6 @@
 # Runbook : Hrz4 AI Quality & Model-Risk Platform
 
-Operational notes for deploying and running Hrz4 in `us-central1`. This is a reference
+Operational notes for deploying and running Hrz4 in `asia-southeast1`. This is a reference
 build: adapt to your own change-management and sign-off processes before production use.
 
 ## Deploy (gcp profile)
@@ -57,7 +57,7 @@ model-risk officer before promoting (maker-checker, P-06).
 
 ## Region fail-fast
 
-Every adapter targets the configured region (default `us-central1`). If the Gen AI
+Every adapter targets the configured region (default `asia-southeast1`). If the Gen AI
 evaluation service or another required service is unavailable there, the relevant call fails rather than silently
 falling back to a global endpoint (which would break residency).
 

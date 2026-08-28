@@ -1,7 +1,7 @@
 # Hrz4 infrastructure (Terraform)
 
 Regional infrastructure for the Hrz4 AI Quality & Model-Risk Platform. The region defaults
-to `us-central1` and must be in the reviewed `allowed_regions` list. Every service id,
+to `asia-southeast1` and must be in the reviewed `allowed_regions` list. Every service id,
 location, dataset, and bucket name resolves in-region and matches
 [`config/settings.yaml`](../../config/settings.yaml).
 
@@ -40,7 +40,7 @@ export AI_QUALITY_KMS_KEY="$(terraform output -raw kms_key)"
 
 ## Residency notes
 
-- Region defaults to `us-central1` and is validated against `allowed_regions`; an
+- Region defaults to `asia-southeast1` and is validated against `allowed_regions`; an
   unapproved value fails `terraform plan` (P-03).
 - CMEK does **not** cascade (P-09): each service (BigQuery, Cloud Storage, Vertex / Agent
   Platform, Logging) has its own explicit key binding in `kms.tf`.

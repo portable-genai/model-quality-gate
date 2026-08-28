@@ -1,7 +1,7 @@
 # variables.tf : The only knobs. Everything else is a concrete in-region value.
 #
 # General Principle map:
-#   P-03 (residency): `region` defaults to us-central1 and is validated against the
+#   P-03 (residency): `region` defaults to asia-southeast1 and is validated against the
 #         deployment's reviewed allowlist.
 #   P-08 (auditability/retention): `retention_days` is a Terraform variable (the
 #         WORM bucket lock is irreversible, so retention must be deliberate).
@@ -18,7 +18,7 @@ variable "project_id" {
 variable "allowed_regions" {
   description = "Residency-approved deployment regions. Extend only after governance review."
   type        = list(string)
-  default     = ["us-central1"]
+  default     = ["asia-southeast1"]
 
   validation {
     condition     = length(var.allowed_regions) > 0
@@ -29,7 +29,7 @@ variable "allowed_regions" {
 variable "region" {
   description = "Deployment region, validated against allowed_regions (P-03)."
   type        = string
-  default     = "us-central1"
+  default     = "asia-southeast1"
 
   validation {
     condition     = contains(var.allowed_regions, var.region)
