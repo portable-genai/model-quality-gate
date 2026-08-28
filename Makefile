@@ -79,7 +79,13 @@ rename-selftest: ## Rename a clean copy, install locked deps, and run its full g
 ui-check: ## Build, execute and audit the production UI artifact.
 	cd $(UI_DIR) && npm ci && npm run lint && npm test && NEXT_TELEMETRY_DISABLED=1 npm run build && npm run assert-hydratable && npm audit --audit-level=high
 
-check: lint test eval eval-narrative gate-local demo-selftest portability-demo ui-check ## Run the full offline quality gate.
+plugin: ## Render the Agent Plugins 1.0.0 directory from this repo's own declarations.
+	python scripts/render_plugin.py --dest dist/plugin
+
+mcp-serve: ## Serve the governed tool catalog over MCP 2026-07-28 (stdio; needs [gcp]).
+	python -m model_quality_gate.mcp
+
+check: lint test eval eval-narrative gate-local demo-selftest portability-demo ui-check plugin ## Run the full offline quality gate.
 
 run-api: ## Run the FastAPI gate service (PROFILE=$(PROFILE)).
 	uvicorn $(API_APP) --host $(API_HOST) --port $(API_PORT) --reload
