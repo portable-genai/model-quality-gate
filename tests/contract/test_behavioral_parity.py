@@ -53,9 +53,9 @@ CONFIG_PATH = "config/settings.yaml"
 
 # The platform clients' localhost defaults (SPEC contract): mocked, never actually served.
 # These MUST match the ``_DEFAULT_URL`` / env-var defaults hard-coded in the remote_* adapters.
-HRZ_KB = "http://localhost:8082"  # remote_knowledge_base (HRZ_KB_URL) -> Hrz2 /v1/search
-HRZ_OBSERVABILITY = (
-    "http://localhost:8085"  # remote_audit (HRZ_OBSERVABILITY_URL) -> Hrz5 /v1/audit
+KNOWLEDGE_BASE = "http://localhost:8082"  # remote_knowledge_base (KNOWLEDGE_BASE_URL) -> Hrz2 /v1/search
+OBSERVABILITY = (
+    "http://localhost:8085"  # remote_audit (OBSERVABILITY_URL) -> Hrz5 /v1/audit
 )
 
 
@@ -117,7 +117,7 @@ def test_knowledge_base_parity_same_citations_across_implementations():
 
     with respx.mock:
         # Hrz2 serves the SAME passages for the same query at the documented /v1/search shape.
-        respx.post(f"{HRZ_KB}/v1/search").respond(
+        respx.post(f"{KNOWLEDGE_BASE}/v1/search").respond(
             200, json={"passages": [_passage_json(c) for c in local_citations]}
         )
         remote_citations = _adapter("knowledge_base", "platform").retrieve(query, top_k=5)
@@ -165,7 +165,7 @@ def test_audit_parity_identical_payload_at_every_sink():
 
     # platform sink (Hrz5 observability): the POSTed body is byte-identical to what local stored.
     with respx.mock:
-        route = respx.post(f"{HRZ_OBSERVABILITY}/v1/audit").respond(
+        route = respx.post(f"{OBSERVABILITY}/v1/audit").respond(
             202, json={"status": "accepted", "event_id": event.event_id}
         )
         _adapter("audit", "platform").record(event)

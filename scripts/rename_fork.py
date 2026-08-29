@@ -79,8 +79,8 @@ def replacements(args: argparse.Namespace) -> list[tuple[str, str]]:
 
 def rewrite_text(original: str, args: argparse.Namespace) -> str:
     """Rewrite app-owned identifiers while preserving the canonical upstream URL."""
-    upstream_marker = "__HRZ4_CANONICAL_UPSTREAM_URL__"
-    distribution_marker = "__HRZ4_FORK_DISTRIBUTION__"
+    upstream_marker = "__QUALITY_GATE_CANONICAL_UPSTREAM_URL__"
+    distribution_marker = "__QUALITY_GATE_FORK_DISTRIBUTION__"
     if upstream_marker in original or distribution_marker in original:
         raise ValueError("reserved rename marker already exists in source text")
     updated = original.replace(UPSTREAM_URL, upstream_marker)

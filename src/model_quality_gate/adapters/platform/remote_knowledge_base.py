@@ -9,7 +9,7 @@ been answered from. That context comes from the A2 Enterprise Knowledge Base
 
 This adapter implements :class:`KnowledgeBaseClientPort` by POSTing the query and mapping
 each returned passage to a domain :class:`Citation`. The base URL is read from
-``HRZ_KB_URL`` with a localhost default. A4 evaluates models, not customer data, so no PII
+``KNOWLEDGE_BASE_URL`` with a localhost default. A4 evaluates models, not customer data, so no PII
 crosses this boundary.
 """
 
@@ -36,7 +36,7 @@ class RemoteKnowledgeBaseAdapter:
 
     def __init__(self, settings: object) -> None:
         self._settings = settings
-        self._base_url = _s2s.env_url("HRZ_KB_URL", _DEFAULT_URL, service="knowledge base")
+        self._base_url = _s2s.env_url("KNOWLEDGE_BASE_URL", _DEFAULT_URL, service="knowledge base")
 
     def retrieve(self, query: str, top_k: int = 5) -> list[Citation]:
         """Return reference citations for ``query`` from the A2 KB."""

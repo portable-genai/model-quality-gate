@@ -61,7 +61,7 @@ def test_partial_managed_configuration_never_fans_one_attestation_across_control
         "AI_QUALITY_EVALUATION_ATTESTATION_REF",
         "projects/demo/locations/asia-southeast1/evaluations/attestation-1",
     )
-    monkeypatch.delenv("HRZ_OBSERVABILITY_URL", raising=False)
+    monkeypatch.delenv("OBSERVABILITY_URL", raising=False)
     monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
 
     manifest = _capability_manifest()
