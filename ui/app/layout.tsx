@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "A4 AI Quality & Model-Risk Platform",
+  title: "AI Quality & Model-Risk Platform",
   description:
     "The production-promotion eval / red-team gate and model-risk (MRM) evidence system for APAC banking.",
 };
