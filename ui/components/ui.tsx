@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Shared presentational primitives for the A4 console.
+ * Shared presentational primitives for the model-quality console.
  */
 
 /**
