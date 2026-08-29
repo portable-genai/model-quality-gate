@@ -5,6 +5,42 @@ import test from "node:test";
 import { apiBase, apiOrigin } from "../lib/api-base.mjs";
 import { WildcardOriginError, contentSecurityPolicy, frameAncestors } from "../lib/csp.mjs";
 
+/**
+ * The environment a deployment runs under. Every assertion about the EXACT policy string passes
+ * this, because the dev branch of `contentSecurityPolicy` deliberately widens two directives and
+ * an assertion that did not say which side of that branch it meant would pin neither.
+ */
+const PROD = { NODE_ENV: "production" };
+
+test("the dev server gets eval and a websocket, and a production build gets neither", () => {
+  // The console that ships is the production one, so this is the assertion that guards the
+  // posture: `'unsafe-eval'` is the allowance an injected script most wants back, and it must be
+  // unreachable from anything `next build` produces.
+  const production = contentSecurityPolicy(
+    { ...PROD, NEXT_PUBLIC_API_BASE: "https://quality.bank.example" },
+    "abc123",
+  );
+  assert.doesNotMatch(production, /unsafe-eval/);
+  assert.doesNotMatch(production, /ws:/);
+  assert.doesNotMatch(production, /wss:/);
+  assert.match(production, /script-src 'self' 'nonce-abc123' 'strict-dynamic';/);
+  assert.match(production, /connect-src 'self' https:\/\/quality\.bank\.example;/);
+
+  // The other half, and the defect this branch was added for: `npm run dev` compiles with
+  // `eval` and opens an HMR websocket, so the strict policy let the page render and never
+  // hydrate. NODE_ENV unset lands on the dev branch too, which is the state `node --test` and
+  // every editor tool run under.
+  for (const env of [{ NODE_ENV: "development" }, {}]) {
+    const development = contentSecurityPolicy(env, "abc123");
+    // The relaxation is additive: the nonce and strict-dynamic still govern what may run, and
+    // `'unsafe-inline'` never comes back on any branch.
+    assert.match(development, /script-src 'self' 'nonce-abc123' 'strict-dynamic' 'unsafe-eval';/);
+    // The loopback API base this repo defaults to sits between 'self' and the websocket schemes.
+    assert.match(development.match(/connect-src [^;]*/)[0], / ws: wss:$/);
+    assert.doesNotMatch(development.match(/script-src [^;]*/)[0], /unsafe-inline/);
+  }
+});
+
 test("client and CSP share one API base", () => {
   const env = { NEXT_PUBLIC_API_BASE: "https://quality.bank.example/api/" };
   assert.equal(apiBase(env), "https://quality.bank.example/api");

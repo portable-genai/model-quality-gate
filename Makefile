@@ -21,7 +21,7 @@ TF_DIR      := infra/terraform
 export AI_QUALITY_PROFILE := $(PROFILE)
 
 .DEFAULT_GOAL := help
-DEMO_PORT   ?= 8092
+DEMO_PORT   ?= 8121
 DEMO_OUT    ?= out
 
 .PHONY: help install install-gcp fmt lint test eval eval-narrative gate-local demo demo-server demo-selftest portability-demo rename-selftest ui-check check run-api run-ui tf-plan clean

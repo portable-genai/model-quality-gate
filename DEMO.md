@@ -73,7 +73,7 @@ before performing it, so you control the pace. (One-time: `pip install playwrigh
 playwright install chromium`.)
 
 ```bash
-# Terminal 1: the live demo server (http://localhost:8092)
+# Terminal 1: the live demo server (http://localhost:8121)
 source .venv/bin/activate
 PYTHONPATH=src python scripts/model_quality_gate_demo_server.py
 
@@ -103,10 +103,10 @@ Full options (`SLOWMO_MS`, `HEADLESS`, `CHROME_PATH`, ...) are in [`scripts/READ
 Run only the server and drive it yourself in any browser:
 
 ```bash
-PYTHONPATH=src python scripts/model_quality_gate_demo_server.py     # http://localhost:8092
+PYTHONPATH=src python scripts/model_quality_gate_demo_server.py     # http://localhost:8121
 ```
 
-Open `http://localhost:8092` and click **Run the gate ▶** to advance the real gate, **Next ▶**
+Open `http://localhost:8121` and click **Run the gate ▶** to advance the real gate, **Next ▶**
 to see the related reference context, **Restart** to reset. Same three steps as above.
 
 Or drive the **real console** against the **real API** on the local profile:
@@ -115,9 +115,12 @@ Or drive the **real console** against the **real API** on the local profile:
 # Terminal 1: the FastAPI gate on the local profile (offline, :8084)
 make run-api PROFILE=local
 
-# Terminal 2: the Next.js console (:3000), talking to the API
-make run-ui
+# Terminal 2: the Next.js console (:3000), built and served the way it ships
+cd ui && npm install && npm run build && npm run start
 ```
+
+Every demo runs against a production build, never a development server. `make run-ui` is the
+developer loop with hot reload, and it is not what a presenter shows.
 
 Open `http://localhost:3000`, keep the defaults (`gemini-3.5-flash` / `v3` /
 `compliance-qa-golden`) and click **Run promotion gate**. The header pill shows
@@ -207,7 +210,7 @@ curl -s localhost:8084/healthz
 Or the browser console (talks to the API on :8084), see [`ui/README.md`](ui/README.md):
 
 ```bash
-make run-ui           # http://localhost:3000
+cd ui && npm install && npm run build && npm run start   # http://localhost:3000
 ```
 
 **What to highlight:** a target passes only if **every** eval metric clears its threshold
@@ -250,7 +253,7 @@ content; an empty golden dataset is a hard error, never a vacuous PASS; everythi
 | Playwright: "executable doesn't exist" | `playwright install chromium`, or set `CHROME_PATH=/path/to/chrome`. |
 | No display for the headed walkthrough | Use 2.2 (manual browser) on a machine with a display, or `HEADLESS=1 DEMO_AUTO=1 python scripts/model_quality_gate_demo_playwright.py` to self-run. |
 | "Cannot reach the demo server" | Start 2.1 Terminal 1 first; or set `DEMO_URL` if you changed `--port`. |
-| Demo port 8092 / API port 8084 in use | `python scripts/model_quality_gate_demo_server.py --port 9000` (then `DEMO_URL=http://127.0.0.1:9000`); API port via `make run-api API_PORT=...`. |
+| Demo port 8121 / API port 8084 in use | `python scripts/model_quality_gate_demo_server.py --port 9000` (then `DEMO_URL=http://127.0.0.1:9000`); API port via `make run-api API_PORT=...`. |
 | UI shows "backend offline" | Start the API first (`make run-api PROFILE=local`); the console expects it on :8084 (`NEXT_PUBLIC_API_BASE`). |
 | CLI exits **2** with a migration message | You're on `AI_QUALITY_PROFILE=onprem` (fail-fast placeholders). Use `local` (Demo A) or `gcp` (Demo B). |
 | CLI `gate` exits **1** | The gate ran but the target FAILED (a metric below threshold or a probe not blocked). That is a real verdict, not an error. |

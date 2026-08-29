@@ -139,9 +139,22 @@ def test_ui_config_emits_a_full_default_deny_csp() -> None:
 
 
 def test_ui_connect_src_is_scoped_to_self_plus_the_api_origin() -> None:
-    """No wildcard: the console talks to its own origin and the A4 API origin only."""
+    """No wildcard: the console talks to its own origin and the A4 API origin only.
+
+    One further entry is allowed and it names no host: the development server's HMR
+    websocket schemes, added only when NODE_ENV is not the exact literal ``production``.
+    Without it `npm run dev` served a page that rendered and never hydrated. A `next build`
+    artefact cannot take that branch, and ``ui/tests/csp.test.mjs`` pins both sides of it by
+    executing the module rather than reading it.
+    """
     policy = UI_CSP.read_text()
-    assert 'const connectSrc = ["\'self\'", apiOrigin(env)].filter(Boolean).join(" ")' in policy
+    assert re.search(
+        r'const connectSrc = \[\s*"\'self\'",\s*apiOrigin\(env\),\s*isDev \? "ws: wss:" : ""\s*\]',
+        policy,
+    ), "connect-src no longer resolves to 'self' plus the API origin plus the dev websocket"
+    assert 'const isDev = env.NODE_ENV !== "production"' in policy, (
+        "the dev relaxation must be keyed off the toolchain's NODE_ENV, compared exactly"
+    )
     api_base = (REPO_ROOT / "ui" / "lib" / "api-base.mjs").read_text()
     assert "new URL(base).origin" in api_base  # only the origin enters the CSP
     assert "connect-src *" not in policy
@@ -174,7 +187,11 @@ def test_ui_script_src_is_nonced_and_the_route_is_dynamic() -> None:
     """
     policy = UI_CSP.read_text()
     assert "'nonce-${nonce}' 'strict-dynamic'" in policy
-    assert "'unsafe-inline'" not in policy.split("const scriptSrc")[1].split("\n")[0]
+    # The WHOLE scriptSrc expression, not its first line: it is a multi-line array now, and a
+    # one-line slice of it would assert nothing. Bounded by the return, so style-src's own
+    # (legitimate) 'unsafe-inline' cannot wander into the slice and make it fail elsewhere.
+    script_src_block = policy.split("const scriptSrc")[1].split("\n  return [")[0]
+    assert "'unsafe-inline'" not in script_src_block
     # The nonce reaches Next only through the REQUEST header, under this exact name.
     proxy = UI_PROXY.read_text()
     assert 'requestHeaders.set("Content-Security-Policy", csp)' in proxy
