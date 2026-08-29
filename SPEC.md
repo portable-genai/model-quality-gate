@@ -6,7 +6,7 @@
 > pieces fit together.
 
 Catalog identity: **Hrz4**, group **`hrz`** (shared platform services), priority **P0**,
-buyer **Model Risk / MLOps**. Service port default **8084** (`HRZ_QUALITY_URL`). Python
+buyer **Model Risk / MLOps**. Service port default **8084** (`QUALITY_GATE_URL`). Python
 package `model_quality_gate`. CLI entry point `ai-quality`. Profile env var `AI_QUALITY_PROFILE`
 (`gcp` | `local` | `platform` | `onprem`; no default anywhere, so every runner names one:
 production sets `gcp` explicitly, dev / tests / CI set `local`, a WORKING offline stack).
@@ -190,7 +190,7 @@ any score as a false PASS.
 
 ## 6. HTTP contracts
 
-### 6.1 Hrz4 defines (other repos consume) : env `HRZ_QUALITY_URL` default `:8084`
+### 6.1 Hrz4 defines (other repos consume) : env `QUALITY_GATE_URL` default `:8084`
 
 - `POST /v1/evaluations {target, dataset_id, bundle?|metrics?}` -> EvalReport
   `{target, results:[{metric, score, threshold, passed}], n_examples, passed}`. Select the
@@ -236,12 +236,12 @@ AgentCard skills: `evaluate`, `red_team`, `promotion_gate`, `version_prompt`.
 
 ### 6.2 Hrz4 consumes (existing live services)
 
-- **Hrz2 Enterprise KB** (`HRZ_KB_URL` default `:8082`): `POST /v1/search {query, top_k,
+- **Hrz2 Enterprise KB** (`KNOWLEDGE_BASE_URL` default `:8082`): `POST /v1/search {query, top_k,
   acl_principals[], filters}` -> `{passages:[{text, citation, score, acl_tags}]}` for
   grounded eval reference context.
-- **Hrz5 Observability/Audit** (`HRZ_OBSERVABILITY_URL` default `:8085`): `POST /v1/audit`
+- **Hrz5 Observability/Audit** (`OBSERVABILITY_URL` default `:8085`): `POST /v1/audit`
   (202) with an AuditEvent body. R2 (audit to Hrz5).
-- **Hrz3 Registry** (`HRZ_REGISTRY_URL` default `:8083`): `POST /v1/agents` (201),
+- **Hrz3 Registry** (`AGENT_REGISTRY_URL` default `:8083`): `POST /v1/agents` (201),
   `GET /v1/agents/{name}`, `GET /v1/agents`. R4 (register in Hrz3).
 
 ---

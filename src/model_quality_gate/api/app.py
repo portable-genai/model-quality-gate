@@ -593,7 +593,7 @@ def _capability_manifest() -> CapabilityManifestModel:
         (
             "immutable-audit",
             "Hrz5 / Cloud Logging WORM",
-            bool(read_env_setting("HRZ_OBSERVABILITY_URL").value),
+            bool(read_env_setting("OBSERVABILITY_URL").value),
             "AI_QUALITY_AUDIT_ATTESTATION_REF",
         ),
         (

@@ -9,7 +9,7 @@ against the registry's ``/v1/agents`` endpoints (SPEC §6, A3 contract):
 * ``get``      -> ``GET  /v1/agents/{name}`` (``200`` -> card, ``404`` -> ``None``)
 * ``list``     -> ``GET  /v1/agents`` (``200`` -> ``[card, ...]``)
 
-The base URL is read from ``HRZ_REGISTRY_URL`` with a localhost default.
+The base URL is read from ``AGENT_REGISTRY_URL`` with a localhost default.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ class RemoteRegistryAdapter:
 
     def __init__(self, settings: object) -> None:
         self._settings = settings
-        self._base_url = _s2s.env_url("HRZ_REGISTRY_URL", _DEFAULT_URL, service="agent registry")
+        self._base_url = _s2s.env_url("AGENT_REGISTRY_URL", _DEFAULT_URL, service="agent registry")
 
     def register(self, card: AgentCard) -> None:
         """Publish (or upsert) this agent's card into the A3 catalog."""

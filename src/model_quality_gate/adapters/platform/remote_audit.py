@@ -7,7 +7,7 @@ FinOps) instead of A4 calling Cloud Logging directly. This adapter implements
 ``/v1/audit`` endpoint, which returns ``202 Accepted`` (SPEC §6, A5 contract).
 
 A4 evaluates models, not customer data, so the event body it sends carries the target ref
-and a verdict summary, never user data. The base URL is read from ``HRZ_OBSERVABILITY_URL``
+and a verdict summary, never user data. The base URL is read from ``OBSERVABILITY_URL``
 with a localhost default.
 """
 
@@ -36,7 +36,7 @@ class RemoteAuditAdapter:
     def __init__(self, settings: object) -> None:
         self._settings = settings
         self._base_url = _s2s.env_url(
-            "HRZ_OBSERVABILITY_URL", _DEFAULT_URL, service="observability sink"
+            "OBSERVABILITY_URL", _DEFAULT_URL, service="observability sink"
         )
 
     def record(self, event: AuditEvent) -> str:
