@@ -54,9 +54,7 @@ CONFIG_PATH = "config/settings.yaml"
 # The platform clients' localhost defaults (SPEC contract): mocked, never actually served.
 # These MUST match the ``_DEFAULT_URL`` / env-var defaults hard-coded in the remote_* adapters.
 KNOWLEDGE_BASE = "http://localhost:8082"  # remote_knowledge_base -> /v1/search
-OBSERVABILITY = (
-    "http://localhost:8085"  # remote_audit -> /v1/audit
-)
+OBSERVABILITY = "http://localhost:8085"  # remote_audit -> /v1/audit
 
 
 def _settings(profile: str) -> Settings:
