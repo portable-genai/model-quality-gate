@@ -32,6 +32,12 @@ from typing import Annotated, Any
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from hex_service_kit import cors_allowlist, read_env_setting, resolve_bind_host
+from hex_service_kit.capabilities import (
+    AssuranceLevel,
+    Capability,
+    CapabilityManifest,
+    CapabilityMode,
+)
 from hex_service_kit.web import add_loopback_exposure_guard, add_security_headers
 
 from ..config import end_user_auth_kind
@@ -56,7 +62,6 @@ from . import deps
 from .schemas import (
     AgentCardModel,
     CapabilityManifestModel,
-    CapabilityModel,
     DatasetIngestRequest,
     DatasetSummaryModel,
     DriftEscalationModel,
@@ -578,7 +583,11 @@ def _capability_manifest() -> CapabilityManifestModel:
     settings = deps.get_settings()
     demo_only = settings.profile == "local"
     managed = settings.profile in {"gcp", "platform"}
-    mode = "local" if demo_only else ("managed" if managed else "disabled")
+    mode = (
+        CapabilityMode.LOCAL
+        if demo_only
+        else (CapabilityMode.MANAGED if managed else CapabilityMode.DISABLED)
+    )
     definitions = (
         (
             "evaluation",
@@ -606,14 +615,18 @@ def _capability_manifest() -> CapabilityManifestModel:
             "AI_QUALITY_TRACE_ATTESTATION_REF",
         ),
     )
-    items: list[CapabilityModel] = []
+    items: list[Capability] = []
     for name, provider, configured, attestation_env in definitions:
         available = demo_only or (managed and configured)
         attestation_ref = read_env_setting(attestation_env).value
         assurance = (
-            "demo-only"
+            AssuranceLevel.DEMO_ONLY
             if demo_only
-            else ("attested" if available and attestation_ref else "not-attested")
+            else (
+                AssuranceLevel.ATTESTED
+                if available and attestation_ref
+                else AssuranceLevel.NOT_ATTESTED
+            )
         )
         reason = (
             "deterministic laptop implementation; not promotion evidence"
@@ -629,26 +642,27 @@ def _capability_manifest() -> CapabilityManifestModel:
             )
         )
         items.append(
-            CapabilityModel(
+            Capability(
                 name=name,
                 available=available,
                 mode=mode,
-                assurance=assurance if available else "unavailable",
+                assurance=assurance if available else AssuranceLevel.UNAVAILABLE,
                 provider=provider,
                 reason=reason,
                 required_for_production=True,
             )
         )
-    production_ready = not demo_only and all(
-        item.available and item.assurance == "attested" for item in items
-    )
-    return CapabilityManifestModel(
-        service="model-quality-gate",
-        profile=settings.profile,
-        region=settings.region,
-        capabilities=items,
-        demo_only=demo_only,
-        production_ready=production_ready,
+    # production_ready is NOT recomputed here. The kit manifest derives it from the same
+    # capabilities this function just built, so the served flag and the rule that decides it
+    # can no longer disagree; that rule used to be written out again, right here.
+    return CapabilityManifestModel.from_manifest(
+        CapabilityManifest(
+            service="model-quality-gate",
+            profile=settings.profile,
+            region=settings.region,
+            capabilities=tuple(items),
+            demo_only=demo_only,
+        )
     )
 
 
