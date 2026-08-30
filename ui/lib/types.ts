@@ -100,6 +100,10 @@ export interface ModelCard {
 }
 
 export interface HealthStatus {
+  // Provenance the banner states on every page: where the runtime sits and which model
+  // answers. Both come from the service; nothing in the console infers either.
+  runtime: string;
+  generator_model: string;
   status: string;
   profile: string;
   region: string;
