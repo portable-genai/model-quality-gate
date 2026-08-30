@@ -556,9 +556,12 @@ def get_model_card(
 def healthz() -> HealthResponse:
     """Liveness probe plus honest assurance posture."""
     manifest = _capability_manifest()
+    settings = deps.get_settings()
     return HealthResponse(
         status="ok",
         profile=manifest.profile,
+        runtime=settings.runtime,
+        generator_model=settings.generator_model,
         region=manifest.region,
         production_ready=manifest.production_ready,
         demo_only=manifest.demo_only,

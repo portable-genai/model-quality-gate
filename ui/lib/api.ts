@@ -166,10 +166,15 @@ export async function healthz(signal?: AbortSignal): Promise<HealthStatus> {
       method: "GET",
       signal: withTimeout(signal, 8_000),
     });
-    if (!res.ok) return { status: "down", profile: "?", region: "?" };
+    // The down fallbacks carry EMPTY provenance, not "?" like the other fields. "?" is a
+    // legible placeholder for a profile the console could not read; an empty runtime is what
+    // the banner keys off to render nothing at all, and stating "running ?" would be an
+    // assertion about provenance the service never made.
+    if (!res.ok)
+      return { status: "down", profile: "?", runtime: "", generator_model: "", region: "?" };
     return (await res.json()) as HealthStatus;
   } catch {
-    return { status: "down", profile: "?", region: "?" };
+    return { status: "down", profile: "?", runtime: "", generator_model: "", region: "?" };
   }
 }
 
