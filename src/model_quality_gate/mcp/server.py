@@ -33,12 +33,36 @@ from ..pipelines.datasets import standard_redteam_cases
 HANDLER_NAMES: tuple[str, ...] = ("evaluate", "red_team", "promotion_gate", "version_prompt")
 
 
+def _model_and_prompt(arguments: dict[str, Any]) -> tuple[str, str]:
+    """The two identifiers every tool here names: which model, at which prompt version."""
+    return (
+        str(arguments.get("model", "") or ""),
+        str(arguments.get("prompt_version", "") or ""),
+    )
+
+
 def _target(arguments: dict[str, Any]) -> EvalTarget:
+    """The target for the two tools that score against a NAMED dataset."""
+    model, prompt_version = _model_and_prompt(arguments)
     return EvalTarget(
-        model=str(arguments.get("model", "") or ""),
-        prompt_version=str(arguments.get("prompt_version", "") or ""),
+        model=model,
+        prompt_version=prompt_version,
         dataset_id=str(arguments.get("dataset_id", "") or ""),
     )
+
+
+def _redteam_target(arguments: dict[str, Any]) -> EvalTarget:
+    """The target for red-teaming, which runs standard cases rather than a dataset.
+
+    ``red_team`` used to build its target through :func:`_target`, so it read a ``dataset_id``
+    its own schema never declared and its run never used: the cases come from
+    ``standard_redteam_cases()``. The value reached the audited target unset, and a caller who
+    believed a dataset was in scope had no way to say so and no way to find out otherwise.
+    Stating the absence here is the honest shape -- red-teaming has no dataset, rather than an
+    empty one.
+    """
+    model, prompt_version = _model_and_prompt(arguments)
+    return EvalTarget(model=model, prompt_version=prompt_version, dataset_id="")
 
 
 def _dataset(dataset_id: str) -> Any:
@@ -60,7 +84,9 @@ def build_handlers(actor: str) -> dict[str, mcpserve.Handler]:
         )
 
     def red_team(**arguments: Any) -> Any:
-        return deps.get_redteam_service().run(_target(arguments), standard_redteam_cases(), actor)
+        return deps.get_redteam_service().run(
+            _redteam_target(arguments), standard_redteam_cases(), actor
+        )
 
     def promotion_gate(**arguments: Any) -> Any:
         target = _target(arguments)
