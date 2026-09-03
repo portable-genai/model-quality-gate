@@ -75,7 +75,12 @@ models:
 
 eval:
   location: ${GCP_REGION:-asia-southeast1}
-  judge_model: gemini-3.7-flash
+  # The model that DOES the judging, and it runs at `location` above -- so it is bound by the
+  # same residency rule as the models slot. `gemini-3.7-flash` was pinned here and serves the
+  # `us` and `eu` MULTI-REGIONS only, so every judged run 404d in asia-southeast1. Verified
+  # against the publisher 2026-09-03: 3.5-flash is the newest Flash with a Singapore
+  # ML-processing commitment; 3.6, 3.7 and 3.8 are all us/eu-only.
+  judge_model: gemini-3.5-flash
   experiment: ai-quality-promotion-gate
 
 bigquery:
