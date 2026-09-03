@@ -1,7 +1,7 @@
 """Generation port : the LLM judge model for LLM-graded metrics.
 
 Primary GCP adapter: Gemini models on the Gemini Enterprise Agent Platform
-(``gemini-3.5-flash`` for the judge at ``thinking=high``, ``gemini-3.1-flash-lite`` for
+(``gemini-3.5-flash`` for the judge at ``thinking=high``, ``gemini-3.5-flash`` for
 cheap triage). The judge grades groundedness / faithfulness / safety where a metric is
 LLM-scored rather than computed by the Gen AI evaluation service directly.
 """

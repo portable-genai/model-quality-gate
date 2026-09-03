@@ -72,7 +72,7 @@ data. Dependency rule R1 / Hrz1 (customer-PII guardrail) is therefore **N/A** fo
 |---------|------------------------|------------|
 | Agent framework | ADK (Python) | `google-adk==2.7.1` |
 | Reasoning / judge model | Gemini 3.5 Flash | `gemini-3.5-flash` (thinking=high) |
-| Triage model | Gemini 3.1 Flash-Lite | `gemini-3.1-flash-lite` |
+| Triage model | Gemini 3.5 Flash | `gemini-3.5-flash` |
 | Unified SDK | Google GenAI SDK | `google-genai` |
 | Eval backend | Gen AI evaluation service | `vertexai.Client(...).evals` |
 | Red-team harness | Gemini-driven adversarial probes | `google-genai` |
