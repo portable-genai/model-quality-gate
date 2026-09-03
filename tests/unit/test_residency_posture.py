@@ -139,11 +139,12 @@ def test_ci_validates_terraform_offline() -> None:
     """fmt + validate run on every PR with no cloud credentials.
 
     This used to read `.github/workflows/ci.yaml`. That file was retired with the rest of the
-    fleet's workflows, which had never run because GitHub Actions are disabled organization-wide,
-    so the assertion was passing over a job nobody executed. The commands now live in the
-    `tf-check` target, and `tf-check` is in this repository's hosted Cloud Build contract
-    (`org-metadata/ci/gcp/repository-policy.json`), which is the required check on `main`. What
-    this asserts is the half that lives HERE: that the target still runs all three commands.
+    fleet's workflows, which had never run because GitHub Actions were disabled organization-wide
+    at the time, so the assertion was passing over a job nobody executed. The commands now live
+    in the `tf-check` target, and `tf-check` is in this repository's hosted-CI contract
+    (`org-metadata/ci/gcp/repository-policy.json`), rendered into the GitHub Actions caller that
+    is the required check on `main`. What this asserts is the half that lives HERE: that the
+    target still runs all three commands.
     """
     makefile = (Path(__file__).resolve().parents[2] / "Makefile").read_text()
     assert "terraform fmt -check -recursive" in makefile
