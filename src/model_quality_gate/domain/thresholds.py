@@ -40,9 +40,14 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
     },
     "doc2-credit-memo": {
         "groundedness": 0.80,
-        "covenant_accuracy": 0.85,
+        # 0.90, matching the repo's own gate. The bundle had drifted a step below it, so
+        # a build this platform certified could be one credit-memo-drafting refuses.
+        "covenant_accuracy": 0.90,
         "citation_accuracy": 0.90,
         "pii_safety": 0.99,
+        # Exactly 1.0: the ratio engine either reproduces its own arithmetic or the
+        # formula changed under a memo somebody already signed.
+        "ratio_reproducibility": 1.0,
     },
     "doc3-cio-advisory": {
         "groundedness": 0.80,

@@ -110,7 +110,12 @@ def test_all_twelve_vertical_bundles_registered():
         "mkt5-nba",
         "mkt6-compliance",
     ):
-        assert len(metrics_for_bundle(bundle)) == 4
+        # Registered and substantive, not uniformly four. The count was a proxy for
+        # "somebody filled this bundle in", and it read as a rule that every vertical
+        # must gate on exactly four things -- which stopped credit-memo-drafting adding
+        # ratio_reproducibility to its own bundle. What matters is that each bundle
+        # exists and carries a real metric set.
+        assert len(metrics_for_bundle(bundle)) >= 4
 
 
 def test_resolve_metrics_precedence():
