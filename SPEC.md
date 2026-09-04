@@ -1,11 +1,11 @@
-# SPEC : Hrz4 AI Quality & Model-Risk Platform
+# SPEC : `model-quality-gate` Platform
 
 > The authoritative build specification: locked decisions, the pinned stack, the adapter
 > convention, the gate pipeline, the produced artifacts, and the cross-repo HTTP contracts
-> Hrz4 defines and consumes. This file is the contract; the other docs describe how the
+> `model-quality-gate` defines and consumes. This file is the contract; the other docs describe how the
 > pieces fit together.
 
-Catalog identity: **Hrz4**, group **`hrz`** (shared platform services), priority **P0**,
+Catalog identity: `model-quality-gate`, group **`hrz`** (shared platform services), priority **P0**,
 buyer **Model Risk / MLOps**. Service port default **8084** (`QUALITY_GATE_URL`). Python
 package `model_quality_gate`. CLI entry point `ai-quality`. Profile env var `AI_QUALITY_PROFILE`
 (`gcp` | `local` | `platform` | `onprem`; no default anywhere, so every runner names one:
@@ -32,15 +32,15 @@ profile with its own permissive default, or if the settings file reintroduces on
 
 ---
 
-## 1. What Hrz4 is
+## 1. What `model-quality-gate` is
 
-Hrz4 is the **production promotion gate** and model-risk system for the catalog. It is an
+`model-quality-gate` is the **production promotion gate** and model-risk system for the catalog. It is an
 eval / red-team harness over golden datasets, with prompt versioning, model cards, and MRM
-(model risk management) evidence. **Every B and C agent must pass Hrz4 before promotion**
-(dependency rule R5). Hrz4 returns a PASS/FAIL gate verdict and the evidence behind it.
+(model risk management) evidence. **Every B and C agent must pass `model-quality-gate` before promotion**
+(dependency rule R5). `model-quality-gate` returns a PASS/FAIL gate verdict and the evidence behind it.
 
-Hrz4 does **not** process customer PII: it evaluates models against datasets, not customer
-data. Dependency rule R1 / Hrz1 (customer-PII guardrail) is therefore **N/A** for Hrz4 (see
+`model-quality-gate` does **not** process customer PII: it evaluates models against datasets, not customer
+data. Dependency rule R1 / `agent-guardrail-gateway` (customer-PII guardrail) is therefore **N/A** for `model-quality-gate` (see
 [`COMPLIANCE.md`](COMPLIANCE.md)).
 
 ---
@@ -58,7 +58,7 @@ data. Dependency rule R1 / Hrz1 (customer-PII guardrail) is therefore **N/A** fo
   speaks only to ports (`typing.Protocol`s). All Google Cloud / ADK imports are lazy.
 - **Maker-checker** (P-06): a borderline PASS (any metric within 0.02 above its threshold,
   or a marginal red-team block) requires human review by a model-risk officer.
-- **Eval-gated promotion** (P-08): Hrz4 is the gate. Its own gate logic is itself protected
+- **Eval-gated promotion** (P-08): `model-quality-gate` is the gate. Its own gate logic is itself protected
   by an offline self-eval gate (`eval/run_eval.py`) that CI runs on every change.
 
 ---
@@ -106,11 +106,11 @@ Twelve ports:
 | `PromptRegistryPort` | Versioned prompts | `bigquery_prompts:BigQueryPromptRegistryAdapter` | `prompt_registry:LocalPromptRegistryAdapter` | n/a | `prompt_registry:OnPremPromptRegistryAdapter` |
 | `ModelCardStorePort` | Model cards (MRM) | `gcs_model_cards:GcsModelCardStoreAdapter` | `model_card_store:LocalModelCardStoreAdapter` | n/a | `model_card_store:OnPremModelCardStoreAdapter` |
 | `MetricsStorePort` | Metrics + drift | `bigquery_metrics:BigQueryMetricsStoreAdapter` | `metrics_store:LocalMetricsStoreAdapter` | n/a | `metrics_store:OnPremMetricsStoreAdapter` |
-| `KnowledgeBaseClientPort` | Hrz2 reference context | `remote_knowledge_base` | `knowledge_base:LocalFtsKnowledgeBaseAdapter` | `remote_knowledge_base` | `knowledge_base:OnPremKnowledgeBaseAdapter` |
+| `KnowledgeBaseClientPort` | `enterprise-knowledge-base` reference context | `remote_knowledge_base` | `knowledge_base:LocalFtsKnowledgeBaseAdapter` | `remote_knowledge_base` | `knowledge_base:OnPremKnowledgeBaseAdapter` |
 | `LLMPort` | Judge model | `gemini_llm:GeminiLLMAdapter` | `llm:LocalDeterministicLLMAdapter` | n/a | `llm:OnPremLLMAdapter` |
-| `AuditSinkPort` | WORM audit (Hrz5) | `cloud_logging_audit:CloudLoggingAuditAdapter` | `audit:LocalAppendOnlyAuditAdapter` | `remote_audit:RemoteAuditAdapter` | `audit:OnPremAuditAdapter` |
-| `ObservabilityTracerPort` | Tracing (Hrz5) | `cloud_trace_tracer:CloudTraceTracerAdapter` | `tracer:LocalNoopTracerAdapter` | n/a | `tracer:OnPremTracerAdapter` |
-| `AgentRegistryPort` | A2A registry (Hrz3) | `a2a_registry:A2ARegistryAdapter` | `registry:LocalRegistryAdapter` | `remote_registry:RemoteRegistryAdapter` | `registry:OnPremRegistryAdapter` |
+| `AuditSinkPort` | WORM audit (`agent-observability`) | `cloud_logging_audit:CloudLoggingAuditAdapter` | `audit:LocalAppendOnlyAuditAdapter` | `remote_audit:RemoteAuditAdapter` | `audit:OnPremAuditAdapter` |
+| `ObservabilityTracerPort` | Tracing (`agent-observability`) | `cloud_trace_tracer:CloudTraceTracerAdapter` | `tracer:LocalNoopTracerAdapter` | n/a | `tracer:OnPremTracerAdapter` |
+| `AgentRegistryPort` | A2A registry (`agent-registry`) | `a2a_registry:A2ARegistryAdapter` | `registry:LocalRegistryAdapter` | `remote_registry:RemoteRegistryAdapter` | `registry:OnPremRegistryAdapter` |
 | `ToolCatalogPort` | Governed MCP tools | `mcp_tool_catalog:McpToolCatalogAdapter` | `tool_catalog:LocalToolCatalogAdapter` | n/a | `tool_catalog:OnPremToolCatalogAdapter` |
 
 ### The `local` profile (offline, SDK-free)
@@ -149,7 +149,7 @@ Each service takes explicit port instances in its constructor (no service locato
 
 - `EvaluationService(evaluation, knowledge_base, llm, tracer, audit)`
   `.evaluate(target, dataset, actor, metrics=None, thresholds=None) -> EvalReport`. Refuses
-  an empty dataset (no vacuous PASS); pulls Hrz2 reference context for grounded metrics. A
+  an empty dataset (no vacuous PASS); pulls `enterprise-knowledge-base` reference context for grounded metrics. A
   resolved `thresholds` map (a vertical bundle) selects the metrics and supplies each
   metric's per-bundle bar.
 - `RedTeamService(redteam, tracer, audit)` `.run(target, cases, actor) -> RedTeamReport`.
@@ -168,7 +168,7 @@ The gate pipeline (wrapped in `tracer.span`, audited at each step):
 
 ```
 gate:
-  evaluation_service.evaluate (+ Hrz2 grounded context)
+  evaluation_service.evaluate (+ `enterprise-knowledge-base` grounded context)
   -> redteam_service.run
   -> combine: passed = eval_report.passed AND redteam_report.passed
   -> write ModelCard + MRM evidence (model_card_store.put)
@@ -190,7 +190,7 @@ any score as a false PASS.
 
 ## 6. HTTP contracts
 
-### 6.1 Hrz4 defines (other repos consume) : env `QUALITY_GATE_URL` default `:8084`
+### 6.1 `model-quality-gate` defines (other repos consume) : env `QUALITY_GATE_URL` default `:8084`
 
 - `POST /v1/evaluations {target, dataset_id, bundle?|metrics?}` -> EvalReport
   `{target, results:[{metric, score, threshold, passed}], n_examples, passed}`. Select the
@@ -234,21 +234,21 @@ identity (IAP `Principal`) is resolved beside it and remains the audit actor.
 
 AgentCard skills: `evaluate`, `red_team`, `promotion_gate`, `version_prompt`.
 
-### 6.2 Hrz4 consumes (existing live services)
+### 6.2 `model-quality-gate` consumes (existing live services)
 
-- **Hrz2 Enterprise KB** (`KNOWLEDGE_BASE_URL` default `:8082`): `POST /v1/search {query, top_k,
+- **`enterprise-knowledge-base`** (`KNOWLEDGE_BASE_URL` default `:8082`): `POST /v1/search {query, top_k,
   acl_principals[], filters}` -> `{passages:[{text, citation, score, acl_tags}]}` for
   grounded eval reference context.
-- **Hrz5 Observability/Audit** (`OBSERVABILITY_URL` default `:8085`): `POST /v1/audit`
-  (202) with an AuditEvent body. R2 (audit to Hrz5).
-- **Hrz3 Registry** (`AGENT_REGISTRY_URL` default `:8083`): `POST /v1/agents` (201),
-  `GET /v1/agents/{name}`, `GET /v1/agents`. R4 (register in Hrz3).
+- **`agent-observability`** (`OBSERVABILITY_URL` default `:8085`): `POST /v1/audit`
+  (202) with an AuditEvent body. R2 (audit to `agent-observability`).
+- **`agent-registry`** (`AGENT_REGISTRY_URL` default `:8083`): `POST /v1/agents` (201),
+  `GET /v1/agents/{name}`, `GET /v1/agents`. R4 (register in `agent-registry`).
 
 ---
 
-## 7. Eval gate (Hrz4 self-eval)
+## 7. Eval gate (`model-quality-gate` self-eval)
 
-Hrz4 is itself eval-driven, so `eval/run_eval.py` validates the **gate logic**: a golden set
+`model-quality-gate` is itself eval-driven, so `eval/run_eval.py` validates the **gate logic**: a golden set
 of `{target, eval_scores, redteam_outcomes, expected_gate_pass}` scenarios drives the
 **real** `PromotionGateService` through deterministic fakes. Metrics: `gate_accuracy`
 (>= 0.95), `threshold_correctness` (>= 0.99), `redteam_detection` (>= 0.90), `safety`

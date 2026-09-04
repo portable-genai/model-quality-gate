@@ -1,6 +1,6 @@
 """The profile has ONE source of truth, and it fails closed on an unset variable.
 
-The standing gate for the absence-read-as-consent class, shared with Hrz7
+The standing gate for the absence-read-as-consent class, shared with human-review-console
 (``human-review-console/tests/test_profile_single_source.py``).
 
 The defect this guards: reading ``AI_QUALITY_PROFILE`` as a two-state value with ``local`` as

@@ -1,6 +1,6 @@
-# Runbook : Hrz4 AI Quality & Model-Risk Platform
+# Runbook : `model-quality-gate` Platform
 
-Operational notes for deploying and running Hrz4 in `asia-southeast1`. This is a reference
+Operational notes for deploying and running `model-quality-gate` in `asia-southeast1`. This is a reference
 build: adapt to your own change-management and sign-off processes before production use.
 
 ## Deploy (gcp profile)
@@ -35,7 +35,7 @@ build: adapt to your own change-management and sign-off processes before product
 
 ## The promotion gate (the daily job)
 
-Hrz4 is the gate the rest of the catalog calls. A sibling promotion pipeline polls:
+`model-quality-gate` is the gate the rest of the catalog calls. A sibling promotion pipeline polls:
 
 ```bash
 curl "https://<a4-host>/v1/gate?model=gemini-3.5-flash&prompt_version=v3&dataset=compliance-qa-golden"

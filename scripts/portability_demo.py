@@ -1,4 +1,4 @@
-"""Executable, bounded proof of Hrz4's adapter-profile portability claims."""
+"""Executable, bounded proof of model-quality-gate's adapter-profile portability claims."""
 
 from __future__ import annotations
 

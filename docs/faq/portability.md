@@ -8,7 +8,7 @@ validity, fail-fast on-prem evaluation, and rejection of unknown profiles.
 
 ## What does it not prove?
 
-It does not call live GCP, IAP, Hrz2, Hrz3, or Hrz5; complete on-prem adapters; migrate
+It does not call live GCP, IAP, `enterprise-knowledge-base`, `agent-registry`, or `agent-observability`; complete on-prem adapters; migrate
 managed storage; port identity-provider or tenant authorization; or prove infrastructure,
 UI/channel, policy, or regulator portability.
 
@@ -16,5 +16,5 @@ UI/channel, policy, or regulator portability.
 
 Silent fallback could route sensitive evaluation data to the wrong provider. Every port
 binding for an unknown profile is rejected. The named `platform` profile is the sole
-documented hybrid: identity plus Hrz2/Hrz3/Hrz5 delegates are explicit and its other ports
+documented hybrid: identity plus `enterprise-knowledge-base`, `agent-registry`, `agent-observability` delegates are explicit and its other ports
 retain their managed GCP adapters.

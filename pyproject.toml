@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "model-quality-gate"
 version = "0.0.1"
-description = "A4 AI Quality & Model-Risk Platform — the production-promotion eval / red-team gate and model-risk (MRM) evidence system, built ports-and-adapters on the Gemini Enterprise Agent Platform."
+description = "AI Quality & Model-Risk Platform — the production-promotion eval / red-team gate and model-risk (MRM) evidence system, built ports-and-adapters on the Gemini Enterprise Agent Platform."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
@@ -62,7 +62,7 @@ dev = [
   "types-PyYAML",
   "respx>=0.21",
   # agent-eval-kit: TEST-AND-EVAL only here (tests/ and eval/, neither of which ships in the
-  # wheel), for two things. First assert_can_go_red: Hrz4 IS the promotion authority, so it
+  # wheel), for two things. First assert_can_go_red: model-quality-gate IS the promotion authority, so it
   # cannot call its own gate client and does not adopt the smoke/gate scaffold; its offline gate
   # validates the gate logic instead, and a gate-logic metric goes falsely green as easily as a
   # judge score. Second the offline judge harness and the quality floors, which eval/

@@ -1,6 +1,6 @@
-# Demo guide: Hrz4 AI Quality & Model-Risk Platform
+# Demo guide: `model-quality-gate` Platform
 
-Step-by-step scripts for demoing Hrz4 two ways:
+Step-by-step scripts for demoing `model-quality-gate` two ways:
 
 - **Demo A: the promotion gate, offline** (the headline flow): a candidate target
   (a model + prompt version + golden dataset) is put through the production-promotion
@@ -90,7 +90,7 @@ You'll step through, pressing Enter each time:
    families. Both reports pass, while production promotion is denied because the laptop
    result has no managed attestation.
 3. **Related reference context**: each golden question retrieves display-only
-   Hrz2-compatible passages for auditor inspection. The deterministic local scorer does
+   `enterprise-knowledge-base`-compatible passages for auditor inspection. The deterministic local scorer does
    not consume this retrieval, so it is not causal score provenance.
 
 **What to point at on screen:** the local-quality-pass / production-denied banner, the metric bars each clearing
@@ -220,15 +220,15 @@ bucket (P-07); tracing captures structure and token usage but **never** prompt/r
 content; an empty golden dataset is a hard error, never a vacuous PASS; everything stays in
 `asia-southeast1` with CMEK + VPC-SC ([README 7](README.md#7-security--residency-posture)).
 
-> **Note.** Hrz4 does **not** process customer PII (it evaluates models against datasets), so
-> rule R1 / the Hrz1 redaction step is N/A here: the audit records carry the target ref and a
+> **Note.** `model-quality-gate` does **not** process customer PII (it evaluates models against datasets), so
+> rule R1 / the `agent-guardrail-gateway` redaction step is N/A here: the audit records carry the target ref and a
 > verdict summary, not user data.
 
 ---
 
 ## 4. Talking points
 
-- **Eval-gated promotion (P-08).** No build in the catalog is promoted without passing Hrz4;
+- **Eval-gated promotion (P-08).** No build in the catalog is promoted without passing `model-quality-gate`;
   every B/C agent calls this gate first (dependency rule R5). The gate is the product.
 - **The verdict is deterministic and replayable.** Reconciling scores against thresholds
   and combining eval AND red-team into PASS/FAIL is pure domain logic (no LLM in the

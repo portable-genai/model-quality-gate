@@ -5,15 +5,14 @@ surface, answering two different questions:
 
 * :func:`get_principal` / :data:`CurrentPrincipal` : *who is the end USER?* Builds a
   :class:`RequestContext` from the inbound headers and asks the active profile's
-  :class:`IdentityPort` adapter to resolve a verified :class:`Principal`. Any request-body
-  ``actor`` is ignored: the audit actor flows from here, closing the spoofable-identity
-  gap. This is the inner ring of the defense-in-depth PEP (edge IAP/Apigee -> Hrz1
-  guardrail -> this per-backend check).
-* :func:`require_service_caller` / :data:`ServiceCaller` : *which calling SERVICE is this?*
-  Authenticates the peer service (e.g. a vertical's promotion-gate CI hitting ``/v1/gate``)
+  :class:`IdentityPort` adapter to resolve a verified :class:`Principal`. Any request-body ``actor``
+  is ignored: the audit actor flows from here, closing the spoofable-identity gap. This is the inner
+  ring of the defense-in-depth PEP (edge IAP/Apigee -> agent-guardrail-gateway -> this per-backend
+  check). * :func:`require_service_caller` / :data:`ServiceCaller` : *which calling SERVICE is
+  this?* Authenticates the peer service (e.g. a vertical's promotion-gate CI hitting ``/v1/gate``)
   from an ``Authorization: Bearer <token>`` credential, per the shared S2S contract. It does **not**
-  replace the IAP identity: a request to a guarded route carries both an end-user identity
-  and a service credential.
+  replace the IAP identity: a request to a guarded route carries both an end-user identity and a
+  service credential.
 
 The S2S contract, by profile:
 

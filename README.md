@@ -1,9 +1,9 @@
-# Hrz4: AI Quality & Model-Risk Platform
+# `model-quality-gate`: AI Quality & Model-Risk Platform
 
 **Industries:** All GenAI; especially regulated (banking, insurance, healthcare / pharma, public sector)
 
 > The production-promotion **eval / red-team gate** and **model-risk (MRM)** evidence
-> system for APAC banking. Every B and C agent in the catalog must pass Hrz4 before
+> system for APAC banking. Every B and C agent in the catalog must pass `model-quality-gate` before
 > promotion (dependency rule R5). Built ports-and-adapters on the **Gemini Enterprise
 > Agent Platform**, with a configurable deployment region defaulting to `asia-southeast1`.
 
@@ -19,9 +19,9 @@
 
 ---
 
-## 1. What Hrz4 produces
+## 1. What `model-quality-gate` produces
 
-Hrz4 takes a **target** (a model + a prompt version + a golden dataset) and returns four
+`model-quality-gate` takes a **target** (a model + a prompt version + a golden dataset) and returns four
 artifacts, each with the evidence behind it:
 
 | # | Artifact | Domain type | Service |
@@ -42,10 +42,10 @@ read a model's recorded quality drift and return a `DriftEscalation`
 absent measurement escalates rather than reading as calm. It states the requirement and
 executes nothing, and the live-traffic sampler behind it is deliberately absent
 ([runbook](docs/runbook.md#drift-monitoring)). Every non-health route requires a verified service caller
-(`api/security.py`; shared-secret in `local`, OIDC in `gcp`). Catalog identity: **Hrz4**,
+(`api/security.py`; shared-secret in `local`, OIDC in `gcp`). Catalog identity: `model-quality-gate`,
 group **`hrz`** (shared platform services), priority **P0**, buyer **Model Risk / MLOps**.
-Hrz4 does **not** process customer PII (it evaluates models against datasets), so rule R1 /
-Hrz1 is **N/A**.
+`model-quality-gate` does **not** process customer PII (it evaluates models against datasets), so rule R1 /
+`agent-guardrail-gateway` is **N/A**.
 
 Every artifact, metric and decision is a pure-stdlib dataclass in
 [`src/model_quality_gate/domain/models.py`](src/model_quality_gate/domain/models.py), the heart of the
@@ -81,9 +81,9 @@ flowchart TB
     subgraph ports["Ports (13 Protocols): the hexagon boundary"]
         P1["Evaluation · RedTeam"]
         P2["PromptRegistry · ModelCardStore · MetricsStore"]
-        P3["KnowledgeBaseClient (Hrz2) · LLM judge"]
-        P4["AuditSink · Tracer (Hrz5)"]
-        P5["AgentRegistry (Hrz3) · ToolCatalog"]
+        P3["KnowledgeBaseClient (`enterprise-knowledge-base`) · LLM judge"]
+        P4["AuditSink · Tracer (`agent-observability`)"]
+        P5["AgentRegistry (`agent-registry`) · ToolCatalog"]
     end
 
     subgraph gcp["adapters/gcp/*: primary (managed services)"]
@@ -93,7 +93,7 @@ flowchart TB
         LO["SQLite FTS5 retrieval · deterministic scorer ·<br/>heuristic red-team · deterministic judge ·<br/>SQLite stores (SDK-free, no emulator)"]
     end
     subgraph plat["adapters/platform/*: platform-service HTTP clients"]
-        PL["Hrz2 Knowledge Base · Hrz5 Audit · Hrz3 Registry"]
+        PL["`enterprise-knowledge-base` Knowledge Base · `agent-observability` Audit · `agent-registry`"]
     end
     subgraph onp["adapters/onprem/*: placeholder stubs"]
         ON["NotImplementedError stubs that satisfy<br/>the same Protocols (P-02 / P-12 exit story)"]
@@ -170,7 +170,7 @@ pip install -e ".[dev]"          # core + dev tooling, NO google-cloud-* package
 
 export AI_QUALITY_PROFILE=local
 make lint test                   # ruff + mypy + pytest -m 'not integration'
-make eval                        # the Hrz4 self-eval gate (gate logic)
+make eval                        # the `model-quality-gate` self-eval gate (gate logic)
 make eval-narrative              # narrative quality vs the per-vertical floors
 ```
 
@@ -255,9 +255,9 @@ offline because it drives the real gate logic with deterministic backends.
 
 ---
 
-## 6. The promotion gate (Hrz4 / P-08)
+## 6. The promotion gate (`model-quality-gate` / P-08)
 
-No build in the catalog is promoted without passing Hrz4. The gate combines two independent
+No build in the catalog is promoted without passing `model-quality-gate`. The gate combines two independent
 checks and writes the MRM evidence behind the verdict:
 
 ```mermaid
@@ -266,7 +266,7 @@ sequenceDiagram
     actor Caller as Promotion pipeline
     participant Gate as PromotionGateService
     participant Eval as EvaluationService
-    participant KB as KnowledgeBaseClient (Hrz2)
+    participant KB as KnowledgeBaseClient (`enterprise-knowledge-base`)
     participant Red as RedTeamService
     participant Card as ModelCardStore
     participant Pol as GateReviewPolicy
@@ -365,18 +365,18 @@ The complete mapping of **every** General Principle (P-01..P-12) and dependency 
 
 ## 8. Platform dependencies
 
-Hrz4 depends on three sibling horizontal-platform services. When deployed standalone, the
+`model-quality-gate` depends on three sibling horizontal-platform services. When deployed standalone, the
 `gcp` adapters use BigQuery / Cloud Logging / a local registry; when deployed inside the
 full platform, the `platform` adapters delegate over HTTP (contracts in
 [`SPEC.md`](SPEC.md) §6).
 
-| Dep | Repo | Hrz4 port it backs | `platform` adapter |
+| Dep | Repo | `model-quality-gate` port it backs | `platform` adapter |
 |-----|------|-------------------|--------------------|
-| **Hrz2** Enterprise KB | `enterprise-knowledge-base` | `KnowledgeBaseClientPort` (grounded eval) | `RemoteKnowledgeBaseAdapter` |
-| **Hrz5** Observability/Audit | `agent-observability` | `AuditSinkPort` (R2) | `RemoteAuditAdapter` |
-| **Hrz3** Registry | `agent-registry` | `AgentRegistryPort` (R4) | `RemoteRegistryAdapter` |
+| `enterprise-knowledge-base` | `enterprise-knowledge-base` | `KnowledgeBaseClientPort` (grounded eval) | `RemoteKnowledgeBaseAdapter` |
+| `agent-observability` | `agent-observability` | `AuditSinkPort` (R2) | `RemoteAuditAdapter` |
+| `agent-registry` | `agent-registry` | `AgentRegistryPort` (R4) | `RemoteRegistryAdapter` |
 
-Hrz4 itself satisfies rule **R5**: it is the gate every other agent calls before promotion.
+`model-quality-gate` itself satisfies rule **R5**: it is the gate every other agent calls before promotion.
 
 ---
 
@@ -448,7 +448,7 @@ flowchart LR
 
 ## Cost and latency
 
-Size this system's cost and latency with the shared interactive calculator: [**live**](https://portable-genai.github.io/cost-latency-calculator/calc/calculator.html?system=Hrz4) or the [in-repo page](cost-latency-calculator.html). The engine and the pricing book are maintained once in [cost-latency-calculator](https://github.com/portable-genai/cost-latency-calculator).
+Size this system's cost and latency with the shared interactive calculator: [**live**](https://portable-genai.github.io/cost-latency-calculator/calc/calculator.html?system=model-quality-gate) or the [in-repo page](cost-latency-calculator.html). The engine and the pricing book are maintained once in [cost-latency-calculator](https://github.com/portable-genai/cost-latency-calculator).
 
 ## License
 

@@ -1,6 +1,6 @@
 # On-prem migration checklist (exit / portability, P-12)
 
-Hrz4's exit story is concrete, not aspirational. Switching from the managed GCP stack to an
+`model-quality-gate`'s exit story is concrete, not aspirational. Switching from the managed GCP stack to an
 on-premise stack (the **Google Distributed Cloud** target) is a one-line profile change,
 `AI_QUALITY_PROFILE=onprem`, after which every port is bound to a placeholder adapter under
 [`src/model_quality_gate/adapters/onprem/`](../src/model_quality_gate/adapters/onprem/). The domain core

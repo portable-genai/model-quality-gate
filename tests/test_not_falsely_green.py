@@ -1,9 +1,9 @@
 """Prove every eval metric can go RED: a degraded gate decision must score below threshold.
 
-Hrz4 IS the promotion authority, so its own offline gate validates the gate LOGIC rather than
-a model's answers: each golden scenario carries the eval scores a backend would produce and the
-verdict the gate should reach. That makes falsification more important here, not less. If these
-four metrics cannot fail, the service that decides whether every other system may promote is
+model-quality-gate IS the promotion authority, so its own offline gate validates the gate LOGIC
+rather than a model's answers: each golden scenario carries the eval scores a backend would produce
+and the verdict the gate should reach. That makes falsification more important here, not less. If
+these four metrics cannot fail, the service that decides whether every other system may promote is
 itself unchecked.
 
 Each scorer is imported from ``eval/run_eval.py`` and fed the same real ``GateDecision`` twice:

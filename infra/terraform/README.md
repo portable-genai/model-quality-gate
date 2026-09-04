@@ -1,6 +1,6 @@
-# Hrz4 infrastructure (Terraform)
+# `model-quality-gate` infrastructure (Terraform)
 
-Regional infrastructure for the Hrz4 AI Quality & Model-Risk Platform. The region defaults
+Regional infrastructure for the `model-quality-gate` Platform. The region defaults
 to `asia-southeast1` and must be in the reviewed `allowed_regions` list. Every service id,
 location, dataset, and bucket name resolves in-region and matches
 [`config/settings.yaml`](../../config/settings.yaml).
@@ -12,7 +12,7 @@ location, dataset, and bucket name resolves in-region and matches
 
 | File | Resource | Principle |
 |------|----------|-----------|
-| `apis.tf` | Enable the managed services Hrz4 uses | P-01 |
+| `apis.tf` | Enable the managed services `model-quality-gate` uses | P-01 |
 | `kms.tf` | Regional CMEK key ring + per-service key bindings | P-03, P-09 |
 | `bigquery.tf` | Eval-metrics + model-drift + prompt-version dataset/tables (CMEK) | P-03, P-07, P-09 |
 | `cloud_storage.tf` | Golden-dataset + model-card buckets (CMEK, versioned, private) | P-03, P-05, P-07, P-09 |

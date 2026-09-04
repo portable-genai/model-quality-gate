@@ -1,4 +1,4 @@
-# Architecture : Hrz4 AI Quality & Model-Risk Platform
+# Architecture : `model-quality-gate` Platform
 
 This document goes deeper than the [README](README.md): the complete port to adapter
 table, the gate pipeline as a sequence diagram, the runtime topology on Agent Runtime, and
@@ -11,7 +11,7 @@ pieces fit together; it does not redefine them.
 
 ## 1. Hexagonal overview
 
-Hrz4 is a **ports-and-adapters** (hexagonal) application. The domain core in
+`model-quality-gate` is a **ports-and-adapters** (hexagonal) application. The domain core in
 [`src/model_quality_gate/domain/`](src/model_quality_gate/domain/) owns all orchestration and has **no**
 dependency on Google Cloud, ADK, FastAPI, or any framework : only the Python standard
 library. Everything the domain needs from the outside world is a `typing.Protocol` **port**;
@@ -96,7 +96,7 @@ Cloud : no third-party product is named).
 > bindings are in [`config/settings.yaml`](config/settings.yaml) under `adapters:` and are
 > the build contract : **module paths and class names there are fixed**. Four ports have a
 > `platform` entry: identity remains IAP-verified while knowledge_base, audit and registry
-> delegate to the three sibling platform services Hrz4 depends on.
+> delegate to the three sibling platform services `model-quality-gate` depends on.
 
 ---
 
@@ -107,7 +107,7 @@ The domain services own orchestration and call only ports. The promotion gate (f
 
 ```mermaid
 flowchart TD
-    eval["evaluation_service.evaluate<br/>(+ Hrz2 grounded reference context)"]
+    eval["evaluation_service.evaluate<br/>(+ `enterprise-knowledge-base` grounded reference context)"]
     eval -->|empty dataset| refuse["EmptyDatasetError (no vacuous PASS)"]
     eval -->|scored| red["redteam_service.run"]
     red --> combine["combine: passed = eval.passed AND redteam.passed"]
@@ -128,7 +128,7 @@ sequenceDiagram
     participant Gate as PromotionGateService
     participant Tr as TracerPort
     participant Eval as EvaluationService
-    participant KB as KnowledgeBaseClient (Hrz2)
+    participant KB as KnowledgeBaseClient (`enterprise-knowledge-base`)
     participant Red as RedTeamService
     participant Card as ModelCardStore
     participant Pol as GateReviewPolicy
@@ -207,12 +207,12 @@ flowchart TB
 
 ## 5. Dependency relationship to the horizontal platform
 
-Hrz4 (catalog **Hrz4**, group `hrz`) is a shared platform service that depends on three sibling
+`model-quality-gate` (catalog `model-quality-gate`, group `hrz`) is a shared platform service that depends on three sibling
 services and is itself depended on by every B/C agent (rule R5).
 
 ```mermaid
 flowchart LR
-    subgraph a4["Hrz4 (this repo)"]
+    subgraph a4["`model-quality-gate` (this repo)"]
         DOMAIN[Domain core]
         KBP[KnowledgeBaseClientPort]
         AUDIT[AuditSinkPort]
@@ -227,24 +227,24 @@ flowchart LR
     end
 
     subgraph platform["profile = platform (inside the horizontal platform)"]
-        Hrz2[enterprise-knowledge-base]
-        Hrz5[agent-observability]
-        Hrz3[agent-registry]
+        `enterprise-knowledge-base`[enterprise-knowledge-base]
+        `agent-observability`[agent-observability]
+        `agent-registry`[agent-registry]
     end
 
-    KBP -- gcp/platform --> Hrz2
+    KBP -- gcp/platform --> `enterprise-knowledge-base`
     AUDIT -- gcp --> CL
-    AUDIT -- platform --> Hrz5
+    AUDIT -- platform --> `agent-observability`
     REGP -- gcp --> A2Acard
-    REGP -- platform --> Hrz3
+    REGP -- platform --> `agent-registry`
 ```
 
-| Dependency | Repo | Backs Hrz4 port | HTTP contract (SPEC §6) |
+| Dependency | Repo | Backs `model-quality-gate` port | HTTP contract (SPEC §6) |
 |------------|------|----------------|-------------------------|
-| **Hrz2** Enterprise KB | `enterprise-knowledge-base` | `KnowledgeBaseClientPort` | `POST /v1/search` |
-| **Hrz5** Observability/Audit | `agent-observability` | `AuditSinkPort` (R2) | `POST /v1/audit` |
-| **Hrz3** Registry | `agent-registry` | `AgentRegistryPort` (R4) | `POST/GET /v1/agents` |
-| **Consumers** | every B/C agent | Hrz4 gate (R5) | `GET /v1/gate?model=...` |
+| `enterprise-knowledge-base` | `enterprise-knowledge-base` | `KnowledgeBaseClientPort` | `POST /v1/search` |
+| `agent-observability` | `agent-observability` | `AuditSinkPort` (R2) | `POST /v1/audit` |
+| `agent-registry` | `agent-registry` | `AgentRegistryPort` (R4) | `POST/GET /v1/agents` |
+| **Consumers** | every B/C agent | `model-quality-gate` (R5) | `GET /v1/gate?model=...` |
 
 The `platform` adapters (`adapters/platform/remote_*.py`) are thin HTTP clients whose JSON
 field names mirror the domain dataclasses exactly (enums as strings), so swapping from the

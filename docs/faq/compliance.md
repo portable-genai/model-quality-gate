@@ -14,6 +14,6 @@ the institution's approved schedule.
 
 ## How do sibling systems divide responsibility?
 
-Hrz2 governs reference knowledge, Hrz3 registry discovery, Hrz5 durable audit, Hrz7 human
-review/disposition, and Hrz1 runtime guardrails. Hrz4 owns only pre-promotion evaluation,
+`enterprise-knowledge-base` governs reference knowledge, `agent-registry` discovery, `agent-observability` durable audit, `human-review-console` human
+review/disposition, and `agent-guardrail-gateway` runtime guardrails. `model-quality-gate` owns only pre-promotion evaluation,
 red-team eligibility, and MRM evidence.

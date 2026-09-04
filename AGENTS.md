@@ -7,14 +7,14 @@ here. Read it first. This file carries only what is specific to this one.
 
 ## What this is
 
-Catalog id **Hrz4**. Eval / red-team harness + golden datasets + prompt versioning +
+Catalog id `model-quality-gate`. Eval / red-team harness + golden datasets + prompt versioning +
 model cards + MRM evidence.
 
 ## Concrete bindings
 
 | | |
 |---|---|
-| Catalog id | `Hrz4` |
+| Catalog id | `model-quality-gate` |
 | Package | `src/model_quality_gate/` |
 | Profile variable | `AI_QUALITY_PROFILE` |
 | Adapter families | `gcp`, `local`, `onprem`, `platform` |

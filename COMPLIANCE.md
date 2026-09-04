@@ -1,10 +1,10 @@
-# Compliance mapping : Hrz4 AI Quality & Model-Risk Platform
+# Compliance mapping : `model-quality-gate` Platform
 
 This document maps every **General Principle** (P-01..P-12) and **dependency rule**
 (R1..R6) to a concrete control, file, or resource in **this** repo. Where a principle does
-not apply to Hrz4, it is marked **N/A** with the reason, honestly, rather than claimed.
+not apply to `model-quality-gate`, it is marked **N/A** with the reason, honestly, rather than claimed.
 
-Hrz4 is the catalog's **production promotion gate** (rule R5) and the concrete home of
+`model-quality-gate` is the catalog's **production promotion gate** (rule R5) and the concrete home of
 **P-08** (eval-gated promotion) and model-risk governance. It evaluates models against
 datasets and does **not** process customer personal data, which is why the customer-PII
 principles and rule R1 are N/A here.
@@ -13,12 +13,12 @@ principles and rule R1 are N/A here.
 
 ## General Principles (P-01..P-12)
 
-| # | Principle | Hrz4 status | Where it lives |
+| # | Principle | `model-quality-gate` status | Where it lives |
 |---|-----------|-----------|----------------|
 | **P-01** | Managed-first, minimal surface | Applies | `infra/terraform/apis.tf` enables only the services the pinned stack uses; `vpc_sc.tf` restricts the perimeter to those services. |
 | **P-02** | No vendor lock-in (ports & adapters) | **Core** | The domain ([`src/model_quality_gate/domain/`](src/model_quality_gate/domain/)) depends only on `typing.Protocol` ports; `config/settings.yaml` binds them; one env var (`AI_QUALITY_PROFILE`) swaps the whole stack across `gcp` / `local` / `platform` / `onprem`. The `local` family ([`src/model_quality_gate/adapters/local/`](src/model_quality_gate/adapters/local/)) proves the domain runs **entirely off-cloud** (the gate runs end to end with no google-cloud package), and the `onprem` family proves interface parity; both are exercised by [`tests/contract/test_port_parity.py`](tests/contract/test_port_parity.py). |
 | **P-03** | Data residency / in-country | Applies | Region pinned `asia-southeast1` everywhere; Terraform validates it and fails fast (`variables.tf`); regional CMEK (`kms.tf`); VPC-SC perimeter (`vpc_sc.tf`); BigQuery + GCS pinned in-region. |
-| **P-04** | Minimise data to the model | Partial / context-specific | Hrz4 evaluates models against synthetic golden datasets and adversarial probes; **no customer data** is sent to a model. Only the probe text and golden inputs reach the judge model. The red-team adapter sends only synthetic probes. |
+| **P-04** | Minimise data to the model | Partial / context-specific | `model-quality-gate` evaluates models against synthetic golden datasets and adversarial probes; **no customer data** is sent to a model. Only the probe text and golden inputs reach the judge model. The red-team adapter sends only synthetic probes. |
 | **P-05** | Private-only data plane | Applies | GCS buckets enforce uniform access + public-access-prevention (`cloud_storage.tf`); BigQuery and the eval service sit inside the VPC-SC perimeter. |
 | **P-06** | Human-in-the-loop (maker-checker) | **Supported** | `GateReviewPolicy` ([`domain/hitl.py`](src/model_quality_gate/domain/hitl.py)) flags a borderline PASS (any metric within 0.02 above threshold, or a marginal red-team block) for a model-risk officer's sign-off; such verdicts audit as `ESCALATED`. |
 | **P-07** | Audited everything / model-risk evidence | **Core** | Every gate / eval / red-team / prompt / model-card action writes an immutable `AuditEvent` to the locked WORM bucket (`cloud_logging_audit.py`, `logging_worm.tf`); each gate writes a `ModelCard` + MRM evidence pointer (`gate_service.py`, `gcs_model_cards.py`); prompt versions are checksummed change-control records (`prompt_service.py`, `bigquery_prompts.py`). |
@@ -32,26 +32,26 @@ principles and rule R1 are N/A here.
 
 ## Dependency rules (R1..R6)
 
-| # | Rule | Hrz4 status | Where it lives |
+| # | Rule | `model-quality-gate` status | Where it lives |
 |---|------|-----------|----------------|
-| **R1** | Customer-PII guardrail via Hrz1 | **N/A** | Hrz4 evaluates models against datasets, not customer data, so there is no customer-PII path to guard. No Hrz1 dependency. (If a future golden dataset ever carried real customer data, Hrz1 redaction would be added on ingestion : not in scope today.) |
-| **R2** | Audit to Hrz5 | Applies | `AuditSinkPort` -> `RemoteAuditAdapter` posts every `AuditEvent` to `agent-observability` `/v1/audit` (platform profile); the `gcp` profile writes Cloud Logging WORM directly. |
-| **R3** | Tracing to Hrz5 | Applies | `ObservabilityTracerPort` -> Cloud Trace via OpenTelemetry (`cloud_trace_tracer.py`), content capture OFF. |
-| **R4** | Register in Hrz3 | Applies | `AgentRegistryPort` -> `RemoteRegistryAdapter` registers the Hrz4 AgentCard in `agent-registry`; the card is also served at `/.well-known/agent-card.json`. |
-| **R5** | Pass the Hrz4 eval gate before promotion | **This IS Hrz4** | Hrz4 *is* the gate the rest of the catalog must pass. The `GET /v1/gate?model=...` endpoint is the cheap promotion poll sibling pipelines call (404 on an unknown/empty dataset, so a poller can tell "missing" from FAIL); the gate logic is `PromotionGateService`. A caller selects its per-vertical metric bundle by name; an unrecognised metric/bundle is a 422, never a silent PASS. Every non-health route requires a verified **service caller** (`api/security.py` `require_service_caller`: shared-secret in `local`, OIDC ID token + allowlist in `gcp`), so the promotion gate authenticates the calling service, not just the end user. |
-| **R6** | Consume the Hrz2 Enterprise KB for grounded knowledge | Applies | `KnowledgeBaseClientPort` -> `RemoteKnowledgeBaseAdapter` pulls reference context from `enterprise-knowledge-base` `/v1/search` for grounded evaluation. |
+| **R1** | Customer-PII guardrail via `agent-guardrail-gateway` | **N/A** | `model-quality-gate` evaluates models against datasets, not customer data, so there is no customer-PII path to guard. No `agent-guardrail-gateway` dependency. (If a future golden dataset ever carried real customer data, `agent-guardrail-gateway` redaction would be added on ingestion : not in scope today.) |
+| **R2** | Audit to `agent-observability` | Applies | `AuditSinkPort` -> `RemoteAuditAdapter` posts every `AuditEvent` to `agent-observability` `/v1/audit` (platform profile); the `gcp` profile writes Cloud Logging WORM directly. |
+| **R3** | Tracing to `agent-observability` | Applies | `ObservabilityTracerPort` -> Cloud Trace via OpenTelemetry (`cloud_trace_tracer.py`), content capture OFF. |
+| **R4** | Register in `agent-registry` | Applies | `AgentRegistryPort` -> `RemoteRegistryAdapter` registers the `model-quality-gate` AgentCard in `agent-registry`; the card is also served at `/.well-known/agent-card.json`. |
+| **R5** | Pass the `model-quality-gate` before promotion | **This IS `model-quality-gate`** | `model-quality-gate` *is* the gate the rest of the catalog must pass. The `GET /v1/gate?model=...` endpoint is the cheap promotion poll sibling pipelines call (404 on an unknown/empty dataset, so a poller can tell "missing" from FAIL); the gate logic is `PromotionGateService`. A caller selects its per-vertical metric bundle by name; an unrecognised metric/bundle is a 422, never a silent PASS. Every non-health route requires a verified **service caller** (`api/security.py` `require_service_caller`: shared-secret in `local`, OIDC ID token + allowlist in `gcp`), so the promotion gate authenticates the calling service, not just the end user. |
+| **R6** | Consume the `enterprise-knowledge-base` for grounded knowledge | Applies | `KnowledgeBaseClientPort` -> `RemoteKnowledgeBaseAdapter` pulls reference context from `enterprise-knowledge-base` `/v1/search` for grounded evaluation. |
 
 ---
 
 ## Honest gaps and scope notes
 
-- **P-04 is context-specific, not absolute.** Hrz4 does not handle customer PII, so the
+- **P-04 is context-specific, not absolute.** `model-quality-gate` does not handle customer PII, so the
   "minimise PII to the model" control that a customer-facing assistant needs is N/A in its
   strict form. The analogous control here is that only synthetic golden inputs and
   adversarial probes reach a model.
-- **R1 / Hrz1 is N/A by design.** Marking it N/A is deliberate: claiming an Hrz1 guardrail
-  dependency Hrz4 does not have would be misleading. Should Hrz4 ever evaluate over a dataset
-  derived from production traffic, Hrz1 redaction must be added at dataset-ingestion time.
+- **R1 / `agent-guardrail-gateway` is N/A by design.** Marking it N/A is deliberate: claiming an `agent-guardrail-gateway`
+  dependency `model-quality-gate` does not have would be misleading. Should `model-quality-gate` ever evaluate over a dataset
+  derived from production traffic, `agent-guardrail-gateway` redaction must be added at dataset-ingestion time.
 - **Terraform is not applied here.** The infra encodes the residency, CMEK, WORM and
   least-privilege controls above, but a real deployment requires your own security and
   model-risk sign-off (the WORM lock is irreversible).

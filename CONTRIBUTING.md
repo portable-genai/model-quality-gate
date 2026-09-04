@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in the Hrz4 AI Quality & Model-Risk Platform reference build. This
+Thanks for your interest in the `model-quality-gate` Platform reference build. This
 is a public engineering-portfolio piece, but it is held to production standards: every
 change must pass the same gate CI enforces.
 
@@ -20,7 +20,7 @@ No Google Cloud SDK is needed for development or the test suite: the domain runs
 ```bash
 make lint        # ruff check + ruff format --check + mypy src
 make test        # pytest -m 'not integration' (unit + contract)
-make eval        # the Hrz4 self-eval gate (eval/run_eval.py)
+make eval        # the `model-quality-gate` self-eval gate (eval/run_eval.py)
 ```
 
 Equivalently:

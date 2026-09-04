@@ -1,7 +1,7 @@
-# Hrz4 AI Quality & Model-Risk Platform : Demo UI
+# `model-quality-gate` Platform : Demo UI
 
-A banking-grade demo console for **Hrz4**, the production-promotion eval / red-team gate and
-model-risk (MRM) evidence system. It is a thin presentation layer over the Hrz4 FastAPI
+A banking-grade demo console for `model-quality-gate`, the production-promotion eval / red-team gate and
+model-risk (MRM) evidence system. It is a thin presentation layer over the `model-quality-gate` FastAPI
 backend: it renders the EvalReport, the RedTeamReport, and the PASS/FAIL GateDecision with
 its MRM evidence, and surfaces the maker-checker banner for a borderline pass.
 
@@ -26,7 +26,7 @@ the `@types` packages, nothing else.
 ## Prerequisites
 
 - Node.js 18.18+ (tested on Node 20/22)
-- The Hrz4 FastAPI backend running and reachable (default `http://localhost:8084`)
+- The `model-quality-gate` FastAPI backend running and reachable (default `http://localhost:8084`)
 
 ## Configure
 
@@ -99,7 +99,7 @@ flowchart LR
 
 ## Notes
 
-- Pure presentation: no secrets, no direct cloud calls. All data comes from the Hrz4 backend
+- Pure presentation: no secrets, no direct cloud calls. All data comes from the `model-quality-gate` backend
   over the documented routes.
 - Region/branding reflects runtime deployment configuration (default `asia-southeast1`).
 - The UI is delivered as **source only**: do not commit `.next/` or `node_modules/` (both

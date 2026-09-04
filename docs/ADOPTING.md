@@ -1,6 +1,6 @@
-# Adopting Hrz4
+# Adopting `model-quality-gate`
 
-Hrz4 is a shared model-risk authority. Most institutions should consume one governed Hrz4
+`model-quality-gate` is a shared model-risk authority. Most institutions should consume one governed `model-quality-gate`
 deployment rather than fork it. Fork only when an institution needs an independently
 owned promotion policy, release cadence, or evidence boundary.
 
@@ -8,17 +8,17 @@ owned promotion policy, release cadence, or evidence boundary.
 
 | Mode | Use when | Institution owns |
 |---|---|---|
-| Consume the API | One model-risk function governs many applications | Golden datasets, approved bundles, service identity, Hrz7 review routing |
+| Consume the API | One model-risk function governs many applications | Golden datasets, approved bundles, service identity, `human-review-console` review routing |
 | Implement adapters | The domain contract is right but a provider or sibling endpoint differs | New port adapters, credentials, endpoint controls, conformance tests |
 | Fork and rename | The institution needs independent source and release authority | All operations, security, policy, evidence retention, and upstream merges |
 
 The stable seams are the domain artifacts, gate API, and 13 typed ports. The institution
 must review evaluator and red-team adapters, golden data, identity and service-to-service
-controls, region/CMEK/retention, Hrz2/Hrz3/Hrz5 endpoints, Hrz7 disposition, thresholds,
+controls, region/CMEK/retention, `enterprise-knowledge-base`, `agent-registry`, `agent-observability` endpoints, `human-review-console` disposition, thresholds,
 and evidence approval. Thresholds remain code constants today; they are not config-tunable
 (the open B4 audit item).
 
-Hrz4 returns model promotion eligibility and evidence. It never deploys a model or
+`model-quality-gate` returns model promotion eligibility and evidence. It never deploys a model or
 substitutes for the institution's maker-checker approval.
 
 ## Mechanical rename

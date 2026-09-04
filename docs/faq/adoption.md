@@ -1,6 +1,6 @@
 # Adoption FAQ
 
-## Should we fork Hrz4?
+## Should we fork `model-quality-gate`?
 
 Usually no. Consume one governed service so model-risk policy and evidence remain
 consistent. Fork when your institution needs independent policy and release authority.
@@ -13,6 +13,6 @@ constructor, behavioral, and portability contract tests. Never add a managed fal
 ## What stays institution-owned?
 
 Golden datasets, bundle approval, threshold changes, evaluator validation, region and key
-custody, identity, sibling endpoints, Hrz7 review routing, operations, and releases.
+custody, identity, sibling endpoints, `human-review-console` review routing, operations, and releases.
 
 See [the adoption guide](../ADOPTING.md).

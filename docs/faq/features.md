@@ -3,7 +3,7 @@
 ## Does a PASS deploy or promote the model?
 
 No. PASS means the tested target is eligible under the selected bundle. The deployment
-pipeline and any Hrz7 maker-checker approval remain outside Hrz4.
+pipeline and any `human-review-console` maker-checker approval remain outside `model-quality-gate`.
 
 ## Who should use the evidence?
 
@@ -11,7 +11,7 @@ Model-risk officers inspect per-metric results, adversarial probes, the model ca
 and immutable references. MLOps consumes the verdict but must not infer authorization to
 deploy.
 
-## Does Hrz4 replace runtime guardrails?
+## Does `model-quality-gate` replace runtime guardrails?
 
-No. Hrz1 remains the runtime safety control. Hrz4 evaluates a versioned target before
+No. `agent-guardrail-gateway` remains the runtime safety control. `model-quality-gate` evaluates a versioned target before
 promotion.

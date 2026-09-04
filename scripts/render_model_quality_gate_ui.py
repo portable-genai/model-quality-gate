@@ -147,7 +147,8 @@ def render_metrics(eval_report: dict) -> str:
         f'<span class="statuspill pill {verdict}">{label}</span></h2>'
         f'<div class="body">{"".join(rows)}'
         f'<p class="muted" style="margin-top:10px">Scored over {esc(eval_report.get("n_examples"))} graded golden examples. '
-        "The marker on each bar is the promotion threshold; the fill is the achieved score.</p></div></section>"
+        "The marker on each bar is the promotion threshold; the fill is the achieved "
+        "score.</p></div></section>"
     )
 
 
@@ -189,7 +190,8 @@ def render_card(card: dict | None) -> str:
         else "<li class='muted'>none recorded — every metric cleared its threshold</li>"
     )
     return (
-        '<section class="panel"><h2>ModelCard — MRM evidence sealed by the gate</h2><div class="body">'
+        '<section class="panel"><h2>ModelCard — MRM evidence sealed by the gate</h2><div '
+        'class="body">'
         '<div class="kv">'
         f'<span class="k">Model @ version</span><span class="v mono">{esc(card.get("model"))}@{esc(card.get("version"))}</span>'
         f'<span class="k">Intended use</span><span class="v">{esc(card.get("intended_use"))}</span>'
@@ -232,7 +234,8 @@ def render_verdict(data: dict) -> str:
         else ""
     )
     evidence = (
-        '<section class="panel"><h2>GateDecision — verdict &amp; MRM pointers</h2><div class="body"><div class="kv">'
+        '<section class="panel"><h2>GateDecision — verdict &amp; MRM pointers</h2><div '
+        'class="body"><div class="kv">'
         f'<span class="k">Verdict</span><span class="v"><b>{"PASS" if passed else "FAIL"}</b></span>'
         f'<span class="k">Model card ref</span><span class="v mono">{esc(d.get("model_card_ref"))}</span>'
         f'<span class="k">MRM evidence ref</span><span class="v mono">{esc(d.get("mrm_evidence_ref"))}</span>'
@@ -288,7 +291,8 @@ def render_references(data: dict) -> str:
         + f'<section class="panel" data-demo-reference-count="{len(rows)}"><h2>Related reference context per golden input</h2>'
         f'<div class="body">{"".join(rows)}'
         '<p class="muted" style="margin-top:8px">These display-only passages are returned by '
-        "the local Hrz2-compatible adapter for auditor inspection. The deterministic local scorer "
+        "the local enterprise-knowledge-base-compatible adapter for auditor inspection. The "
+        "deterministic local scorer "
         "does not consume this retrieval, so it is not causal score provenance.</p></div></section>"
         "<p class='foot'>Audit-first A4 gate view · synthetic fictional data</p>"
     )

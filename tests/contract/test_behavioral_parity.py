@@ -6,20 +6,20 @@ its Protocol. This suite proves the stronger claim behind the no-lock-in promise
 identically at the boundary, and the migration placeholder fails fast rather than ever
 returning a silent wrong answer.
 
-Hrz4 is the eval / model-risk promotion AUTHORITY, not a customer-facing agent: it
+model-quality-gate is the eval / model-risk promotion AUTHORITY, not a customer-facing agent: it
 evaluates models against datasets and processes no customer PII. It consumes two platform
-siblings over real HTTP clients (``config/settings.yaml``): the **Hrz2** Enterprise KB for
-grounded reference retrieval and the **Hrz5** observability service for the WORM audit
+siblings over real HTTP clients (``config/settings.yaml``): the enterprise-knowledge-base for
+grounded reference retrieval and the agent-observability service for the WORM audit
 sink. Those two ports have a real ``platform`` implementation, so for each we put the SAME
 request through ``local`` and ``platform`` and require identical domain-level behavior:
 
-* ``knowledge_base`` (KnowledgeBaseClientPort -> Hrz2): the local FTS5 index and the
-  ``platform`` httpx client (respx-mocked at the documented ``/v1/search`` contract) return
+* ``knowledge_base`` (KnowledgeBaseClientPort -> enterprise-knowledge-base): the local FTS5 index
+  and the ``platform`` httpx client (respx-mocked at the documented ``/v1/search`` contract) return
   the SAME first-class :class:`Citation` objects for one query; a local re-run over a fresh
-  in-memory index is identical (determinism); ``onprem`` raises.
-* ``audit`` (AuditSinkPort -> Hrz5): the local hash-chained store reads back exactly the
-  serialized :class:`AuditEvent`, and the ``platform`` client POSTs a byte-identical body
-  to ``/v1/audit`` (respx-mocked); ``onprem`` raises.
+  in-memory index is identical (determinism); ``onprem`` raises. * ``audit`` (AuditSinkPort ->
+  agent-observability): the local hash-chained store reads back exactly the serialized
+  :class:`AuditEvent`, and the ``platform`` client POSTs a byte-identical body to ``/v1/audit``
+  (respx-mocked); ``onprem`` raises.
 
 The ``evaluation`` port (the deterministic eval scorer) has no platform sibling
 (``gcp`` needs the Google Cloud SDK, ``onprem`` is a placeholder), so parity is proven the
@@ -80,7 +80,8 @@ def _adapter(port: str, profile: str) -> Any:
 
 
 def _passage_json(citation: Citation) -> dict[str, Any]:
-    """Render a :class:`Citation` into the Hrz2 ``/v1/search`` passage shape (SPEC §6).
+    """Render a :class:`Citation` into the enterprise-knowledge-base ``/v1/search`` passage shape
+    (SPEC §6).
 
     The remote adapter's ``_parse_passages`` reads ``{text, citation{...}, score, acl_tags}``,
     so the sibling must serve exactly that shape. Feeding the local adapter's own output back
@@ -100,10 +101,13 @@ def _passage_json(citation: Citation) -> dict[str, Any]:
 
 
 # --------------------------------------------------------------------------- #
-# KnowledgeBaseClientPort (Hrz2) : identical citations whether local or platform
+# KnowledgeBaseClientPort (enterprise-knowledge-base) : identical citations whether local or
+# platform
 # --------------------------------------------------------------------------- #
 def test_knowledge_base_parity_same_citations_across_implementations():
-    """One query -> the SAME first-class Citation objects from local FTS5 and the Hrz2 client."""
+    """One query -> the SAME first-class Citation objects from local FTS5 and the
+    enterprise-knowledge-base client.
+    """
     query = "cloud outsourcing due diligence provider tolerance operations"
 
     # local: seed a known fictional corpus for a deterministic result, then retrieve.
@@ -114,7 +118,8 @@ def test_knowledge_base_parity_same_citations_across_implementations():
     assert any(c.page is not None for c in local_citations), "page-level citation required"
 
     with respx.mock:
-        # Hrz2 serves the SAME passages for the same query at the documented /v1/search shape.
+        # enterprise-knowledge-base serves the SAME passages for the same query at the documented
+        # /v1/search shape.
         respx.post(f"{KNOWLEDGE_BASE}/v1/search").respond(
             200, json={"passages": [_passage_json(c) for c in local_citations]}
         )
@@ -134,10 +139,10 @@ def test_knowledge_base_parity_same_citations_across_implementations():
 
 
 # --------------------------------------------------------------------------- #
-# AuditSinkPort (Hrz5) : byte-identical record shape at every sink boundary
+# AuditSinkPort (agent-observability) : byte-identical record shape at every sink boundary
 # --------------------------------------------------------------------------- #
 def test_audit_parity_identical_payload_at_every_sink():
-    """The local WORM store and the Hrz5 client see byte-identical audit payloads."""
+    """The local WORM store and the agent-observability client see byte-identical audit payloads."""
     event = AuditEvent(
         action="gate",
         actor="eval-bot@bank.test (FICTIONAL)",
@@ -161,7 +166,7 @@ def test_audit_parity_identical_payload_at_every_sink():
     local_audit.record(event)
     assert local_audit.read_all() == [expected]
 
-    # platform sink (Hrz5 observability): the POSTed body is byte-identical to what local stored.
+    # platform sink (agent-observability): the POSTed body is byte-identical to what local stored.
     with respx.mock:
         route = respx.post(f"{OBSERVABILITY}/v1/audit").respond(
             202, json={"status": "accepted", "event_id": event.event_id}
@@ -180,7 +185,8 @@ def test_audit_parity_identical_payload_at_every_sink():
 def test_evaluation_scorer_is_deterministic_and_onprem_fails_fast():
     """The deterministic local scorer returns byte-identical scores across re-runs.
 
-    ``gcp`` needs the Google Cloud SDK and there is no ``platform`` evaluator (Hrz4 IS the
+    ``gcp`` needs the Google Cloud SDK and there is no ``platform`` evaluator (model-quality-gate IS
+    the
     eval authority, it does not call a sibling to evaluate), so behavioral parity for this
     port is the offline claim this repo can make: the same request scored twice is
     indistinguishable, and the migration placeholder never waves a model through unevaluated.

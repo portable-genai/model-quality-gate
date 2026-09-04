@@ -9,7 +9,7 @@ approved origins, and authorization policy.
 ## Where does durable audit live?
 
 The local profile uses a tamper-evident hash chain for conformance. Production delegates
-durable cross-service audit to Hrz5 or its approved equivalent and must enforce retention,
+durable cross-service audit to `agent-observability` or its approved equivalent and must enforce retention,
 access, and key controls.
 
 ## Is synthetic demo data production-safe?
