@@ -288,7 +288,7 @@ def render_references(data: dict) -> str:
         + f'<section class="panel" data-demo-reference-count="{len(rows)}"><h2>Related reference context per golden input</h2>'
         f'<div class="body">{"".join(rows)}'
         '<p class="muted" style="margin-top:8px">These display-only passages are returned by '
-        "the local Hrz2-compatible adapter for auditor inspection. The deterministic local scorer "
+        "the local enterprise-knowledge-base-compatible adapter for auditor inspection. The deterministic local scorer "
         "does not consume this retrieval, so it is not causal score provenance.</p></div></section>"
         "<p class='foot'>Audit-first A4 gate view · synthetic fictional data</p>"
     )

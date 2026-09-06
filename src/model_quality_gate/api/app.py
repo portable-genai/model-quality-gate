@@ -604,13 +604,13 @@ def _capability_manifest() -> CapabilityManifestModel:
         ),
         (
             "immutable-audit",
-            "Hrz5 / Cloud Logging WORM",
+            "agent-observability / Cloud Logging WORM",
             bool(read_env_setting("OBSERVABILITY_URL").value),
             "AI_QUALITY_AUDIT_ATTESTATION_REF",
         ),
         (
             "trace-correlation",
-            "Hrz5 / OpenTelemetry",
+            "agent-observability / OpenTelemetry",
             bool(read_env_setting("OTEL_EXPORTER_OTLP_ENDPOINT").value),
             "AI_QUALITY_TRACE_ATTESTATION_REF",
         ),
