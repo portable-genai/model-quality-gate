@@ -1,4 +1,4 @@
-# Demo scripts: Hrz4 promotion gate
+# Demo scripts: `model-quality-gate` promotion gate
 
 All scripts are SDK-free and run against the in-process `local` stack (SQLite FTS5
 retrieval + deterministic scorer / judge + heuristic red-team: no Google Cloud, no API

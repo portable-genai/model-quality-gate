@@ -1,4 +1,4 @@
-# Hrz4 FAQs
+# `model-quality-gate` FAQs
 
 - [Features and model-risk ownership](features.md)
 - [Security and identity](security.md)
@@ -13,6 +13,6 @@
 | Platform / MLOps engineer | [Adoption](adoption.md), then [portability](portability.md) |
 | Auditor / compliance owner | [Compliance evidence](compliance.md), then [security](security.md) |
 
-Hrz4 owns the deterministic evaluation/red-team eligibility verdict and its MRM evidence.
-Hrz2 owns governed reference knowledge, Hrz3 agent registry, Hrz5 durable cross-service
-audit, Hrz7 human disposition, and Hrz1 runtime safety controls.
+`model-quality-gate` owns the deterministic evaluation/red-team eligibility verdict and its MRM evidence.
+`enterprise-knowledge-base` owns governed reference knowledge, `agent-registry`, `agent-observability` durable cross-service
+audit, `human-review-console` human disposition, and `agent-guardrail-gateway` runtime safety controls.
