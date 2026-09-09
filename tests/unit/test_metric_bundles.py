@@ -327,13 +327,52 @@ def test_every_p1_and_p2_promotion_client_has_a_declaration():
 def test_each_newly_registered_bundle_mirrors_its_repo_gate():
     """Spot-check the bars that would be wrong in the most expensive way if they drifted.
 
-    Each was captured by running that repository's own ``make eval`` and reading the threshold
-    column, not from memory. The three below are the ones where this bundle is STRICTER than
-    the same metric elsewhere, which is the direction a copy-paste registration loses.
+    Each was captured by reading that repository's own ``eval/rubrics/``, not from memory.
+    These are the ones where this bundle is STRICTER than the same metric elsewhere, which is
+    the direction a copy-paste registration loses.
+
+    `horizon_citation_accuracy` moved from 0.95 to 1.00 on 2026-09-10, with four others in the
+    same bundle, because the repository's own gate raised them on the denominator rule: over
+    the corpus each is scored on, 0.95 already required a perfect run. It is pinned here in the
+    direction it moved, and the direction is the point. A promotion bar BELOW a merge bar lets
+    a build that fails locally pass here, and it is the one direction that is never acceptable.
+
+    This can only ever be a spot-check: nothing in THIS repository can read a sibling's rubrics,
+    so the structural version of it lives in `org-metadata/scripts/portfolio-status.sh`, which
+    can see every checkout at once.
     """
     assert bundle_thresholds("aml-alert-triage")["groundedness"] == 1.00
-    assert bundle_thresholds("rsk1-compliance-advisory")["horizon_citation_accuracy"] == 0.95
+    assert bundle_thresholds("rsk1-compliance-advisory")["horizon_citation_accuracy"] == 1.00
     assert bundle_thresholds("exam-rfi-orchestrator")["entitlement_safety"] == 1.00
     # And the deterministic control plane, whose whole metric set is an invariant rather than
     # a model score.
     assert bundle_thresholds("journey-portal")["observability_audit_isolation"] == 1.00
+
+
+def test_the_unbundled_bar_does_not_depend_on_declaration_order():
+    """`EVAL_THRESHOLDS` is what a request naming no bundle is held to. It used to be an accident.
+
+    Built by `setdefault` over the whole table, it took whichever bundle was written FIRST in
+    the file, so moving a literal up or down changed a promotion bar with no diff that said so.
+    Now the `default` bundle wins where it names the metric, because that bundle exists to be
+    the un-bundled answer, and every other metric takes the strictest bar any vertical
+    registered, because nobody decided one and the fail-closed answer is the strictest.
+    """
+    from model_quality_gate.domain.thresholds import EVAL_THRESHOLDS, METRIC_BUNDLES
+
+    for metric, bar in METRIC_BUNDLES["default"].items():
+        assert EVAL_THRESHOLDS[metric] == bar, (
+            f"{metric}: the default bundle says {bar} and the un-bundled bar is "
+            f"{EVAL_THRESHOLDS[metric]}; the default bundle is the decision"
+        )
+    strictest: dict[str, float] = {}
+    for body in METRIC_BUNDLES.values():
+        for metric, bar in body.items():
+            strictest[metric] = max(strictest.get(metric, 0.0), bar)
+    for metric, bar in strictest.items():
+        if metric in METRIC_BUNDLES["default"]:
+            continue
+        assert EVAL_THRESHOLDS[metric] == bar, (
+            f"{metric}: some bundle asks {bar} and an un-bundled request is held to "
+            f"{EVAL_THRESHOLDS[metric]}, which is laxer than a vertical already demands"
+        )
