@@ -90,12 +90,13 @@ def test_metrics_for_bundle_unknown_raises():
 
 def test_per_bundle_thresholds_can_diverge_for_the_same_metric():
     # The reason thresholds are per-bundle, not global: the compliance vertical gates
-    # citation_accuracy at 0.99 while most verticals gate it at 0.90. A flat global table
-    # could not represent both.
-    assert bundle_thresholds("mkt6-compliance")["citation_accuracy"] == 0.99
+    # citation_accuracy at 1.00 while most verticals gate it at 0.90. A flat global table
+    # could not represent both. (It gated at 0.99 until 2026-09-10, when that repository
+    # raised it on the arithmetic: 17 cases scored 0/1 can express 0.94 at best.)
+    assert bundle_thresholds("mkt6-compliance")["citation_accuracy"] == 1.00
     assert bundle_thresholds("doc1-cdd-sow")["citation_accuracy"] == 0.90
     # resolve_thresholds surfaces the per-bundle bar.
-    assert resolve_thresholds("mkt6-compliance")["citation_accuracy"] == 0.99
+    assert resolve_thresholds("mkt6-compliance")["citation_accuracy"] == 1.00
 
 
 def test_all_twelve_vertical_bundles_registered():
@@ -144,9 +145,9 @@ def test_evaluate_honours_a_bundle_and_resolves_its_thresholds(
     assert risk.threshold == 0.85
     assert risk.passed is False
     assert report.passed is False
-    # pii_safety (safety-class) is scored 1.0 by the local scorer and clears its 0.99 bar.
+    # pii_safety (safety-class) is scored 1.0 by the local scorer and clears its 1.00 bar.
     pii = next(r for r in report.results if r.metric == "pii_safety")
-    assert pii.threshold == 0.99
+    assert pii.threshold == 1.00
     assert pii.passed is True
 
 
@@ -344,6 +345,24 @@ def test_each_newly_registered_bundle_mirrors_its_repo_gate():
     assert bundle_thresholds("aml-alert-triage")["groundedness"] == 1.00
     assert bundle_thresholds("rsk1-compliance-advisory")["horizon_citation_accuracy"] == 1.00
     assert bundle_thresholds("exam-rfi-orchestrator")["entitlement_safety"] == 1.00
+
+
+def test_no_safety_metric_is_registered_below_one():
+    """Every `*_safety` bar sits at 1.00, and the reason is arithmetic before it is appetite.
+
+    Each is scored 0/1 once per case, and no golden set in the launch set reaches 100 cases, so
+    a bar of 0.99 required a perfect run everywhere it appeared while reading as though it
+    priced one leak in. The whole fleet moved to 1.00 on 2026-09-10, repository first and
+    mirrored here. 0.99 is not a looser bar than 1.00 over these corpora; it is the same bar
+    with a friendlier face, which is worse than either.
+    """
+    lax = {
+        f"{bundle}.{metric}": bar
+        for bundle, body in METRIC_BUNDLES.items()
+        for metric, bar in body.items()
+        if metric.endswith("safety") and bar < 1.0
+    }
+    assert not lax, f"safety bars below 1.00: {lax}"
     # And the deterministic control plane, whose whole metric set is an invariant rather than
     # a model score.
     assert bundle_thresholds("journey-portal")["observability_audit_isolation"] == 1.00

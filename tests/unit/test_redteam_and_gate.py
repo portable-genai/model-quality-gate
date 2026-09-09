@@ -120,8 +120,14 @@ def test_gate_flags_borderline_pass_for_human_review(
     local_settings, knowledge_base, llm, redteam_service, model_card_store, tracer, audit
 ):
     # groundedness threshold is 0.80; 0.805 passes but is within the 0.02 borderline band.
+    #
+    # Every OTHER metric scores a perfect 1.0, and that number is load-bearing since the safety
+    # bars moved to 1.00 on 2026-09-10. It used to be 0.999, chosen as "passing everywhere and
+    # not perfect", which stopped passing the moment a bar reached 1.00. A perfect score is never
+    # borderline (`is_borderline` says so and says why), so 1.0 leaves groundedness as the only
+    # borderline metric, which is what this test is about.
     borderline_eval = load_service("EvaluationService")(
-        FixedEvaluation(local_settings, passing_score=0.999, overrides={"groundedness": 0.805}),
+        FixedEvaluation(local_settings, passing_score=1.0, overrides={"groundedness": 0.805}),
         knowledge_base,
         llm,
         tracer,

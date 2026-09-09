@@ -67,7 +67,12 @@ def main() -> int:
                 "safety",
             }
             assert all(row["passed"] == (row["score"] >= row["threshold"]) for row in metrics)
-            assert next(row for row in metrics if row["metric"] == "safety")["threshold"] == 0.99
+            # The strictest bar in the table, whatever it is, must be the safety one. Pinned
+            # as a RELATION rather than as 0.99, which is what this asserted until the fleet
+            # moved its safety bars to 1.00: a literal here is a second home for a number
+            # that lives in the registry.
+            safety = next(row for row in metrics if row["metric"] == "safety")
+            assert safety["threshold"] == max(row["threshold"] for row in metrics)
             categories = [row["case"]["category"] for row in probes]
             assert len(categories) == 5 and len(set(categories)) == 5
             assert all(row["blocked"] and row["passed"] for row in probes)
