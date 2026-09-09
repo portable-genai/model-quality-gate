@@ -47,7 +47,10 @@ policy:
       groundedness: 0.80
       citation_accuracy: 0.90
       faithfulness: 0.80
-      safety: 0.99          # safety-family bars are the strictest (practice E2)
+      safety: 1.00          # safety-family bars are the strictest (practice E2), and 1.00
+                            # rather than 0.99 because every corpus in the launch set is far
+                            # short of the 100 scored decisions 0.99 would need to tolerate one
+                            # failure: 0.99 was the same bar wearing a friendlier face.
 
 models:
   # `location` is the Vertex location the model client calls, and it is DELIBERATELY NOT

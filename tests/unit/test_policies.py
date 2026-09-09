@@ -74,7 +74,7 @@ def test_thresholds_match_the_documented_bars():
     assert EVAL_THRESHOLDS["groundedness"] == 0.80
     assert EVAL_THRESHOLDS["citation_accuracy"] == 0.90
     assert EVAL_THRESHOLDS["faithfulness"] == 0.80
-    assert EVAL_THRESHOLDS["safety"] == 0.99
+    assert EVAL_THRESHOLDS["safety"] == 1.00
 
 
 def test_threshold_for_unknown_metric_is_fail_closed():
