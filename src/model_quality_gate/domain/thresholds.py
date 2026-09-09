@@ -40,14 +40,26 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
     },
     "doc2-credit-memo": {
         "groundedness": 0.80,
-        # 0.90, matching the repo's own gate. The bundle had drifted a step below it, so
-        # a build this platform certified could be one credit-memo-drafting refuses.
-        "covenant_accuracy": 0.90,
-        "citation_accuracy": 0.90,
+        # 1.00, raised with the repo's own gate, and the reason is arithmetic rather than
+        # ambition. Both were 0.90 over a corpus that could not express 0.90: a 0.90 bar
+        # tolerates one miss only over ten scored positives, and credit-memo-drafting's golden
+        # set carries six cases and eight expected covenants. The bars were 1.0 wearing a 0.90
+        # label, and a reviewer reading 0.90 believed in headroom that was never there.
+        "covenant_accuracy": 1.0,
+        "citation_accuracy": 1.0,
         "pii_safety": 0.99,
         # Exactly 1.0: the ratio engine either reproduces its own arithmetic or the
         # formula changed under a memo somebody already signed.
         "ratio_reproducibility": 1.0,
+        # The four metrics this bundle had never carried. The repository gates on nine and this
+        # authority resolved five, so a promotion certified here was measured against a
+        # narrower thing than the merge gate the repository runs. spread_accuracy is the only
+        # rate among them, because a spread is EXTRACTED rather than computed and extraction
+        # over a scanned filing has a genuine error rate.
+        "spread_accuracy": 0.90,
+        "tie_out_precision": 1.0,
+        "revision_integrity": 1.0,
+        "research_isolation": 1.0,
     },
     "doc3-cio-advisory": {
         "groundedness": 0.80,
