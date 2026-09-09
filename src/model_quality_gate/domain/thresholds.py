@@ -142,6 +142,138 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
         # an assistant that contains too much is a worse outcome than one that hands off.
         "containment": 0.20,
     },
+    # risk and assurance verticals. Each mirrors the repo's OWN eval/run_eval.py THRESHOLDS,
+    # captured by running that repo's `make eval` and reading the threshold column, so a bundle
+    # run reproduces the vertical's gate rather than a remembered version of it. Until these
+    # were registered, every one of these repos' `--mode gate` failed closed on
+    # UnknownMetricError: the client sends only the bundle name, and this table is what a name
+    # resolves to.
+    "rsk1-compliance-advisory": {
+        # Three families in one gate, prefixed so they never collide in the shared report
+        # table: the regulator-QA metrics, the control-mapping metrics, and horizon scanning.
+        "groundedness": 0.80,
+        "citation_accuracy": 0.90,
+        "faithfulness": 0.80,
+        "safety": 0.99,
+        "mapping_accuracy": 0.80,
+        "mapping_coverage_correctness": 0.80,
+        "mapping_citation_accuracy": 0.90,
+        "mapping_safety": 0.99,
+        "horizon_applicability_accuracy": 0.90,
+        "horizon_materiality_accuracy": 0.80,
+        "horizon_routing_accuracy": 0.90,
+        # Stricter than the QA family's 0.90: a horizon item cites the instrument that
+        # created the obligation, and a wrong instrument is a wrong obligation.
+        "horizon_citation_accuracy": 0.95,
+    },
+    "rsk3-architecture-validator": {
+        "principle_accuracy": 0.90,
+        "injection_recall": 0.80,
+        "citation_accuracy": 0.90,
+        "safety": 0.99,
+        # The residency family reuses three metric CONCEPTS and none of the names, because a
+        # shared row would blend a design review with a data-residency scan.
+        "residency_detection_recall": 0.90,
+        "residency_precision": 0.90,
+        "residency_citation_accuracy": 0.90,
+        "residency_safety": 0.99,
+    },
+    "aml-alert-triage": {
+        "recommendation_accuracy": 0.80,
+        "typology_recall": 0.90,
+        # 1.00, and stricter than the default bundle's 0.80: an alert narrative that asserts a
+        # fact the alert does not contain is a fact an investigator files with a regulator.
+        "groundedness": 1.00,
+        "review_safety": 1.00,
+        "pii_safety": 0.99,
+    },
+    "third-party-risk-ddq": {
+        "scoring_accuracy": 0.80,
+        "extraction_fidelity": 0.90,
+        "gap_recall": 0.80,
+        "review_safety": 1.00,
+        "pii_safety": 0.99,
+    },
+    "credit-portfolio-early-warning": {
+        # Every decision metric is exactly 1.00 because the engine is deterministic: it either
+        # reproduces its own arithmetic or the formula moved under a grade somebody already
+        # acted on. That is a REGRESSION bar, and it is not evidence of predictive validity;
+        # see this repo's drift rule and the model-risk section of the eval plan.
+        "grade_accuracy": 1.00,
+        "movement_accuracy": 1.00,
+        "floor_precision": 1.00,
+        "composite_accuracy": 1.00,
+        "routing_accuracy": 1.00,
+        "pii_safety": 0.99,
+        "narration_groundedness": 0.98,
+    },
+    "exam-rfi-orchestrator": {
+        "disposition_accuracy": 1.00,
+        "clock_accuracy": 1.00,
+        "completeness_accuracy": 1.00,
+        "withhold_precision": 1.00,
+        "blocker_recall": 1.00,
+        "citation_grounding": 0.99,
+        "entitlement_safety": 1.00,
+        "pii_safety": 0.99,
+    },
+    # The control plane. Not agentic: every metric here is a deterministic security or
+    # composition invariant, which is the right reading of an eval for a trust boundary. It
+    # is registered for the same reason as the rest: its runner sent a bundle name, and an
+    # unregistered name is a gate that cannot run rather than a gate that passes.
+    "journey-portal": {
+        "journey_integrity": 0.99,
+        "identity_isolation": 0.99,
+        "routing_correctness": 0.99,
+        "tenant_policy_isolation": 0.99,
+        "observability_audit_isolation": 1.00,
+    },
+}
+
+#: Which repository asks for which bundle. One line per promotion client in the fleet, naming
+#: the ``_BUNDLE`` constant that repository's gate adapter actually sends.
+#:
+#: This table exists because of a failure mode nothing here could see: a sibling repo names a
+#: bundle, this authority does not register it, and NOTHING reports that until somebody runs
+#: ``--mode gate`` at promotion time and gets ``UnknownMetricError``. Six repositories sat in
+#: that state at once. The offline smoke gate passed in all six, every practices audit recorded
+#: E1 as PASS, and the promotion path E1 names was unusable for a third of the launch set.
+#:
+#: So the declaration is written down HERE, where the registry is, and
+#: ``tests/unit/test_metric_bundles.py`` fails on any declared name this file does not register.
+#: The other half of the check lives in ``org-metadata/scripts/portfolio-status.sh``, which
+#: greps each repository for the name it really sends and fails when this table disagrees.
+#: Each half catches the other's drift: this one catches an unregistered bundle, that one
+#: catches a manifest that has gone stale.
+DECLARED_BY: dict[str, str] = {
+    # P1, the BFSI launch set
+    "cdd-sow-research": "doc1-cdd-sow",
+    "credit-memo-drafting": "doc2-credit-memo",
+    "cio-advisory": "doc3-cio-advisory",
+    "compliance-advisory": "rsk1-compliance-advisory",
+    "marketing-compliance-gate": "mkt6-compliance",
+    "journey-portal": "journey-portal",
+    # P2, the second wave
+    "loan-document-intelligence": "doc5-loan-document-intelligence",
+    "complaints-review": "doc6-complaints-review",
+    "architecture-validator": "rsk3-architecture-validator",
+    "market-intelligence": "mkt1-market-intel",
+    "campaign-planner": "mkt2-campaign",
+    "creative-studio": "mkt3-creative",
+    "performance-marketing-optimisation": "mkt4-performance",
+    "next-best-action": "mkt5-nba",
+    "trade-finance-checker": "doc4-trade-finance",
+    "aml-alert-triage": "aml-alert-triage",
+    "third-party-risk-ddq": "third-party-risk-ddq",
+    "credit-portfolio-early-warning": "credit-portfolio-early-warning",
+    "exam-rfi-orchestrator": "exam-rfi-orchestrator",
+    # One repository, two promotions. It ships two separately gated modes, so it declares two
+    # bundles and the key names the mode rather than the repository.
+    "contact-centre-conversations[agent-assist]": "contact-centre-conversations-agent-assist",
+    "contact-centre-conversations[self-service]": "contact-centre-conversations-self-service",
+    # onprem-dlp is deliberately absent. It has no promotion client at all: its eval scores a
+    # precision/recall corpus locally and names no bundle. An absent row is the honest record
+    # of that, and a row naming a bundle nothing sends would be worse than none.
 }
 
 #: Default metric set evaluated when a caller names neither a bundle nor an explicit set.
@@ -161,6 +293,16 @@ for _bundle in METRIC_BUNDLES.values():
 #: How close to a threshold a passing metric may be before the gate flags the target
 #: for human review (maker-checker, P-06). A 0.02 band means "passed, but barely".
 BORDERLINE_MARGIN: float = 0.02
+
+
+def unregistered_declarations() -> dict[str, str]:
+    """Every ``{declared_by: bundle}`` row naming a bundle this authority does not register.
+
+    Empty is the only acceptable answer, and it is asserted in the test suite. A non-empty
+    result is a repository whose ``--mode gate`` cannot run: the client sends a bundle name
+    and nothing else, so an unregistered name is not a loose gate, it is no gate.
+    """
+    return {who: bundle for who, bundle in DECLARED_BY.items() if bundle not in METRIC_BUNDLES}
 
 
 def threshold_for(metric: str) -> float:
