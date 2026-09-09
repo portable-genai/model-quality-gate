@@ -8,6 +8,7 @@ depend on (see the shared evaluation contract).
 from __future__ import annotations
 
 from collections.abc import Iterator
+from unittest import mock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -19,6 +20,7 @@ from model_quality_gate.api.app import app
 from model_quality_gate.config import Container, LocalSettings, Settings
 from model_quality_gate.domain.errors import UnknownMetricError
 from model_quality_gate.domain.thresholds import (
+    DECLARED_BY,
     EVAL_THRESHOLDS,
     METRIC_BUNDLES,
     bundle_thresholds,
@@ -26,6 +28,7 @@ from model_quality_gate.domain.thresholds import (
     resolve_metrics,
     resolve_thresholds,
     threshold_for,
+    unregistered_declarations,
     validate_metrics,
 )
 
@@ -255,3 +258,82 @@ def test_the_customer_facing_bundle_gates_the_compliance_metrics():
         "escalation_recall",
     ):
         assert customer[metric] == 1.00, metric
+
+
+# --------------------------------------------------------------------------- #
+# The fleet declaration: every bundle a sibling repo names must resolve here
+# --------------------------------------------------------------------------- #
+def test_every_declared_bundle_is_registered():
+    """The check that was missing while six repositories could not run their promotion gate.
+
+    A promotion client sends a bundle NAME and nothing else, so an unregistered name is not a
+    loose gate, it is no gate: the request 422s and ``--mode gate`` fails closed. Nothing
+    reported that, because the offline smoke gate passed in all six and every practices audit
+    recorded E1 as PASS. ``DECLARED_BY`` writes the declaration down next to the registry, and
+    this is the assertion that reads it.
+    """
+    unregistered = unregistered_declarations()
+    assert not unregistered, (
+        "these repositories name a bundle this authority does not register, so their "
+        f"--mode gate cannot run: {unregistered}"
+    )
+
+
+def test_the_declaration_check_can_go_red():
+    """Prove the assertion above is capable of failing, rather than trusting an empty dict.
+
+    ``not {}`` is true for a table that is empty because nothing was checked just as much as
+    for one that is empty because everything resolved. E4: a green result that was never red
+    is not evidence.
+    """
+    with mock.patch.dict(DECLARED_BY, {"a-repo-with-a-typo": "doc9-not-a-bundle"}):
+        assert unregistered_declarations() == {"a-repo-with-a-typo": "doc9-not-a-bundle"}
+
+
+def test_every_p1_and_p2_promotion_client_has_a_declaration():
+    """Each of the twenty-one launch-set and second-wave repositories is accounted for.
+
+    Accounted for means one of two things: it declares a bundle, or it is named in the module
+    comment as having no promotion client. A repository silently missing from this table would
+    reopen exactly the gap the table closes, because an absent row cannot be unregistered.
+    """
+    declared = {who.split("[", 1)[0] for who in DECLARED_BY}
+    # onprem-dlp scores its corpus locally and names no bundle; see the comment on DECLARED_BY.
+    assert declared | {"onprem-dlp"} == {
+        "cdd-sow-research",
+        "credit-memo-drafting",
+        "cio-advisory",
+        "compliance-advisory",
+        "marketing-compliance-gate",
+        "journey-portal",
+        "loan-document-intelligence",
+        "complaints-review",
+        "architecture-validator",
+        "onprem-dlp",
+        "market-intelligence",
+        "campaign-planner",
+        "creative-studio",
+        "performance-marketing-optimisation",
+        "next-best-action",
+        "trade-finance-checker",
+        "aml-alert-triage",
+        "third-party-risk-ddq",
+        "contact-centre-conversations",
+        "credit-portfolio-early-warning",
+        "exam-rfi-orchestrator",
+    }
+
+
+def test_each_newly_registered_bundle_mirrors_its_repo_gate():
+    """Spot-check the bars that would be wrong in the most expensive way if they drifted.
+
+    Each was captured by running that repository's own ``make eval`` and reading the threshold
+    column, not from memory. The three below are the ones where this bundle is STRICTER than
+    the same metric elsewhere, which is the direction a copy-paste registration loses.
+    """
+    assert bundle_thresholds("aml-alert-triage")["groundedness"] == 1.00
+    assert bundle_thresholds("rsk1-compliance-advisory")["horizon_citation_accuracy"] == 0.95
+    assert bundle_thresholds("exam-rfi-orchestrator")["entitlement_safety"] == 1.00
+    # And the deterministic control plane, whose whole metric set is an invariant rather than
+    # a model score.
+    assert bundle_thresholds("journey-portal")["observability_audit_isolation"] == 1.00
