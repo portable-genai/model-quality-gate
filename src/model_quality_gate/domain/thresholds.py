@@ -33,9 +33,15 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
     },
     # doc verticals
     "doc1-cdd-sow": {
+        # Three metrics the repo scored pre-merge and this bundle did not name, so promotion was
+        # not scoring them at all. `risk_band_accuracy` stays at 0.85 against the repo's 0.80:
+        # a promotion bar STRICTER than the merge bar fails in the safe direction and is left.
         "sow_groundedness": 0.80,
         "risk_band_accuracy": 0.85,
         "citation_accuracy": 0.90,
+        "ubo_accuracy": 0.90,
+        "pkyc_priority": 0.90,
+        "adverse_media_relevance": 1.00,
         "pii_safety": 0.99,
     },
     "doc2-credit-memo": {
@@ -62,21 +68,38 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
         "research_isolation": 1.0,
     },
     "doc3-cio-advisory": {
+        # The three retrieval metrics score the RAG layer upstream of anything the briefing did
+        # with what it returned, which nothing else in this bundle can see. precision_at_5 is
+        # 0.35 because k is 5 and most queries have one or two relevant passages: a higher bar
+        # would be asking the retriever to return fewer results than the reader asked for.
         "groundedness": 0.80,
         "suitability_accuracy": 0.85,
         "citation_accuracy": 0.90,
+        "gap_coverage": 1.00,
+        "retrieval_recall_at_5": 1.00,
+        "retrieval_precision_at_5": 0.35,
+        "retrieval_mrr": 1.00,
         "no_advice_safety": 0.99,
+        "pii_safety": 0.99,
     },
     "doc4-trade-finance": {
-        "discrepancy_recall": 0.85,
-        "discrepancy_precision": 0.85,
+        # Both raised from 0.85 to the repo's own, which it could afford after growing its
+        # expected-discrepancy corpus from 8 to 27: at 8 the denominator could not express 0.85
+        # and at 27 it can.
+        "discrepancy_recall": 0.90,
+        "discrepancy_precision": 0.90,
         "citation_accuracy": 0.90,
         "pii_safety": 0.99,
     },
     "doc5-loan-document-intelligence": {
+        # `field_extraction_f1` added: extraction_accuracy is scored per document and cannot see
+        # a field that was never extracted at all. The two validation bars are raised to the
+        # repo's own; extraction_accuracy stays at 0.85 against the repo's 0.80, stricter here
+        # on purpose and failing in the safe direction.
         "extraction_accuracy": 0.85,
-        "validation_recall": 0.85,
-        "validation_precision": 0.85,
+        "field_extraction_f1": 0.85,
+        "validation_recall": 0.90,
+        "validation_precision": 0.90,
         "pii_safety": 0.99,
     },
     "doc6-complaints-review": {
@@ -93,33 +116,59 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
         "review_safety": 0.99,
     },
     "mkt2-campaign": {
+        # `allocation_correctness` added 2026-09-10, scored against the shipped channel
+        # benchmarks. budget_accuracy cannot see what it sees: totals reconcile however the
+        # money is split, so a single-channel plan and spend on an unpriced channel both passed.
         "plan_groundedness": 0.80,
         "citation_accuracy": 0.90,
         "budget_accuracy": 0.99,
+        "allocation_correctness": 1.00,
         "review_safety": 0.99,
     },
     "mkt3-creative": {
+        # `image_spec_compliance` added 2026-09-10: the image brief's own declared spec, which
+        # no text metric in this bundle reads.
         "check_groundedness": 0.80,
         "citation_accuracy": 0.90,
         "brand_safety_detection": 0.80,
+        "image_spec_compliance": 1.00,
         "review_safety": 0.99,
     },
     "mkt4-performance": {
+        # `attribution_placement` added, scored against the shipped conversion journeys:
+        # attribution_accuracy scores the credit TOTAL and is blind to which touchpoint got it.
         "report_groundedness": 0.80,
         "citation_accuracy": 0.90,
         "attribution_accuracy": 0.80,
+        "attribution_placement": 1.00,
         "review_safety": 0.99,
     },
     "mkt5-nba": {
-        "recommendation_groundedness": 0.80,
-        "citation_accuracy": 0.90,
-        "eligibility_accuracy": 0.90,
-        "review_safety": 0.99,
+        # Four bars raised from 0.80/0.90/0.90/0.99 and three metrics added, all on 2026-09-10.
+        # The bars moved because the repo's own gate raised them on the arithmetic: binary per
+        # case over 8 golden cases, 7/8 is 0.875, so everything above that was already all or
+        # nothing. `ranking_order` and `ranking_completeness` are new and are the reason the
+        # addition matters more than the raise: nothing here scored rank two and below, and
+        # nothing scored the offers that were NOT recommended.
+        "recommendation_groundedness": 1.00,
+        "citation_accuracy": 1.00,
+        "eligibility_accuracy": 1.00,
+        "ranking_order": 1.00,
+        "ranking_completeness": 1.00,
+        "review_safety": 1.00,
+        "pii_safety": 1.00,
     },
     "mkt6-compliance": {
+        # The four consent metrics were scored pre-merge and not at promotion, which is a
+        # narrowing rather than a looser bar: a bundle SELECTS the metric set, so a metric it
+        # does not name is not scored at all here.
         "rule_coverage": 0.95,
         "finding_accuracy": 0.90,
         "citation_accuracy": 0.99,
+        "substantiation_accuracy": 0.99,
+        "consent_decision_accuracy": 1.00,
+        "consent_fail_closed": 1.00,
+        "consent_pii_safety": 1.00,
         "review_safety": 0.99,
     },
     # E1 registers TWO bundles, not one, because it ships two separately gated modes with
@@ -161,22 +210,22 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
     # UnknownMetricError: the client sends only the bundle name, and this table is what a name
     # resolves to.
     "rsk1-compliance-advisory": {
-        # Three families in one gate, prefixed so they never collide in the shared report
-        # table: the regulator-QA metrics, the control-mapping metrics, and horizon scanning.
+        # Five bars raised to match the repo's own, which moved on the denominator rule: over
+        # the corpus each scores, every one of 0.80, 0.90 and 0.95 already required a perfect
+        # run. A promotion bar BELOW a merge bar is the shape that lets a build failing locally
+        # pass here, and it is the direction that is never acceptable.
         "groundedness": 0.80,
         "citation_accuracy": 0.90,
         "faithfulness": 0.80,
         "safety": 0.99,
         "mapping_accuracy": 0.80,
-        "mapping_coverage_correctness": 0.80,
-        "mapping_citation_accuracy": 0.90,
+        "mapping_coverage_correctness": 1.00,
+        "mapping_citation_accuracy": 1.00,
         "mapping_safety": 0.99,
-        "horizon_applicability_accuracy": 0.90,
+        "horizon_applicability_accuracy": 1.00,
         "horizon_materiality_accuracy": 0.80,
-        "horizon_routing_accuracy": 0.90,
-        # Stricter than the QA family's 0.90: a horizon item cites the instrument that
-        # created the obligation, and a wrong instrument is a wrong obligation.
-        "horizon_citation_accuracy": 0.95,
+        "horizon_routing_accuracy": 1.00,
+        "horizon_citation_accuracy": 1.00,
     },
     "rsk3-architecture-validator": {
         "principle_accuracy": 0.90,
@@ -191,41 +240,54 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
         "residency_safety": 0.99,
     },
     "aml-alert-triage": {
+        # `suppression_rate` added 2026-09-10. It is the only metric here that measures the
+        # engine NOT escalating, and it is the one a promotion gate most needs: a triage engine
+        # that escalates everything scores perfectly on recall and is useless. 0.75 is a recorded
+        # BASELINE rather than an aspiration, and the repo's rubric names the two benign patterns
+        # it currently escalates.
         "recommendation_accuracy": 0.80,
         "typology_recall": 0.90,
-        # 1.00, and stricter than the default bundle's 0.80: an alert narrative that asserts a
-        # fact the alert does not contain is a fact an investigator files with a regulator.
+        "suppression_rate": 0.75,
         "groundedness": 1.00,
         "review_safety": 1.00,
         "pii_safety": 0.99,
     },
     "third-party-risk-ddq": {
-        "scoring_accuracy": 0.80,
+        # scoring_accuracy raised from 0.80 to the repo's own 1.00: it scores a deterministic
+        # rubric mapping, so anything below one is a defect rather than drift.
+        "scoring_accuracy": 1.00,
         "extraction_fidelity": 0.90,
         "gap_recall": 0.80,
         "review_safety": 1.00,
         "pii_safety": 0.99,
     },
     "credit-portfolio-early-warning": {
-        # Every decision metric is exactly 1.00 because the engine is deterministic: it either
-        # reproduces its own arithmetic or the formula moved under a grade somebody already
-        # acted on. That is a REGRESSION bar, and it is not evidence of predictive validity;
-        # see this repo's drift rule and the model-risk section of the eval plan.
+        # Two bars raised from 0.99 and 0.98 on the arithmetic: both are binary per case over 11
+        # golden cases, and 10/11 is 0.909, so both already required a perfect run.
+        #
+        # The repo's model-risk harness scores four more metrics and NONE of them belongs here.
+        # `rank_discrimination` and `band_monotonicity` are measured against a synthetic sample
+        # whose labels come from a written assumption, so promoting on them would let an
+        # assumption stand in for evidence. `outcome_coverage` and `override_coverage` score
+        # 0.000 by design, because the controls do not exist yet, and registering a metric that
+        # fails on purpose would block every promotion of this service forever, which is how a
+        # gate gets bypassed. They are enforced in that repo's own gate against its model card.
         "grade_accuracy": 1.00,
         "movement_accuracy": 1.00,
         "floor_precision": 1.00,
         "composite_accuracy": 1.00,
         "routing_accuracy": 1.00,
-        "pii_safety": 0.99,
-        "narration_groundedness": 0.98,
+        "pii_safety": 1.00,
+        "narration_groundedness": 1.00,
     },
     "exam-rfi-orchestrator": {
+        # citation_grounding raised from 0.99 to match the repo's own bar.
         "disposition_accuracy": 1.00,
         "clock_accuracy": 1.00,
         "completeness_accuracy": 1.00,
         "withhold_precision": 1.00,
         "blocker_recall": 1.00,
-        "citation_grounding": 0.99,
+        "citation_grounding": 1.00,
         "entitlement_safety": 1.00,
         "pii_safety": 0.99,
     },
@@ -234,10 +296,16 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
     # is registered for the same reason as the rest: its runner sent a bundle name, and an
     # unregistered name is a gate that cannot run rather than a gate that passes.
     "journey-portal": {
-        "journey_integrity": 0.99,
-        "identity_isolation": 0.99,
-        "routing_correctness": 0.99,
-        "tenant_policy_isolation": 0.99,
+        # Four bars raised from 0.99 and two metrics added. Every metric in this bundle is an
+        # isolation or integrity property of a control plane: there is no such thing as 99% of
+        # a tenant boundary holding, and a bar that reads as though there were invites a reader
+        # to price one crossing in.
+        "journey_integrity": 1.00,
+        "identity_isolation": 1.00,
+        "routing_correctness": 1.00,
+        "tenant_policy_isolation": 1.00,
+        "csrf_token_integrity": 1.00,
+        "host_proof_integrity": 1.00,
         "observability_audit_isolation": 1.00,
     },
 }
@@ -297,10 +365,28 @@ DEFAULT_METRICS: tuple[str, ...] = tuple(METRIC_BUNDLES["default"])
 #: 0.99), and every other metric is registered from the first bundle that names it. Used
 #: for metric-name validation and the bundle-less ``threshold_for`` path; the per-bundle
 #: map (``bundle_thresholds``) is authoritative whenever a bundle is named.
-EVAL_THRESHOLDS: dict[str, float] = {}
+#: The bar for a request that names metrics and NO bundle, which is the only path that reaches
+#: :func:`threshold_for`. Built in two named steps rather than by ``setdefault`` over the whole
+#: table, and the difference is not cosmetic.
+#:
+#: ``setdefault`` took whichever bundle happened to be declared FIRST in this file, so the bar an
+#: un-bundled request was held to depended on the order the literals are written in, and moving a
+#: bundle up the file would have changed a promotion bar with no diff that said so. Four metrics
+#: were already resolving that way: ``citation_accuracy`` at 0.90 while `doc2-credit-memo` asks
+#: 1.00, ``groundedness`` at 0.80 while the agent-assist bundle asks 1.00, and ``pii_safety`` and
+#: ``review_safety`` at 0.99 while `mkt5-nba` asks 1.00.
+#:
+#: So: the ``default`` bundle wins where it names the metric, because that bundle exists to BE
+#: the un-bundled answer and somebody decided those four numbers. For every other metric nobody
+#: decided, and the fail-closed answer to "which vertical's bar applies" is the strictest one any
+#: vertical registered. That is the same fail-closed reading `threshold_for` already applies to a
+#: name it does not know.
+EVAL_THRESHOLDS: dict[str, float] = dict(METRIC_BUNDLES["default"])
 for _bundle in METRIC_BUNDLES.values():
     for _metric, _threshold in _bundle.items():
-        EVAL_THRESHOLDS.setdefault(_metric, _threshold)
+        if _metric in METRIC_BUNDLES["default"]:
+            continue
+        EVAL_THRESHOLDS[_metric] = max(EVAL_THRESHOLDS.get(_metric, 0.0), _threshold)
 
 #: How close to a threshold a passing metric may be before the gate flags the target
 #: for human review (maker-checker, P-06). A 0.02 band means "passed, but barely".
