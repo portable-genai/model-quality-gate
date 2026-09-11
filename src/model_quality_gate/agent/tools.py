@@ -1,4 +1,4 @@
-"""ADK FunctionTools that expose the A4 domain services to the agent.
+"""ADK FunctionTools that expose the gate's domain services to the agent.
 
 Each tool is a thin, side-effect-honest wrapper: it builds the relevant domain service
 from a :class:`~model_quality_gate.config.Container` (so every port is bound to the adapter

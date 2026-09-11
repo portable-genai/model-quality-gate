@@ -52,7 +52,7 @@ resource "google_logging_metric" "resource_location_denials" {
 
 resource "google_monitoring_alert_policy" "posture_violation" {
   project      = var.project_id
-  display_name = "A4 residency / perimeter posture violation"
+  display_name = "model-quality-gate residency / perimeter posture violation"
   combiner     = "OR"
 
   documentation {

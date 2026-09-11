@@ -1,6 +1,6 @@
 """Golden-dataset and red-team-case loading from the bundled JSONL fixtures.
 
-A4's gate operates over a golden dataset and a battery of adversarial probes. The repo
+The gate operates over a golden dataset and a battery of adversarial probes. The repo
 ships small, clearly-synthetic JSONL sets under ``eval/datasets``; in a real deployment
 these come from the CMEK Cloud Storage golden bucket. This module resolves a dataset id
 to an :class:`EvalDataset` and loads the standard red-team battery, so the API / CLI /

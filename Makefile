@@ -1,4 +1,4 @@
-# A4 AI Quality & Model-Risk Platform : developer Makefile.
+# model-quality-gate (AI Quality & Model-Risk Platform) : developer Makefile.
 #
 # The default test/lint/run targets run under the LOCAL profile: a WORKING offline stack
 # (SQLite FTS5 + deterministic scorer / judge) that needs NO Google Cloud SDK and runs the
@@ -49,7 +49,7 @@ lint: ## Lint (ruff) and type-check (mypy).
 test: ## Run unit + contract tests on the local profile (no GCP SDK required).
 	AI_QUALITY_PROFILE=local $(PYTHON) -m pytest -m 'not integration' -q
 
-eval: ## Run the A4 self-eval gate (gate_accuracy / threshold_correctness / redteam / safety).
+eval: ## Run the offline self-eval gate (gate_accuracy / threshold_correctness / redteam / safety).
 	$(PYTHON) eval/run_eval.py
 
 eval-narrative: ## Score narrative quality against the per-vertical floors (offline judge, no server).

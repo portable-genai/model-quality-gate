@@ -1,4 +1,4 @@
-"""Gen AI evaluation adapter : the A4 scoring backend (EvaluationPort).
+"""Gen AI evaluation adapter : the gate's scoring backend (EvaluationPort).
 
 Backs the domain ``EvaluationPort`` with the **Gen AI evaluation service**, accessed
 through ``vertexai.Client(project, location).evals``. Over a golden dataset it scores a

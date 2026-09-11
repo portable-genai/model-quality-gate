@@ -1,1 +1,1 @@
-"""ADK root agent + A2A/MCP wiring for A4."""
+"""ADK root agent + A2A/MCP wiring for model-quality-gate."""

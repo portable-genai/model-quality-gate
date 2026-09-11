@@ -3,14 +3,14 @@
 Owns the evaluation pipeline and calls only ports. For a target and golden dataset it
 produces an :class:`EvalReport` scoring the target on the model-risk metrics
 (groundedness, citation_accuracy, faithfulness, safety). Grounded metrics pull the
-reference context for each golden input from the A2 Enterprise KB
+reference context for each golden input from enterprise-knowledge-base
 (``KnowledgeBaseClientPort``) so a groundedness judgement is traceable to a source.
 
 Pipeline (SPEC §5), wrapped in ``tracer.span`` and audited:
 
     tracer.span("evaluation.evaluate"):
       empty dataset -> EmptyDatasetError (never a vacuous PASS)
-      -> for each metric: pull A2 reference context, call the EvaluationPort
+      -> for each metric: pull KB reference context, call the EvaluationPort
          (Gen AI evaluation service in gcp, deterministic backend in tests)
       -> assemble EvalReport (per-metric score / threshold / passed)
       -> audit.record(evaluate)
@@ -103,8 +103,8 @@ class EvaluationService:
         # A resolved threshold map defines both the metric set and each metric's bar.
         wanted = tuple(thresholds) if thresholds is not None else (metrics or DEFAULT_METRICS)
 
-        # 2) Pull the A2 reference context once so grounded metrics are traceable.
-        #    Best-effort: if A2 is unavailable the backend still scores, just without
+        # 2) Pull the KB reference context once so grounded metrics are traceable.
+        #    Best-effort: if the KB is unavailable the backend still scores, just without
         #    enriched reference context (the deterministic test backend ignores it).
         self._warm_reference_context(dataset)
 
@@ -144,7 +144,7 @@ class EvaluationService:
     # Helpers
     # ------------------------------------------------------------------ #
     def _warm_reference_context(self, dataset: EvalDataset) -> None:
-        """Retrieve A2 reference context for each golden input (best-effort).
+        """Retrieve KB reference context for each golden input (best-effort).
 
         This warms the injected ``knowledge_base`` port for traceability; the retrieved
         context is not returned. Under ``local`` the deterministic scorer self-grounds on

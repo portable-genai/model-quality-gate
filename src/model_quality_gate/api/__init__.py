@@ -1,1 +1,1 @@
-"""FastAPI application surface for A4."""
+"""FastAPI application surface for model-quality-gate."""

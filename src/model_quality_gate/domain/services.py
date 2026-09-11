@@ -1,4 +1,4 @@
-"""Aggregator re-exporting the A4 orchestration services.
+"""Aggregator re-exporting the gate's orchestration services.
 
 The services live one-per-module (``evaluation_service``, ``redteam_service``,
 ``gate_service``, ``drift_service``, ``prompt_service``, ``model_card_service``) so each

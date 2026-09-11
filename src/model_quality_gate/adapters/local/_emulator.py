@@ -11,7 +11,7 @@ lazily, inside the method, and only on the emulator branch, so the default local
 the offline test suite never import a google-cloud package.
 
 There is no emulator for the Gen AI evaluation service, Gemini, BigQuery query semantics
-or Cloud Storage object-card layout used here in a way that benefits A4's offline path, so
+or Cloud Storage object-card layout used here in a way that benefits the gate's offline path, so
 those adapters stay on the SDK-free workaround unconditionally. The Firestore emulator is
 wired for the in-process registry as the representative opt-in.
 """

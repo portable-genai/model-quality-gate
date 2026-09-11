@@ -1,4 +1,4 @@
-"""Domain models for the AI Quality & Model-Risk Platform (system A4).
+"""Domain models for model-quality-gate, the AI Quality & Model-Risk Platform.
 
 This module is the heart of the hexagon. It has **no dependency on Google Cloud,
 ADK, FastAPI, or any framework** : only the Python standard library. Every adapter
@@ -6,7 +6,7 @@ ADK, FastAPI, or any framework** : only the Python standard library. Every adapt
 is what lets the managed-service stack be swapped for an on-premise one without
 touching domain logic (General Principle P-02, "no vendor lock-in / ports & adapters").
 
-A4 is the **production promotion gate**: it evaluates a target (a model + prompt
+model-quality-gate is the **production promotion gate**: it evaluates a target (a model + prompt
 version + dataset) against golden datasets, runs an adversarial red-team harness, and
 emits a PASS/FAIL gate verdict together with the model-risk (MRM) evidence behind it.
 """
@@ -32,7 +32,7 @@ def utcnow() -> datetime:
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True, slots=True)
 class EvalTarget:
-    """The unit A4 gates: a model + prompt version + golden dataset.
+    """The unit the gate evaluates: a model + prompt version + golden dataset.
 
     A *target* uniquely identifies what is being promoted. The same physical model
     behind two prompt versions is two distinct targets, because the prompt is part of
@@ -42,7 +42,7 @@ class EvalTarget:
     model: str  # e.g. "gemini-3.5-flash" or a fine-tuned resource name
     prompt_version: str  # the PromptVersion.version this target was evaluated under
     dataset_id: str  # the golden EvalDataset.id used as the bar
-    system: str = ""  # the system / agent under test (e.g. "C1", "A2"), free text
+    system: str = ""  # the system / agent under test (e.g. "compliance-advisory"), free text
 
     @property
     def ref(self) -> str:
@@ -96,13 +96,13 @@ class EvalDataset:
 
 
 # --------------------------------------------------------------------------- #
-# Retrieval & citation (grounded eval pulls reference context from A2)
+# Retrieval & citation (grounded eval pulls reference context from enterprise-knowledge-base)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True, slots=True)
 class Citation:
     """Provenance for a retrieved reference passage used in grounded evaluation.
 
-    For A4 a citation points at the reference context the A2 Enterprise KB returned
+    Here a citation points at the reference context enterprise-knowledge-base returned
     for a golden input, so a groundedness/citation-accuracy judgement can be traced to
     the exact source the answer should have used.
     """
@@ -172,7 +172,7 @@ class LlmResponse:
 
 
 # --------------------------------------------------------------------------- #
-# Evaluation reports (the EvalReport artifact) : A4 AI Quality concern
+# Evaluation reports (the EvalReport artifact) : AI Quality concern
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True, slots=True)
 class EvalMetricResult:
@@ -218,7 +218,7 @@ class EvaluationOutcome:
 
 @dataclass(frozen=True, slots=True)
 class EvalReport:
-    """Scores per metric for one target over one dataset (the first A4 artifact)."""
+    """Scores per metric for one target over one dataset (the first gate artifact)."""
 
     target: EvalTarget
     results: tuple[EvalMetricResult, ...]
@@ -279,7 +279,7 @@ class RedTeamResult:
 
 @dataclass(frozen=True, slots=True)
 class RedTeamReport:
-    """Per-probe outcomes for one target (the second A4 artifact)."""
+    """Per-probe outcomes for one target (the second gate artifact)."""
 
     target: EvalTarget
     results: tuple[RedTeamResult, ...]
@@ -360,7 +360,7 @@ class Severity(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class GateDecision:
-    """The promotion verdict for a target (the third A4 artifact).
+    """The promotion verdict for a target (the third gate artifact).
 
     ``passed`` is True iff the EvalReport passed every metric **and** the RedTeamReport
     blocked every probe it had to. A borderline pass (close to a threshold) sets
@@ -378,11 +378,11 @@ class GateDecision:
 
 
 # --------------------------------------------------------------------------- #
-# Drift (A5 metrics-store / drift dashboards concern)
+# Drift (agent-observability metrics-store / drift dashboards concern)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True, slots=True)
 class DriftSignal:
-    """A drift observation for a model metric over time (feeds A5 dashboards)."""
+    """A drift observation for a model metric over time (feeds agent-observability dashboards)."""
 
     model: str
     metric: str
@@ -420,7 +420,7 @@ class DriftEscalation:
 
 
 # --------------------------------------------------------------------------- #
-# Audit & observability : A5 Observability, Audit & FinOps concerns
+# Audit & observability : agent-observability concerns (audit, trace, FinOps)
 # --------------------------------------------------------------------------- #
 class Decision(StrEnum):
     ALLOWED = "allowed"  # gate PASS, auto-promotable
@@ -432,7 +432,7 @@ class Decision(StrEnum):
 class AuditEvent:
     """An immutable, WORM-stored record of one gate / eval / red-team action.
 
-    A4 does not process customer PII (it evaluates models against datasets), so there
+    The gate does not process customer PII (it evaluates models against datasets), so there
     is no PII-redaction step here as there is in a customer-facing assistant; the
     prompt/response fields carry the target ref and a verdict summary, not user data.
     """
@@ -455,7 +455,7 @@ class AuditEvent:
 
 
 # --------------------------------------------------------------------------- #
-# Governance : A3 Agent Registry & Governance concerns (A2A AgentCard)
+# Governance : agent-registry and governance concerns (A2A AgentCard)
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True, slots=True)
 class AgentSkill:

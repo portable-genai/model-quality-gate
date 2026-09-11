@@ -38,7 +38,7 @@ build: adapt to your own change-management and sign-off processes before product
 `model-quality-gate` is the gate the rest of the catalog calls. A sibling promotion pipeline polls:
 
 ```bash
-curl "https://<a4-host>/v1/gate?model=gemini-3.5-flash&prompt_version=v3&dataset=compliance-qa-golden"
+curl "https://<model-quality-gate-host>/v1/gate?model=gemini-3.5-flash&prompt_version=v3&dataset=compliance-qa-golden"
 # -> {"passed": true}
 ```
 
@@ -47,7 +47,7 @@ IAP-verified assertion behind Cloud IAP, or a seeded persona via `X-Dev-Persona`
 mode), never a request-body field (docs/embedding-and-identity.md):
 
 ```bash
-curl -X POST https://<a4-host>/v1/gate \
+curl -X POST https://<model-quality-gate-host>/v1/gate \
   -H 'content-type: application/json' \
   -d '{"target":{"model":"gemini-3.5-flash","prompt_version":"v3","dataset_id":"compliance-qa-golden"},"dataset_id":"compliance-qa-golden"}'
 ```
@@ -91,7 +91,7 @@ so a re-tuned band cannot mean one thing on a laptop and another in production.
 Read it on either surface. No dashboard has to be built first:
 
 ```bash
-curl "https://<a4-host>/v1/drift/gemini-3.5-flash"
+curl "https://<model-quality-gate-host>/v1/drift/gemini-3.5-flash"
 # -> {"model":"...","status":"alert","requires_re_gate":true,"requires_human_review":true,
 #     "escalating_metrics":["groundedness"],"signals":[...],"reasons":[...]}
 ```

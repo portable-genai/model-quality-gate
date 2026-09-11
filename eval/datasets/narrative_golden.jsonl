@@ -1,4 +1,4 @@
-# A4 narrative-quality golden set: each row is one case, with the SAME narrative written
+# Narrative-quality golden set: each row is one case, with the SAME narrative written
 # three ways, one per profile, plus the criteria a good narrative for that case must meet and
 # the band each profile is EXPECTED to land in.
 # Fields: id, vertical, criteria[{name,must_cover,must_cite,must_not_say,weight}],

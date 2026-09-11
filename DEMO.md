@@ -84,7 +84,7 @@ python scripts/model_quality_gate_demo_playwright.py
 
 You'll step through, pressing Enter each time:
 
-1. **Candidate submitted**: the target is `gemini-3.5-flash @ v3 : compliance-qa-golden`, system C1. Nothing gated yet.
+1. **Candidate submitted**: the target is `gemini-3.5-flash @ v3 : compliance-qa-golden`, system `compliance-advisory`. Nothing gated yet.
 2. **Run the gate**: the deterministic evaluation scores four metrics (groundedness,
    citation accuracy, faithfulness, safety) and the red-team battery runs five attack
    families. Both reports pass, while production promotion is denied because the laptop
@@ -195,7 +195,7 @@ Then demo any surface ([README 5](README.md#5-running-the-three-surfaces)):
 # -H 'X-Dev-Persona: approver' to pick a seeded persona (default persona otherwise);
 # in secure mode it comes from the IAP-verified assertion (docs/embedding-and-identity.md).
 curl -s localhost:8084/v1/gate -H 'content-type: application/json' -d '{
-  "target": {"model":"gemini-3.5-flash","prompt_version":"v3","dataset_id":"compliance-qa-golden","system":"C1"},
+  "target": {"model":"gemini-3.5-flash","prompt_version":"v3","dataset_id":"compliance-qa-golden","system":"compliance-advisory"},
   "dataset_id": "compliance-qa-golden"
 }' | python -m json.tool
 

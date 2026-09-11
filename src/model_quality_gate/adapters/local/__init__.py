@@ -3,12 +3,12 @@
 The ``local`` profile is the third deployment option alongside ``gcp`` (managed Google
 Cloud services) and ``onprem`` (fail-fast Google Distributed Cloud migration
 placeholders). Unlike ``onprem``, every adapter here is a *real, deterministic*
-implementation that runs the whole A4 promotion gate end to end with **no Google Cloud,
+implementation that runs the whole promotion gate end to end with **no Google Cloud,
 no API key, and no running emulators by default**:
 
 * Knowledge base (grounded reference retrieval) -> a ``sqlite3`` **FTS5** index over the
   reference passages (BM25 rank).
-* Evaluation (the A4 scoring backend) -> a deterministic, schema-aware scorer that grades
+* Evaluation (the gate's scoring backend) -> a deterministic, schema-aware scorer that grades
   each golden example against its reference context offline.
 * Red-team -> a heuristic harness that blocks prompt-injection / jailbreak / exfiltration
   probes and detects hallucination probes.

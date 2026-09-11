@@ -1,7 +1,7 @@
 """Local tool-catalog adapter (ToolCatalogPort) : in-process MCP tool catalog.
 
 The ``local`` profile's stand-in for the governed **MCP** tool catalog: a small,
-deterministic in-process set of least-privilege tool specs for the A4 gate skills.
+deterministic in-process set of least-privilege tool specs for the gate's skills.
 SDK-free and unconditional (there is no emulator for the tool catalog).
 """
 
@@ -12,7 +12,7 @@ from ...domain.models import ToolSpec
 
 
 class LocalToolCatalogAdapter:
-    """In-process catalog of the governed tools exposed to the A4 agent."""
+    """In-process catalog of the governed tools exposed to the gate's agent."""
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings

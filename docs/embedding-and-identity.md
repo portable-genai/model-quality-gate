@@ -1,4 +1,4 @@
-# Embedding and identity: client integration guide (A4 model-quality-gate)
+# Embedding and identity: client integration guide (`model-quality-gate`)
 
 This service ships two pieces: a FastAPI backend (the eval / red-team / promotion-gate API)
 and a Next.js UI (`ui/`). This guide explains how a client embeds the UI into their existing
@@ -62,7 +62,7 @@ the iframe is first-party. No third-party-cookie problem, no CORS.
 
 ### Shape B: standalone behind Cloud IAP
 
-Deploy the UI and API on their own host (for example `a4.client.com`) fronted by Cloud IAP.
+Deploy the UI and API on their own host (for example `model-quality-gate.client.com`) fronted by Cloud IAP.
 IAP authenticates the user and injects the signed assertion the backend verifies. Use this
 when there is no host app to embed into.
 
@@ -113,11 +113,11 @@ use Workforce Identity Federation at the IAP edge: the app code does not change.
 ```nginx
 # On https://portal.client.com
 location /agent/ {
-    proxy_pass http://a4-ui:3000/agent/;          # the Next.js UI, mounted at /agent
+    proxy_pass http://model-quality-gate-ui:3000/agent/;  # the Next.js UI, mounted at /agent
     proxy_set_header Host $host;
 }
 location /agent/api/ {
-    proxy_pass http://a4-api:8084/;               # the FastAPI backend
+    proxy_pass http://model-quality-gate-api:8084/;       # the FastAPI backend
     proxy_set_header Host $host;
     # In secure mode this hop is behind Cloud IAP; the assertion header is forwarded here.
 }
@@ -186,7 +186,7 @@ Same-origin embedding needs no CORS. For a standalone dev UI on a different orig
 explicit per-tenant allowlist (never `*`):
 
 ```bash
-export AI_QUALITY_CORS_ORIGINS="https://a4.client.com,https://staging.client.com"
+export AI_QUALITY_CORS_ORIGINS="https://model-quality-gate.client.com,https://staging.client.com"
 ```
 
 The allowed methods are `GET`, `POST`, `OPTIONS`; the allowed headers are `Content-Type`,

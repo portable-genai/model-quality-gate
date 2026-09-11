@@ -8,7 +8,7 @@ test green. A trace backend is not the WORM audit trail. It has no redaction sta
 read audience and no retention rule written against a regulator's requirement, so an
 attribute is OUTSIDE the boundary the audit sink holds (P-04).
 
-A4 opens spans from five domain sites. Rather than enumerate five bespoke drivers, this
+The gate opens spans from five domain sites. Rather than enumerate five bespoke drivers, this
 module drives the two REAL request paths that reach all five:
 
 * ``gate_service.gate(...)`` : the promotion gate, which internally runs the evaluation and
@@ -35,7 +35,7 @@ TARGET = sample_targets.SAMPLE_TARGET
 DATASET = sample_targets.SAMPLE_DATASET
 CASES = sample_targets.SAMPLE_REDTEAM_CASES
 
-#: The complete attribute key set an A4 span may carry, per span name. Widening one of
+#: The complete attribute key set a gate span may carry, per span name. Widening one of
 #: these is a decision about what leaves the trust boundary, so it is made here rather
 #: than at a call site.
 _ALLOWED = {

@@ -1,4 +1,4 @@
-"""Observability ports : the A5 (audit/trace) concerns.
+"""Observability ports : the agent-observability (audit/trace) concerns.
 
 ``ObservabilityTracerPort`` and its ``TokenUsage`` value type are NOT declared here. They come
 from :mod:`hex_service_kit.observability`, where they are defined once for the whole catalog, for

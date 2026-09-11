@@ -1,14 +1,14 @@
-# Groundedness rubric : A4 AI Quality & Model-Risk gate (P-08).
+# Groundedness rubric : model-quality-gate (P-08).
 #
 # "Groundedness" measures whether every substantive claim in a target's answer is
-# supported by the reference context retrieved from the A2 Enterprise Knowledge Base.
+# supported by the reference context retrieved from enterprise-knowledge-base.
 # For a regulated assistant this is non-negotiable: a regulator/CRO must be able to
 # trace each statement back to a source.
 #
 # Production scorer: the Gen AI evaluation service on the Gemini Enterprise Agent Platform
 # (vertexai GenAI Client -> client.evals.evaluate with a "groundedness" metric), routed
 # through model_quality_gate.adapters.gcp.genai_eval:GenAiEvalAdapter.
-# Offline scorer: the A4 self-eval gate validates the GATE LOGIC (that this metric is
+# Offline scorer: the self-eval gate validates the GATE LOGIC (that this metric is
 # compared against the threshold below), so the gate runs with no GCP credentials.
 
 metric: groundedness

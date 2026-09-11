@@ -1,4 +1,4 @@
-"""Live, presenter-controlled demo server for the A4 promotion gate (stdlib only).
+"""Live, presenter-controlled demo server for the promotion gate (stdlib only).
 
 Holds a real :class:`PromotionGateService` on the offline ``local`` stack and runs the
 *actual* gate for the candidate target one click at a time — submit target -> run the gate
@@ -118,13 +118,13 @@ class DemoSession:
     def render(self) -> str:
         key = STEPS[self.idx]["key"]
         if key == "target":
-            html = r.page("A4 gate demo — candidate", self._target_body())
+            html = r.page("model-quality-gate demo — candidate", self._target_body())
         elif key == "verdict" and self.data["decision"]:
             html = r.render_verdict(self.data)
         elif key == "references" and self.data["references"]:
             html = r.render_references(self.data)
         else:  # pragma: no cover - defensive
-            html = r.page("A4 gate demo", "<p>Nothing to show.</p>")
+            html = r.page("model-quality-gate demo", "<p>Nothing to show.</p>")
         return self._inject_controls(html)
 
     def _target_body(self) -> str:
@@ -141,7 +141,7 @@ class DemoSession:
             ]
         )
         return (
-            f"<h1>A4 promotion gate — candidate {r.esc(t['model'])}</h1>"
+            f"<h1>model-quality-gate promotion gate — candidate {r.esc(t['model'])}</h1>"
             f"<p class='sub'>Candidate <b class='mono'>{r.esc(ref)}</b> · profile <b>{r.esc(self.data['profile'])}</b> · "
             f"region <b>{r.esc(self.data['region'])}</b> · a candidate awaiting promotion. Not gated yet.</p>"
             "<section class='panel'><h2>Candidate under promotion"
@@ -150,7 +150,7 @@ class DemoSession:
             f"<p class='muted' style='margin-top:10px'>The gate will score {self.dataset.n_examples} golden "
             f"examples on four AI-quality metrics and run {len(cases)} adversarial probes; a target passes only "
             "if every metric clears its threshold and every probe is blocked.</p></div></section>"
-            "<p class='foot'>Audit-first A4 gate view · synthetic fictional data · deterministic offline scorer / red-team</p>"
+            "<p class='foot'>Audit-first model-quality-gate view · synthetic fictional data · deterministic offline scorer / red-team</p>"
         )
 
     def _inject_controls(self, html: str) -> str:
@@ -225,7 +225,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Live A4 promotion-gate demo server")
+    parser = argparse.ArgumentParser(description="Live model-quality-gate demo server")
     parser.add_argument("--port", type=int, default=8092)
     parser.add_argument("--host", default="127.0.0.1")
     args = parser.parse_args()
@@ -233,7 +233,7 @@ def main() -> None:
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     server.session = DemoSession()  # type: ignore[attr-defined]
     server.lock = threading.Lock()  # type: ignore[attr-defined]
-    print(f"A4 gate demo server on http://{args.host}:{args.port}  (Ctrl-C to stop)")
+    print(f"model-quality-gate demo server on http://{args.host}:{args.port}  (Ctrl-C to stop)")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

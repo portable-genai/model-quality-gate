@@ -2,7 +2,7 @@
 
 Pipeline (SPEC §5):
     empty dataset -> EmptyDatasetError
-    -> warm A2 reference context -> EvaluationPort.score
+    -> warm KB reference context -> EvaluationPort.score
     -> assemble EvalReport (per-metric score/threshold/passed) -> audit
 
 These tests are driven by the real ``local`` adapter family (no Google Cloud SDK): the
@@ -50,7 +50,7 @@ def test_evaluate_returns_passing_report_for_good_scores(evaluation_service, aud
 
 def test_evaluate_warms_a2_reference_context(evaluation_service, knowledge_base):
     evaluation_service.evaluate(TARGET, DATASET, actor=ACTOR)
-    # Grounded eval pulls reference context from A2 once per golden example.
+    # Grounded eval pulls reference context from the KB once per golden example.
     assert len(knowledge_base.calls) == DATASET.n_examples
 
 

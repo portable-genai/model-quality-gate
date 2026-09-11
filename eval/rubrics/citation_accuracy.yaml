@@ -1,4 +1,4 @@
-# Citation-accuracy rubric : A4 AI Quality & Model-Risk gate (P-08).
+# Citation-accuracy rubric : model-quality-gate (P-08).
 #
 # Citation accuracy measures whether the sources a target cites are exactly the sources
 # it should have cited: cited is a subset of retrieved (no fabrication) and contains the
@@ -6,7 +6,7 @@
 #
 # Production scorer: the Gen AI evaluation service (CITATION_ACCURACY metric), routed
 # through model_quality_gate.adapters.gcp.genai_eval:GenAiEvalAdapter.
-# Offline scorer: the A4 self-eval gate validates that this metric is compared against the
+# Offline scorer: the self-eval gate validates that this metric is compared against the
 # threshold below in the gate logic.
 
 metric: citation_accuracy

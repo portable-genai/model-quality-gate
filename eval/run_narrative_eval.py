@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline narrative-quality floor check for A4: is a reduced profile degraded, or unfit?
+"""Offline narrative-quality floor check: is a reduced profile degraded, or unfit?
 
 ``eval/run_eval.py`` checks the gate LOGIC. This checks the other half, the one nothing in the
 fleet measured: the quality of the NARRATIVE a model produces, scored against per-vertical floors
@@ -7,11 +7,11 @@ that a model-risk function owns as data (``config/quality-floors.toml``).
 
 Why it lives here rather than in the service
 --------------------------------------------
-A4 is the promotion authority, and it is a MANAGED control. That is exactly why the gap existed:
-the profile running the weaker local model was also the profile that cannot reach the authority,
-so it had no quality measurement at all. This runs offline, in the ``local`` profile, with the
-same deterministic judge a laptop or an on-prem install would use, so the reduced profile can
-measure itself.
+model-quality-gate is the promotion authority, and it is a MANAGED control. That is exactly why the
+gap existed: the profile running the weaker local model was also the profile that cannot reach the
+authority, so it had no quality measurement at all. This runs offline, in the ``local`` profile,
+with the same deterministic judge a laptop or an on-prem install would use, so the reduced profile
+can measure itself.
 
 What a run does
 ---------------
@@ -320,7 +320,7 @@ def print_findings(measurements: list[Measurement]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Offline narrative-quality floor check for A4.",
+        description="Offline narrative-quality floor check for model-quality-gate.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET)

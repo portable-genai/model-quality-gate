@@ -1,6 +1,6 @@
 """MCP tool-catalog adapter (ToolCatalogPort).
 
-Backs the domain ``ToolCatalogPort`` with the governed, least-privilege set of tools A4
+Backs the domain ``ToolCatalogPort`` with the governed, least-privilege set of tools the gate
 exposes over MCP (Model Context Protocol). The catalog is declared statically here so the
 governed surface is auditable; an MCP server (``mcp`` SDK) publishes it at runtime. The
 ``mcp`` import is lazy so the on-prem and test profiles import without it.
@@ -15,7 +15,7 @@ from ...domain.models import ToolSpec
 # handshake this catalog once assumed was removed in this revision.
 MCP_PROTOCOL_VERSION = "2026-07-28"
 
-# The governed A4 tool surface, mirroring the four agent skills.
+# The governed tool surface, mirroring the four agent skills.
 _TOOLS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="evaluate",
@@ -69,7 +69,7 @@ _TOOLS: tuple[ToolSpec, ...] = (
 
 
 class McpToolCatalogAdapter:
-    """Governed MCP tool catalog for A4."""
+    """Governed MCP tool catalog for model-quality-gate."""
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings

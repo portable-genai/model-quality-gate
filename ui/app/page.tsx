@@ -51,7 +51,7 @@ export default function Home() {
         <header className="mb-6">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold text-ink-900">
-              A4 AI Quality &amp; Model-Risk Platform
+              AI Quality &amp; Model-Risk Platform
             </h1>
             {health && (
               <span

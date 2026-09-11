@@ -1,8 +1,8 @@
 {
-  "name": "a4-model-quality-gate-ui",
+  "name": "model-quality-gate-ui",
   "version": "0.0.1",
   "private": true,
-  "description": "Demo console for the A4 AI Quality & Model-Risk Platform (hrz group).",
+  "description": "Demo console for model-quality-gate, the AI Quality & Model-Risk Platform.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

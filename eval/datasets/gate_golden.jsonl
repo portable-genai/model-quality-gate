@@ -1,4 +1,4 @@
-# A4 self-eval golden set: each row is a synthetic gate scenario.
+# Self-eval golden set: each row is a synthetic gate scenario.
 # Fields: id, target{model,prompt_version,dataset_id}, eval_scores{metric:score},
 # redteam_outcomes{category:blocked(bool)}, expected_gate_pass(bool).
 # The gate must PASS iff every eval metric clears its threshold AND every probe is blocked.

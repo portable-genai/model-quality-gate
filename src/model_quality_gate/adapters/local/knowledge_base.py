@@ -1,12 +1,11 @@
 """Local knowledge-base adapter (KnowledgeBaseClientPort) : SQLite FTS5 retrieval.
 
-The ``local`` profile's stand-in for the **A2 Enterprise Knowledge Base**: a ``sqlite3``
-database with an **FTS5** virtual table over the reference passages, queried with BM25
-(``ORDER BY rank``). It is SDK-free, deterministic and **seedable**, so the same code
-grounds the offline gate run and the unit tests. Under ``local`` this platform client uses
-an in-process SQLite index rather than HTTP to the sibling A2 service (a laptop runs one
-app, not the whole platform). There is no Google emulator for enterprise search, so this
-path is unconditional.
+The ``local`` profile's stand-in for the **enterprise-knowledge-base**: a ``sqlite3`` database with
+an **FTS5** virtual table over the reference passages, queried with BM25 (``ORDER BY rank``). It is
+SDK-free, deterministic and **seedable**, so the same code grounds the offline gate run and the unit
+tests. Under ``local`` this platform client uses an in-process SQLite index rather than HTTP to the
+sibling enterprise-knowledge-base (a laptop runs one app, not the whole platform). There is no
+Google emulator for enterprise search, so this path is unconditional.
 
 The adapter returns the same :class:`Citation` objects with page-level provenance as the
 managed / remote adapter, preserving interface parity. It self-seeds from the built-in

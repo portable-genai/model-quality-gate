@@ -1,8 +1,8 @@
-"""Local agent-registry adapter (AgentRegistryPort) : in-process A3 registry.
+"""Local agent-registry adapter (AgentRegistryPort) : in-process agent-registry stand-in.
 
-The ``local`` profile's stand-in for the **A3 Agent Registry**: a small in-process store
+The ``local`` profile's stand-in for the **agent-registry**: a small in-process store
 of A2A AgentCards, seedable and deterministic. Under ``local`` this platform client uses
-an in-process implementation rather than HTTP to the sibling A3 service (a laptop runs one
+an in-process implementation rather than HTTP to the sibling agent-registry (a laptop runs one
 app, not the whole platform). When the Firestore emulator is opted in
 (``FIRESTORE_EMULATOR_HOST`` set AND the client lib imports), it routes to the emulator;
 the google client is imported lazily, only on that branch, so the default path imports no

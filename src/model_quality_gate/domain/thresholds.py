@@ -1,4 +1,4 @@
-"""Promotion thresholds for the A4 gate (SPEC §3 / P-08).
+"""Promotion thresholds (SPEC §3 / P-08).
 
 Single source of truth in the domain for the metric bars a target must clear to be
 promotable. Mirrors ``eval/rubrics/*.yaml`` (the human-facing rubric files) so code
@@ -171,10 +171,10 @@ METRIC_BUNDLES: dict[str, dict[str, float]] = {
         "consent_pii_safety": 1.00,
         "review_safety": 1.00,
     },
-    # E1 registers TWO bundles, not one, because it ships two separately gated modes with
-    # different risk postures: a whisper panel a trained employee reads, and a customer-facing
-    # assistant with nobody in between. One bundle would let a strong result in the first carry
-    # a weak one in the second, which is the whole reason those modes are gated apart.
+    # contact-centre-conversations registers TWO bundles, not one, because it ships two separately
+    # gated modes with different risk postures: a whisper panel a trained employee reads, and a
+    # customer-facing assistant with nobody in between. One bundle would let a strong result in the
+    # first carry a weak one in the second, which is the whole reason those modes are gated apart.
     #
     # The metric names and bars MIRROR the repo's own eval/rubrics/*.yaml, which is where the
     # reasoning for each number lives.

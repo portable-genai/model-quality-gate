@@ -80,7 +80,7 @@ def test_thresholds_match_the_documented_bars():
 def test_threshold_for_unknown_metric_is_fail_closed():
     # Fail-closed (CD2): an unregistered metric name raises rather than clearing a 0.0
     # bar with any score. The old 0.0 fallback was a silent-pass trap for every sibling
-    # sending a metric name A4 did not recognise.
+    # sending a metric name the gate did not recognise.
     with pytest.raises(UnknownMetricError):
         threshold_for("nonexistent")
 

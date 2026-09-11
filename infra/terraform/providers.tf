@@ -1,4 +1,4 @@
-# providers.tf : Provider pinning for the A4 AI Quality & Model-Risk sovereign deploy.
+# providers.tf : Provider pinning for the model-quality-gate sovereign deploy.
 #
 # General Principle map:
 #   P-03 (data residency / in-country): every provider call is pinned to the

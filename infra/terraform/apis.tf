@@ -1,4 +1,4 @@
-# apis.tf : Enable exactly the managed services A4 depends on.
+# apis.tf : Enable exactly the managed services model-quality-gate depends on.
 #
 # General Principle map:
 #   P-01 (managed-first / minimal surface): only the services the pinned stack

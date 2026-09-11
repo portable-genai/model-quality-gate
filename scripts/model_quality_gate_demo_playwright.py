@@ -1,4 +1,4 @@
-"""Presenter-controlled Playwright walkthrough of the live A4 gate demo.
+"""Presenter-controlled Playwright walkthrough of the live model-quality-gate demo.
 
 Drives a headed browser through the promotion-gate flow served by
 ``scripts/model_quality_gate_demo_server.py``. It is **paced by the presenter**: before each step
@@ -58,7 +58,7 @@ STEPS = [
     (
         "Candidate submitted. A target is a model + prompt version + golden dataset — here "
         "gemini-3.5-flash @ v3 against the compliance-qa-golden set. Nothing has been gated "
-        "yet; this is the unit A4 promotes.",
+        "yet; this is the unit the gate promotes.",
         False,
         ".panel",
     ),
@@ -123,7 +123,7 @@ def main() -> int:
         browser = p.chromium.launch(headless=HEADLESS, slow_mo=SLOWMO, executable_path=CHROME_PATH)
         page = browser.new_context(viewport={"width": 1100, "height": 900}).new_page()
 
-        print("\n=== A4 promotion-gate live demo — press Enter to advance each step ===\n")
+        print("\n=== model-quality-gate live demo — press Enter to advance each step ===\n")
         page.goto(BASE + "/restart", wait_until="load")  # always start clean
         page.goto(BASE + "/", wait_until="load")
         assert page.locator("[data-demo-step='target']").count() == 1

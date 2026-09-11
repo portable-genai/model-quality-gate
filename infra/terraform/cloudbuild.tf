@@ -1,10 +1,10 @@
 # cloudbuild.tf : The CI promotion gate (Cloud Build trigger).
 #
 # General Principle map:
-#   P-08 (eval-gated promotion): A4 IS the gate. This Cloud Build trigger runs the
+#   P-08 (eval-gated promotion): model-quality-gate IS the gate. This Cloud Build trigger runs the
 #         offline self-eval gate (eval/run_eval.py) plus the lint+test suite on every
 #         push, and a release is not promotable unless the build is green. This is the
-#         infra embodiment of rule R5 (every B/C agent must pass A4 before promotion).
+#         infra embodiment of rule R5 (every B/C agent must pass model-quality-gate before promotion).
 #   P-06 (least privilege): the trigger runs as the dedicated cloudbuild service
 #         account (iam.tf), not the default Cloud Build SA.
 #
@@ -16,7 +16,7 @@ resource "google_cloudbuild_trigger" "promotion_gate" {
   project     = var.project_id
   location    = var.region
   name        = "ai-quality-promotion-gate"
-  description = "Runs ruff + pytest + the A4 self-eval gate; blocks promotion on failure (P-08)."
+  description = "Runs ruff + pytest + the self-eval gate; blocks promotion on failure (P-08)."
 
   service_account = google_service_account.cloudbuild.id
 

@@ -3,7 +3,7 @@
 A tiny, clearly-fictional set of compliance control-reference passages (with page-level
 citations) so the local knowledge-base adapter has reference context to ground evaluation
 on out of the box, and the end-to-end CLI gate run scores against a real grounded corpus
-with no external A2 service. The text is invented; the source ids / titles are plausible
+with no external knowledge-base service. The text is invented; the source ids / titles are plausible
 but fictional and must not be treated as real control references.
 
 The corpus covers the source ids and expected points of the bundled golden dataset

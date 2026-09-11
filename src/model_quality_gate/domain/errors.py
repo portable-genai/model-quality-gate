@@ -1,4 +1,4 @@
-"""Domain exceptions for the AI Quality & Model-Risk Platform (system A4).
+"""Domain exceptions for model-quality-gate, the AI Quality & Model-Risk Platform.
 
 Pure-Python exception hierarchy raised by the orchestration services. The domain
 layer never imports Google Cloud, ADK, or any framework : these errors let callers
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 
 class AiQualityError(Exception):
-    """Base class for all domain-level errors raised by A4 services."""
+    """Base class for all domain-level errors raised by the gate's services."""
 
 
 class EmptyDatasetError(AiQualityError):

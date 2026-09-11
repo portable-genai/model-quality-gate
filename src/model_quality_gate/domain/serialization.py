@@ -9,7 +9,7 @@ to live here as a copy; it is now re-exported from :mod:`hex_service_kit.seriali
 stringified keys, never raises). Pure standard library.
 
 **Derived verdicts.** ``to_jsonable`` walks ``dataclasses.fields``, so a value computed by
-a ``@property`` never reaches the wire. Two of A4's three verdicts are computed that way:
+a ``@property`` never reaches the wire. Two of the gate's three verdicts are computed that way:
 :attr:`~model_quality_gate.domain.models.EvalReport.passed` (every metric at or above its
 threshold, over a non-empty dataset) and
 :attr:`~model_quality_gate.domain.models.RedTeamReport.passed` (every probe handled safely). Only

@@ -1,4 +1,4 @@
-"""Synthetic targets, golden datasets, red-team cases and prompts for A4 tests.
+"""Synthetic targets, golden datasets, red-team cases and prompts for model-quality-gate tests.
 
 Nothing here touches Google Cloud. The data mimics the shape of a real promotion-gate
 input : a target (model + prompt version + dataset), a small golden set with expected
@@ -25,11 +25,11 @@ SAMPLE_TARGET: EvalTarget = EvalTarget(
     model="gemini-3.7-flash",
     prompt_version="v3",
     dataset_id="compliance-qa-golden",
-    system="C1",
+    system="compliance-advisory",
 )
 
 # --------------------------------------------------------------------------- #
-# Reference context the A2 KB would return for a grounded eval.
+# Reference context enterprise-knowledge-base would return for a grounded eval.
 # --------------------------------------------------------------------------- #
 SAMPLE_CITATIONS: tuple[Citation, ...] = (
     Citation(

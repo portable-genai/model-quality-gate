@@ -1,6 +1,6 @@
 """Human-in-the-loop (maker-checker) policy : General Principle P-06.
 
-A4 is a *decision-support* gate, never a fully autonomous approver. P-06 (maker
+The gate is a *decision-support* gate, never a fully autonomous approver. P-06 (maker
 checker) requires that a human model-risk officer reviews a borderline or otherwise
 consequential gate verdict before a model is promoted on the back of it. This module
 centralises that gate so the PromotionGateService applies identical rules and the

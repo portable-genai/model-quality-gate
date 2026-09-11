@@ -1,12 +1,12 @@
-"""Remote-platform audit adapter : thin HTTP client to A5.
+"""Remote-platform audit adapter : thin HTTP client to agent-observability.
 
 In the full platform deployment, immutable audit records are written through the shared
 ``agent-observability`` service (WORM Cloud Logging locked bucket + Cloud Trace +
-FinOps) instead of A4 calling Cloud Logging directly. This adapter implements
+FinOps) instead of this service calling Cloud Logging directly. This adapter implements
 :class:`AuditSinkPort` by POSTing the :class:`AuditEvent` to the observability service's
-``/v1/audit`` endpoint, which returns ``202 Accepted`` (SPEC §6, A5 contract).
+``/v1/audit`` endpoint, which returns ``202 Accepted`` (SPEC §6, agent-observability contract).
 
-A4 evaluates models, not customer data, so the event body it sends carries the target ref
+The gate evaluates models, not customer data, so the event body it sends carries the target ref
 and a verdict summary, never user data. The base URL is read from ``OBSERVABILITY_URL``
 with a localhost default.
 """
@@ -31,7 +31,7 @@ class RemoteAuditError(AiQualityError):
 
 
 class RemoteAuditAdapter:
-    """HTTP client for the A5 ``agent-observability`` audit sink."""
+    """HTTP client for the ``agent-observability`` audit sink."""
 
     def __init__(self, settings: object) -> None:
         self._settings = settings
@@ -40,7 +40,7 @@ class RemoteAuditAdapter:
         )
 
     def record(self, event: AuditEvent) -> str:
-        """Write an immutable audit record (WORM) via A5."""
+        """Write an immutable audit record (WORM) via agent-observability."""
         payload = to_jsonable(event)
         url = f"{self._base_url}/v1/audit"
         digest = hashlib.sha256(repr(sorted(payload.items())).encode("utf-8")).hexdigest()

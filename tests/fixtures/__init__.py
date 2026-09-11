@@ -1,1 +1,1 @@
-"""Synthetic fixtures for A4 tests."""
+"""Synthetic fixtures for model-quality-gate tests."""

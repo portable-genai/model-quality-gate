@@ -1,8 +1,8 @@
-"""Governance ports : the A3 Agent Registry concern and the MCP tool catalog.
+"""Governance ports : the agent-registry concern and the MCP tool catalog.
 
 Primary GCP adapters: an **A2A AgentCard** published at
 ``/.well-known/agent-card.json`` (with a remote client to the ``agent-registry``
-service for A3 registration), and a governed, least-privilege **MCP** tool catalog.
+service for agent-registry registration), and a governed, least-privilege **MCP** tool catalog.
 """
 
 from __future__ import annotations

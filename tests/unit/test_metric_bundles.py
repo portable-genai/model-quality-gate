@@ -72,11 +72,11 @@ def test_safety_leak_metrics_have_the_strictest_bar():
     # detection-rate metric, not a leak gate, so it is deliberately excluded (ends in
     # "detection").
     #
-    # The comparison is `>=` rather than `==`, and that is the check keeping its intent rather
-    # than losing it. E2 exists to stop a leak gate being set LOOSELY; `==` also refused a
-    # STRICTER one, which is the opposite of the point. E1's customer-facing bundle gates
-    # party isolation and citation audience at 1.00, because there is no acceptable rate of
-    # telling one customer another customer's business.
+    # The comparison is `>=` rather than `==`, and that is the check keeping its intent rather than
+    # losing it. E2 exists to stop a leak gate being set LOOSELY; `==` also refused a STRICTER one,
+    # which is the opposite of the point. contact-centre-conversations' customer-facing bundle gates
+    # party isolation and citation audience at 1.00, because there is no acceptable rate of telling
+    # one customer another customer's business.
     for bundle, metrics in METRIC_BUNDLES.items():
         for metric, threshold in metrics.items():
             if metric.endswith("safety"):
@@ -233,8 +233,8 @@ if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(pytest.main([__file__, "-q"]))
 
 
-def test_the_two_e1_mode_bundles_are_registered_separately():
-    """E1 ships two separately gated modes, so it registers two bundles and not one.
+def test_the_two_contact_centre_mode_bundles_are_registered_separately():
+    """contact-centre-conversations ships two gated modes, so it registers two bundles.
 
     One bundle would let a strong agent-assist result carry a weak customer-facing one over the
     line, which is the whole reason those modes are gated apart. The metric sets are disjoint

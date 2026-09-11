@@ -1,1 +1,1 @@
-"""Test package for A4."""
+"""Test package for model-quality-gate."""
