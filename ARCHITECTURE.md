@@ -212,7 +212,7 @@ services and is itself depended on by every B/C agent (rule R5).
 
 ```mermaid
 flowchart LR
-    subgraph a4["`model-quality-gate` (this repo)"]
+    subgraph mqg["`model-quality-gate` (this repo)"]
         DOMAIN[Domain core]
         KBP[KnowledgeBaseClientPort]
         AUDIT[AuditSinkPort]

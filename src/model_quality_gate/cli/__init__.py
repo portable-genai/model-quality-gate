@@ -1,1 +1,1 @@
-"""Typer CLI for A4."""
+"""Typer CLI for model-quality-gate."""

@@ -1,9 +1,9 @@
-"""Remote-platform registry adapter : thin HTTP client to A3.
+"""Remote-platform registry adapter : thin HTTP client to agent-registry.
 
-In the full platform deployment, A4's A2A AgentCard is published to and resolved through
-the shared ``agent-registry`` service (R4) rather than served only from A4's own
+In the full platform deployment, this service's A2A AgentCard is published to and resolved through
+the shared ``agent-registry`` service (R4) rather than served only from this service's own
 ``/.well-known/agent-card.json``. This adapter implements :class:`AgentRegistryPort`
-against the registry's ``/v1/agents`` endpoints (SPEC §6, A3 contract):
+against the registry's ``/v1/agents`` endpoints (SPEC §6, agent-registry contract):
 
 * ``register`` -> ``POST /v1/agents`` (``201``)
 * ``get``      -> ``GET  /v1/agents/{name}`` (``200`` -> card, ``404`` -> ``None``)
@@ -30,14 +30,14 @@ class RemoteRegistryError(AiQualityError):
 
 
 class RemoteRegistryAdapter:
-    """HTTP client for the A3 ``agent-registry`` service."""
+    """HTTP client for the ``agent-registry`` service."""
 
     def __init__(self, settings: object) -> None:
         self._settings = settings
         self._base_url = _s2s.env_url("AGENT_REGISTRY_URL", _DEFAULT_URL, service="agent registry")
 
     def register(self, card: AgentCard) -> None:
-        """Publish (or upsert) this agent's card into the A3 catalog."""
+        """Publish (or upsert) this agent's card into the agent-registry catalog."""
         payload = to_jsonable(card)
         url = f"{self._base_url}/v1/agents"
         response = self._post(url, payload)
@@ -55,7 +55,7 @@ class RemoteRegistryAdapter:
         return self._parse_card(response.json())
 
     def list(self) -> list[AgentCard]:
-        """List every agent card currently in the A3 catalog."""
+        """List every agent card currently in the agent-registry catalog."""
         url = f"{self._base_url}/v1/agents"
         response = self._request("GET", url)
         if response.status_code // 100 != 2:

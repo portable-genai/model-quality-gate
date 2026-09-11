@@ -1,6 +1,6 @@
 """Shared judge / parsing helpers (private to the domain layer).
 
-A4's evaluation and red-team services share the same machinery: render reference
+The gate's evaluation and red-team services share the same machinery: render reference
 passages into a judge prompt, call the judge LLM with a structured-output schema,
 defensively parse the JSON reply, and coerce model-emitted values. This module factors
 out that core so each service keeps the exact constructor and method signature mandated

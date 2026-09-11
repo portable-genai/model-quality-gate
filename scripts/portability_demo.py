@@ -81,7 +81,7 @@ def _run_local(base: Settings, root: Path) -> dict:
         model="gemini-3.5-flash",
         prompt_version="v3",
         dataset_id="compliance-qa-golden",
-        system="C1",
+        system="compliance-advisory",
     )
     analyst = container.identity.resolve(RequestContext())
     approver = container.identity.resolve(RequestContext(headers={"x-dev-persona": "approver"}))

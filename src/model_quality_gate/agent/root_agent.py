@@ -1,4 +1,4 @@
-"""Root ADK agent for the A4 AI Quality & Model-Risk Platform, on Agent Runtime.
+"""Root ADK agent for model-quality-gate, on Agent Runtime.
 
 This is the agent the Gemini Enterprise Agent Platform **Agent Runtime** (ex-Agent
 Engine) hosts. It wires together the four domain-service :class:`FunctionTool` wrappers
@@ -45,7 +45,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 ROOT_AGENT_NAME = "model_quality_gate_model_risk"
 
 _ROOT_INSTRUCTION = (
-    "You are the A4 AI Quality & Model-Risk gate for APAC banking. You evaluate AI "
+    "You are the AI Quality & Model-Risk gate for APAC banking. You evaluate AI "
     "targets (a model plus a prompt version) against golden datasets, run adversarial "
     "red-team probes, and decide whether a target may be promoted.\n\n"
     "Routing:\n"
@@ -64,7 +64,7 @@ _ROOT_INSTRUCTION = (
 
 
 def build_root_agent(settings: Settings | None = None) -> LlmAgent:
-    """Construct the root ADK ``LlmAgent`` for the A4 gate.
+    """Construct the root ADK ``LlmAgent`` for the promotion gate.
 
     Wires the four FunctionTools and runs the reasoning model at ``thinking=high``
     (SPEC §3). All ADK imports are local to this function (SPEC §4).

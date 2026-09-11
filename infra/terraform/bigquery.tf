@@ -1,4 +1,4 @@
-# bigquery.tf : Eval-metrics + model-drift datasets (the A4 quality store).
+# bigquery.tf : Eval-metrics + model-drift datasets (the gate's quality store).
 #
 # General Principle map:
 #   P-03 (residency): the dataset location is the configured approved region.
@@ -15,7 +15,7 @@ resource "google_bigquery_dataset" "model_quality_gate" {
   dataset_id  = "model_quality_gate" # matches settings.yaml bigquery.dataset
   project     = var.project_id
   location    = var.region
-  description = "A4 AI quality: eval metrics, model drift, and prompt-version change control."
+  description = "model-quality-gate: eval metrics, model drift, and prompt-version change control."
 
   default_encryption_configuration {
     kms_key_name = google_kms_crypto_key.model_quality_gate.id # CMEK explicit (P-09)

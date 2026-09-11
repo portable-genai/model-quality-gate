@@ -1,6 +1,6 @@
-"""PromotionGateService : the A4 promotion gate (SPEC §5, P-08).
+"""PromotionGateService : the promotion gate (SPEC §5, P-08).
 
-This is the heart of A4 and the concrete home of General Principle **P-08**
+This is the heart of model-quality-gate and the concrete home of General Principle **P-08**
 (eval-gated promotion). For a target it runs the evaluation, runs the red-team harness,
 combines the two into a single PASS/FAIL :class:`GateDecision`, writes a
 :class:`ModelCard` plus an MRM (model-risk management) evidence pointer, and applies the
@@ -13,7 +13,7 @@ a hair) sets ``requires_human_review`` so a model-risk officer signs off (P-06).
 Pipeline (SPEC §5), wrapped in ``tracer.span`` and audited:
 
     tracer.span("gate.gate"):
-      evaluation_service.evaluate (+ A2 grounded context)
+      evaluation_service.evaluate (+ KB grounded context)
       -> redteam_service.run
       -> combine: passed = eval.passed AND redteam.passed
       -> write ModelCard + MRM evidence (model_card_store.put)
@@ -99,7 +99,7 @@ class PromotionGateService:
         actor: str,
         thresholds: dict[str, float] | None = None,
     ) -> GateDecision:
-        # 1) Evaluate (grounded; pulls A2 reference context internally).
+        # 1) Evaluate (grounded; pulls KB reference context internally).
         eval_report: EvalReport = self._evaluation_service.evaluate(
             target, dataset, actor, thresholds=thresholds
         )

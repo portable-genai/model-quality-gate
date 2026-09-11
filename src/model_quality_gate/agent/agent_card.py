@@ -1,11 +1,11 @@
-"""A2A AgentCard for the A4 AI Quality & Model-Risk Platform (A3 Registry).
+"""A2A AgentCard for model-quality-gate, published to agent-registry.
 
 This builds the service's discovery card : the same minimal A2A shape the
 ``agent-registry`` service stores and serves (SPEC §6). It is published at
 ``/.well-known/agent-card.json``; :func:`agent_card_document` returns the JSON-safe body
 the API layer serves there.
 
-The card advertises the four A4 skills (evaluate, red_team, promotion_gate,
+The card advertises the four gate skills (evaluate, red_team, promotion_gate,
 version_prompt), mirroring the four ADK FunctionTools so a peer agent or the registry sees
 one consistent capability surface.
 
@@ -59,7 +59,7 @@ SKILLS: tuple[AgentSkill, ...] = (
 
 _DESCRIPTION = (
     "AI Quality & Model-Risk Platform: the production-promotion eval / red-team gate and "
-    "model-risk (MRM) evidence system for APAC banking. Every B/C agent must pass A4 "
+    "model-risk (MRM) evidence system for APAC banking. Every B/C agent must pass this gate "
     "before promotion (rule R5). Built ports-and-adapters on the Gemini Enterprise Agent "
     "Platform (Gen AI evaluation service, BigQuery / GCS stores)."
 )

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Offline self-eval gate for the A4 AI Quality & Model-Risk Platform (P-08).
+"""Offline self-eval gate for model-quality-gate (P-08).
 
-A4 is itself eval-driven, so its offline gate validates the **gate logic**: given a
+model-quality-gate is itself eval-driven, so its offline gate validates the **gate logic**: given a
 golden set of synthetic scenarios (each with the eval scores a backend would produce, the
 red-team outcomes, and the expected PASS/FAIL verdict), it drives the **real**
 ``PromotionGateService`` through deterministic fakes and checks that the gate decides
@@ -323,7 +323,7 @@ class _PerMetric:
 def run_offline(dataset: Path) -> EvalReport:
     scenarios = load_scenarios(dataset)
     agg: dict[str, _PerMetric] = {m: _PerMetric() for m in THRESHOLDS}
-    print(f"Running A4 self-eval gate over {len(scenarios)} gate scenarios.\n")
+    print(f"Running the self-eval gate over {len(scenarios)} gate scenarios.\n")
     for scenario in scenarios:
         decision = _run_gate(scenario)
         agg["gate_accuracy"].scores.append(score_gate_accuracy(scenario, decision))
@@ -361,7 +361,7 @@ def print_report(report: EvalReport, evaluator: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Offline self-eval gate for A4 (P-08).",
+        description="Offline self-eval gate for model-quality-gate (P-08).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(

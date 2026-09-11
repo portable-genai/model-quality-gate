@@ -1,7 +1,7 @@
 """On-prem placeholder for ``KnowledgeBaseClientPort`` : Google Distributed Cloud target.
 
 One of the reversibility (P-02, P-12) migration placeholders: in the managed / platform
-profile this port is a thin HTTP client to the A2 Enterprise Knowledge Base; switching
+profile this port is a thin HTTP client to enterprise-knowledge-base; switching
 ``profile`` to ``onprem`` rebinds it here. The adapter constructs cleanly with **no
 external dependencies** and structurally satisfies the same Protocol as the managed
 adapter. ``retrieve`` raises rather than returning empty reference context: a silent
@@ -22,7 +22,7 @@ _MESSAGE = (
 
 
 class OnPremKnowledgeBaseAdapter:
-    """Placeholder A2 knowledge-base client for the on-prem profile."""
+    """Placeholder enterprise-knowledge-base client for the on-prem profile."""
 
     def __init__(self, settings: Settings) -> None:
         self.settings = settings

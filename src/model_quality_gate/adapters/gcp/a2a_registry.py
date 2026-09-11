@@ -3,8 +3,8 @@
 Backs the domain ``AgentRegistryPort`` by serving / resolving this service's A2A
 AgentCard. In a standalone deployment the card is served locally at
 ``/.well-known/agent-card.json``; an in-memory store keeps any cards registered at
-runtime so the A3 governance surface is consistent. When deployed inside the full
-platform the ``platform`` profile swaps this for the remote A3 client.
+runtime so the agent-registry governance surface is consistent. When deployed inside the full
+platform the ``platform`` profile swaps this for the remote agent-registry client.
 
 This adapter imports no Google Cloud SDK at module level (the AgentCard is a pure domain
 object), so it is import-safe under any profile.

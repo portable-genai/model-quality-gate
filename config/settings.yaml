@@ -1,4 +1,4 @@
-# AI Quality & Model-Risk Platform (A4) : runtime configuration.
+# model-quality-gate (AI Quality & Model-Risk Platform) : runtime configuration.
 #
 # Four deployment profiles, selected by AI_QUALITY_PROFILE (or profile: below):
 #   gcp    : Google Cloud managed services (lazy SDK imports). Production sets
@@ -6,7 +6,7 @@
 #   local  : a WORKING offline laptop stack (SQLite FTS5 + deterministic scorer / judge,
 #            SDK-free, no API key, no emulator required). What dev / test / CI name
 #            explicitly (Makefile, ci.yaml).
-#   platform: thin HTTP clients to the sibling horizontal-platform services (A2/A3/A5).
+#   platform: thin HTTP clients to the sibling horizontal-platform services (enterprise-knowledge-base, agent-registry, agent-observability).
 #   onprem : fail-fast Google Distributed Cloud migration placeholders.
 # Nothing in src/model_quality_gate/domain changes between profiles.
 #

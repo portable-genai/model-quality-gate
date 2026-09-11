@@ -1,5 +1,5 @@
 /**
- * Typed fetch client for the A4 AI Quality & Model-Risk FastAPI backend.
+ * Typed fetch client for the model-quality-gate FastAPI backend.
  *
  * Routes (SPEC §6):
  *   POST /v1/evaluations  -> EvalReport

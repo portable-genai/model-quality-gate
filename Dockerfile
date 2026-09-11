@@ -1,4 +1,4 @@
-# A4 AI Quality & Model-Risk Platform : API service image.
+# model-quality-gate (AI Quality & Model-Risk Platform) : API service image.
 #
 # Builds the FastAPI gate service with the managed-stack extra ([gcp]) installed, so the
 # deployed container talks to the Gen AI evaluation service / BigQuery / GCS / Cloud

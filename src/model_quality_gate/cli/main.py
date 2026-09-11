@@ -1,4 +1,4 @@
-"""``ai-quality`` : the Typer CLI for the A4 AI Quality & Model-Risk Platform.
+"""``ai-quality`` : the Typer CLI for model-quality-gate.
 
 This is a thin presentation layer over the domain services. It owns no business logic:
 every command builds the wiring from :func:`model_quality_gate.config.build_container` and the
@@ -31,7 +31,7 @@ app = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
     help=(
-        "A4 AI Quality & Model-Risk Platform : the production-promotion eval / red-team "
+        "AI Quality & Model-Risk Platform : the production-promotion eval / red-team "
         "gate and model-risk (MRM) evidence system, on the Gemini Enterprise Agent "
         "Platform (GCP region configurable; default asia-southeast1)."
     ),
@@ -310,7 +310,7 @@ def eval_gate(
         None, "--dataset", "-d", help="Path to the golden gate-logic dataset (defaults bundled)."
     ),
 ) -> None:
-    """Run the A4 self-eval gate (validates the gate logic: gate_accuracy, etc.).
+    """Run the offline self-eval gate (validates the gate logic: gate_accuracy, etc.).
 
     Delegates to ``eval/run_eval.py`` in a subprocess so the heavy Gen AI evaluation
     dependencies stay out of the CLI's import graph. The subprocess's exit code is the

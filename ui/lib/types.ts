@@ -1,5 +1,5 @@
 /**
- * TypeScript mirrors of the A4 domain dataclasses.
+ * TypeScript mirrors of the model-quality-gate domain dataclasses.
  *
  * Source of truth: `src/model_quality_gate/domain/models.py`.
  * The backend serialises dataclasses with `domain/serialization.to_jsonable`

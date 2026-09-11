@@ -206,7 +206,7 @@ class ModelSettings:
 
 @dataclass(frozen=True)
 class EvalSettings:
-    """Gen AI evaluation service settings (the A4 scoring backend)."""
+    """Gen AI evaluation service settings (the gate's scoring backend)."""
 
     location: str = DEFAULT_GCP_REGION
     judge_model: str = "gemini-3.5-flash"

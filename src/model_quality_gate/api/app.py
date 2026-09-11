@@ -1,7 +1,7 @@
-"""FastAPI application for the A4 AI Quality & Model-Risk Platform.
+"""FastAPI application for model-quality-gate, the AI Quality & Model-Risk Platform.
 
-Exposes the A4 promotion-gate contract that sibling repos consume (every B/C agent must
-pass A4 before promotion, rule R5):
+Exposes the promotion-gate contract that sibling repos consume (every B/C agent must
+pass model-quality-gate before promotion, rule R5):
 
 * ``POST /v1/evaluations`` -> EvalReport
 * ``POST /v1/redteam``      -> RedTeamReport
@@ -194,7 +194,7 @@ def _cors_origins() -> list[str]:
 
 
 app = FastAPI(
-    title="A4 AI Quality & Model-Risk Platform",
+    title="AI Quality & Model-Risk Platform",
     version="0.1.0",
     description=(
         "The production-promotion eval / red-team gate and model-risk (MRM) evidence "
@@ -377,7 +377,7 @@ def redteam(
 
 
 # --------------------------------------------------------------------------- #
-# Promotion gate (the A4 contract other repos consume)
+# Promotion gate (the contract other repos consume)
 # --------------------------------------------------------------------------- #
 @app.post(
     "/v1/gate",
@@ -683,7 +683,7 @@ def personas() -> list[dict[str, str]]:
 
 @app.get("/.well-known/agent-card.json", response_model=AgentCardModel, tags=["governance"])
 def agent_card() -> AgentCardModel:
-    """Publish this service's A2A AgentCard for discovery (A3 Registry / interop)."""
+    """Publish this service's A2A AgentCard for discovery (agent-registry / interop)."""
     from ..agent.agent_card import build_agent_card
 
     settings = deps.get_settings()

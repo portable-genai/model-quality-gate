@@ -1,4 +1,4 @@
-# A4 narrative-quality floors: how good a model's NARRATIVE has to be, per vertical.
+# Narrative-quality floors: how good a model's NARRATIVE has to be, per vertical.
 #
 # The gate logic in eval/run_eval.py checks the DECISION core. This file is the other half: the
 # bar the narrative itself must clear, which is what a reduced (laptop / on-prem) profile
@@ -26,7 +26,7 @@
 # a bundle name the same thing.
 
 schema = "quality-floors/v1"
-owner = "model risk (A4 promotion authority)"
+owner = "model risk (model-quality-gate promotion authority)"
 
 [verticals.default]
 floor = 0.70

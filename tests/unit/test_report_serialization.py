@@ -37,7 +37,7 @@ TARGET = EvalTarget(
     model="gemini-3.7-flash",
     prompt_version="v3",
     dataset_id="compliance-qa-golden",
-    system="C1",
+    system="compliance-advisory",
 )
 
 

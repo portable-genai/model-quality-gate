@@ -139,7 +139,7 @@ def test_ui_config_emits_a_full_default_deny_csp() -> None:
 
 
 def test_ui_connect_src_is_scoped_to_self_plus_the_api_origin() -> None:
-    """No wildcard: the console talks to its own origin and the A4 API origin only.
+    """No wildcard: the console talks to its own origin and the gate API origin only.
 
     One further entry is allowed and it names no host: the development server's HMR
     websocket schemes, added only when NODE_ENV is not the exact literal ``production``.

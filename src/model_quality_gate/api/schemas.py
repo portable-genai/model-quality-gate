@@ -1,8 +1,8 @@
-"""Pydantic v2 request/response models for the A4 AI Quality & Model-Risk API.
+"""Pydantic v2 request/response models for the model-quality-gate API.
 
 These schemas mirror the frozen domain dataclasses in :mod:`model_quality_gate.domain.models`
 one-for-one, so the HTTP boundary is a thin, typed projection of the domain : the
-React/Next.js UI, the CLI, and sibling repos (which consume the A4 gate contract) all
+React/Next.js UI, the CLI, and sibling repos (which consume the gate contract) all
 speak exactly these shapes. Each response model exposes a ``from_domain`` classmethod that
 builds itself from the corresponding domain object (enums become their ``.value`` strings).
 

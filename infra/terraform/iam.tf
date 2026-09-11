@@ -1,4 +1,4 @@
-# iam.tf : Least-privilege service accounts for the A4 workloads.
+# iam.tf : Least-privilege service accounts for the model-quality-gate workloads.
 #
 # General Principle map:
 #   P-06 (least privilege / separation of duties): three distinct identities :
@@ -12,7 +12,7 @@
 # ------------------------------- App (serving) ------------------------------ #
 resource "google_service_account" "app" {
   account_id   = "ai-quality-app"
-  display_name = "A4 AI Quality app (gate API)"
+  display_name = "model-quality-gate app (gate API)"
   project      = var.project_id
 
   depends_on = [google_project_service.required]
@@ -48,7 +48,7 @@ resource "google_kms_crypto_key_iam_member" "app" {
 # --------------------------- Agent Runtime (ADK) ---------------------------- #
 resource "google_service_account" "agent_runtime" {
   account_id   = "ai-quality-agent"
-  display_name = "A4 Agent Runtime (reasoningEngine)"
+  display_name = "model-quality-gate Agent Runtime (reasoningEngine)"
   project      = var.project_id
 
   depends_on = [google_project_service.required]
@@ -109,7 +109,7 @@ resource "google_storage_bucket_iam_member" "mrm_evidence_viewer" {
 # ------------------------------- Cloud Build -------------------------------- #
 resource "google_service_account" "cloudbuild" {
   account_id   = "ai-quality-cloudbuild"
-  display_name = "A4 CI promotion-gate Cloud Build runner"
+  display_name = "model-quality-gate CI Cloud Build runner"
   project      = var.project_id
 
   depends_on = [google_project_service.required]

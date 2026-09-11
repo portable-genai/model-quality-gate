@@ -1,8 +1,8 @@
 """The narrative-quality floor, and the not-falsely-green proof turned on the JUDGE itself.
 
-A4 is the promotion authority, so the quality bar it applies to everyone else has to be one it
-can prove still works. The gate-logic proofs live in `tests/test_not_falsely_green.py`; these are
-the narrative half, and they are almost all falsification:
+model-quality-gate is the promotion authority, so the quality bar it applies to everyone else has to
+be one it can prove still works. The gate-logic proofs live in `tests/test_not_falsely_green.py`;
+these are the narrative half, and they are almost all falsification:
 
 * the judge can go red, PER VERTICAL, against a narrative carrying that vertical's own defect;
 * a judge that certifies anything is caught rather than trusted;

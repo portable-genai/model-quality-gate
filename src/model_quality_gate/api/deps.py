@@ -1,4 +1,4 @@
-"""FastAPI dependency wiring for the A4 AI Quality & Model-Risk service.
+"""FastAPI dependency wiring for the model-quality-gate service.
 
 This module builds a single, process-wide :class:`~model_quality_gate.config.Container` (the
 ports-and-adapters registry) and assembles the orchestration services from the

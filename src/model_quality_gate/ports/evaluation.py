@@ -1,4 +1,4 @@
-"""Evaluation ports : the A4 core (scoring + adversarial red-team).
+"""Evaluation ports : the gate's core (scoring + adversarial red-team).
 
 Primary GCP adapters: the **Gen AI evaluation service** on the Gemini Enterprise Agent
 Platform (LLM-judge groundedness / faithfulness / safety, lazy ``vertexai ... .evals``)

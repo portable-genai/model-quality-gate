@@ -7,7 +7,7 @@
 #         Manager). Data cannot be read across the boundary to an unapproved
 #         project, which is what stops the eval metrics, golden datasets, model cards
 #         and audit log from leaving the country.
-#   P-01 (least surface): only the services A4 uses are inside the perimeter.
+#   P-01 (least surface): only the services model-quality-gate uses are inside the perimeter.
 #
 # Guarded by var.enable_vpc_sc so non-prod/dev applies can skip it (count = 0), and
 # DRY-RUN FIRST by default (var.vpc_sc_enforce = false): the perimeter is applied as an

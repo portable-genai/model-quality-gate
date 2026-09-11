@@ -1,4 +1,4 @@
-"""Render the audit-first A4 gate UI from the demo JSON into static HTML pages.
+"""Render the audit-first model-quality-gate UI from the demo JSON into static HTML pages.
 
 Server-side, dependency-free rendering of the gate decision produced by
 ``scripts/model_quality_gate_demo.py``: a verdict page (EvalReport + RedTeamReport + GateDecision
@@ -119,7 +119,7 @@ def _header(data: dict) -> str:
     t = data["target"]
     ref = f"{t['model']}@{t['prompt_version']}:{t['dataset_id']}"
     return (
-        f"<h1>A4 promotion gate — {esc(t['model'])}</h1>"
+        f"<h1>model-quality-gate promotion gate — {esc(t['model'])}</h1>"
         f"<p class='sub'>Candidate <b class='mono'>{esc(ref)}</b> · system <b>{esc(t.get('system') or '—')}</b> · "
         f"profile <b>{esc(data.get('profile'))}</b> · region <b>{esc(data.get('region'))}</b></p>"
     )
@@ -254,9 +254,9 @@ def render_verdict(data: dict) -> str:
         + render_metrics(d["eval_report"])
         + render_redteam(d["redteam_report"])
         + render_card(data.get("model_card"))
-        + "<p class='foot'>Audit-first A4 gate view · synthetic fictional data · deterministic offline scorer / red-team</p>"
+        + "<p class='foot'>Audit-first model-quality-gate view · synthetic fictional data · deterministic offline scorer / red-team</p>"
     )
-    return page("A4 gate verdict", body)
+    return page("model-quality-gate verdict", body)
 
 
 def render_references(data: dict) -> str:
@@ -290,9 +290,9 @@ def render_references(data: dict) -> str:
         '<p class="muted" style="margin-top:8px">These display-only passages are returned by '
         "the local enterprise-knowledge-base-compatible adapter for auditor inspection. The deterministic local scorer "
         "does not consume this retrieval, so it is not causal score provenance.</p></div></section>"
-        "<p class='foot'>Audit-first A4 gate view · synthetic fictional data</p>"
+        "<p class='foot'>Audit-first model-quality-gate view · synthetic fictional data</p>"
     )
-    return page("A4 related references", body)
+    return page("model-quality-gate related references", body)
 
 
 def main(json_path: str, out_dir: str) -> None:

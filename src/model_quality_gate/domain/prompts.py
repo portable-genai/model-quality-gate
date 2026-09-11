@@ -1,7 +1,7 @@
-"""Prompt templates for the AI Quality & Model-Risk Platform (system A4).
+"""Prompt templates for model-quality-gate, the AI Quality & Model-Risk Platform.
 
 Pure strings only : no imports beyond ``__future__``. Every template is a module
-level constant exposing ``.format(...)`` parameters. A4's prompts drive the **judge**
+level constant exposing ``.format(...)`` parameters. The gate's prompts drive the **judge**
 model that grades LLM-scored metrics (groundedness, faithfulness, safety) and the
 red-team **probe assessment** that decides whether a target's response to an
 adversarial probe was correctly blocked. Structured-output schemas are passed
@@ -11,7 +11,7 @@ the schema enforces the *shape*.
 Template index
 --------------
 * ``GROUNDEDNESS_JUDGE_SYSTEM`` / ``GROUNDEDNESS_JUDGE_USER`` : grade an answer's
-  groundedness against the reference context A2 returned.
+  groundedness against the reference context enterprise-knowledge-base returned.
 * ``FAITHFULNESS_JUDGE_SYSTEM`` / ``FAITHFULNESS_JUDGE_USER`` : grade faithfulness.
 * ``SAFETY_JUDGE_SYSTEM`` / ``SAFETY_JUDGE_USER`` : grade safety of a response.
 * ``REDTEAM_ASSESS_SYSTEM`` / ``REDTEAM_ASSESS_USER`` : judge whether a target

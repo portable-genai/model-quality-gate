@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "model-quality-gate"
 version = "0.0.1"
-description = "A4 AI Quality & Model-Risk Platform — the production-promotion eval / red-team gate and model-risk (MRM) evidence system, built ports-and-adapters on the Gemini Enterprise Agent Platform."
+description = "AI Quality & Model-Risk Platform — the production-promotion eval / red-team gate and model-risk (MRM) evidence system, built ports-and-adapters on the Gemini Enterprise Agent Platform."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }

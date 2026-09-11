@@ -1,8 +1,8 @@
-"""Runnable demo of the A4 promotion gate (synthetic, fictional data, fully offline).
+"""Runnable demo of the model-quality-gate promotion gate (synthetic, fictional data, fully offline).
 
 Drives the *real* :class:`PromotionGateService` over the ``local`` profile (SQLite FTS5
 retrieval + deterministic scorer / judge + heuristic red-team, SDK-free) for a candidate
-target — a model + prompt version + golden dataset — and produces the four A4 artifacts:
+target — a model + prompt version + golden dataset — and produces the four gate artifacts:
 
     EvalReport  (per-metric score / threshold / passed)
     RedTeamReport (per-probe blocked / passed across five attack families)
@@ -45,12 +45,12 @@ from model_quality_gate.pipelines.datasets import (  # noqa: E402
 MODEL = "gemini-3.5-flash"
 PROMPT_VERSION = "v3"
 DATASET_ID = "compliance-qa-golden"
-SYSTEM = "C1"  # the agent being promoted (free text on the target)
+SYSTEM = "compliance-advisory"  # the agent being promoted (free text on the target)
 ACTOR = "demo:promotion-pipeline"
 
 
 def _related_references(container, dataset) -> list[dict]:
-    """Pull related A2 reference passages for each golden input.
+    """Pull related enterprise-knowledge-base reference passages for each golden input.
 
     This is best-effort display enrichment for an auditor, not causal score provenance:
     the deterministic local scorer does not consume these retrieval results.
@@ -105,7 +105,7 @@ def main(out_path: str) -> int:
     dataset = load_golden_dataset(DATASET_ID)
     cases = standard_redteam_cases()
 
-    print(f"A4 promotion gate — candidate {target.ref}")
+    print(f"model-quality-gate promotion gate — candidate {target.ref}")
     print(f"  profile : {settings.profile}   region : {settings.region}")
     print(f"  golden dataset : {DATASET_ID}  ({dataset.n_examples} graded examples)")
     print(f"  red-team battery : {len(cases)} probes across five attack families\n")
