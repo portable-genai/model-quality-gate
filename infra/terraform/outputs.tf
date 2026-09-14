@@ -16,7 +16,7 @@ output "region" {
 # --------------------------------- KMS -------------------------------------- #
 output "kms_key" {
   description = "Regional CMEK crypto key id (settings.yaml kms_key / AI_QUALITY_KMS_KEY)."
-  value       = google_kms_crypto_key.model_quality_gate.id
+  value       = one(google_kms_crypto_key.model_quality_gate[*].id)
 }
 
 # ------------------------------- BigQuery ----------------------------------- #
