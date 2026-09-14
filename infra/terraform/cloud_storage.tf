@@ -17,8 +17,11 @@ resource "google_storage_bucket" "golden_datasets" {
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced" # P-05 : never public
 
-  encryption {
-    default_kms_key_name = google_kms_crypto_key.model_quality_gate.id # CMEK explicit (P-09)
+  dynamic "encryption" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      default_kms_key_name = one(google_kms_crypto_key.model_quality_gate[*].id) # CMEK explicit (P-09)
+    }
   }
 
   versioning {
@@ -39,8 +42,11 @@ resource "google_storage_bucket" "model_cards" {
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
 
-  encryption {
-    default_kms_key_name = google_kms_crypto_key.model_quality_gate.id
+  dynamic "encryption" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      default_kms_key_name = one(google_kms_crypto_key.model_quality_gate[*].id)
+    }
   }
 
   # Retain model-card history as MRM evidence (P-07).
@@ -64,8 +70,11 @@ resource "google_storage_bucket" "mrm_evidence" {
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
 
-  encryption {
-    default_kms_key_name = google_kms_crypto_key.model_quality_gate.id
+  dynamic "encryption" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      default_kms_key_name = one(google_kms_crypto_key.model_quality_gate[*].id)
+    }
   }
 
   retention_policy {
