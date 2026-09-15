@@ -17,8 +17,11 @@ resource "google_bigquery_dataset" "model_quality_gate" {
   location    = var.region
   description = "model-quality-gate: eval metrics, model drift, and prompt-version change control."
 
-  default_encryption_configuration {
-    kms_key_name = google_kms_crypto_key.model_quality_gate.id # CMEK explicit (P-09)
+  dynamic "default_encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.model_quality_gate[*].id) # CMEK explicit (P-09)
+    }
   }
 
   depends_on = [

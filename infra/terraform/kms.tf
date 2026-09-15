@@ -10,6 +10,7 @@
 #         never the global/multi-region key. Regional CMEK pins crypto material in-country.
 
 resource "google_kms_key_ring" "model_quality_gate" {
+  count    = var.cmek_enabled ? 1 : 0
   name     = "ai-quality-ring"
   location = var.region # us-central1 : regional, in-country key material (P-03)
 
@@ -17,8 +18,9 @@ resource "google_kms_key_ring" "model_quality_gate" {
 }
 
 resource "google_kms_crypto_key" "model_quality_gate" {
+  count    = var.cmek_enabled ? 1 : 0
   name     = "ai-quality-cmek"
-  key_ring = google_kms_key_ring.model_quality_gate.id
+  key_ring = one(google_kms_key_ring.model_quality_gate[*].id)
 
   purpose         = "ENCRYPT_DECRYPT"
   rotation_period = "7776000s" # 90 days : periodic rotation for key hygiene
@@ -44,28 +46,32 @@ data "google_project" "this" {
 
 # BigQuery service agent (eval metrics + drift datasets).
 resource "google_kms_crypto_key_iam_member" "bigquery" {
-  crypto_key_id = google_kms_crypto_key.model_quality_gate.id
+  count         = var.cmek_enabled ? 1 : 0
+  crypto_key_id = one(google_kms_crypto_key.model_quality_gate[*].id)
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:bq-${data.google_project.this.number}@bigquery-encryption.iam.gserviceaccount.com"
 }
 
 # Cloud Storage service agent (golden datasets + model cards buckets).
 resource "google_kms_crypto_key_iam_member" "storage" {
-  crypto_key_id = google_kms_crypto_key.model_quality_gate.id
+  count         = var.cmek_enabled ? 1 : 0
+  crypto_key_id = one(google_kms_crypto_key.model_quality_gate[*].id)
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.this.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 
 # Vertex AI / Agent Runtime + Gen AI evaluation service agent.
 resource "google_kms_crypto_key_iam_member" "aiplatform" {
-  crypto_key_id = google_kms_crypto_key.model_quality_gate.id
+  count         = var.cmek_enabled ? 1 : 0
+  crypto_key_id = one(google_kms_crypto_key.model_quality_gate[*].id)
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.this.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
 
 # Cloud Logging service agent (CMEK on the WORM bucket).
 resource "google_kms_crypto_key_iam_member" "logging" {
-  crypto_key_id = google_kms_crypto_key.model_quality_gate.id
+  count         = var.cmek_enabled ? 1 : 0
+  crypto_key_id = one(google_kms_crypto_key.model_quality_gate[*].id)
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.this.number}@gcp-sa-logging.iam.gserviceaccount.com"
 }
