@@ -32,7 +32,7 @@ PORTS = {
     "registry",
     "tool_catalog",
 }
-RUNTIME_PROFILES = {"gcp", "platform", "local", "onprem"}
+RUNTIME_PROFILES = {"gcp", "platform", "local", "live", "onprem"}
 REQUIRED_LIMIT_AXES = {
     "channel_ui",
     "runtime_controls",

@@ -205,6 +205,16 @@ Contract tests confirm that the `local` adapters (and the `onprem` placeholder a
 satisfy the same 13 Protocols as the GCP adapters (interface parity), and the unit suite
 drives the domain services against the real `local` adapters.
 
+**`live` profile: the same laptop stack, with the judge on a local open-weight model.**
+`AI_QUALITY_PROFILE=live` binds every port exactly as `local` does, with the same laptop posture,
+except `llm`, which calls the local model server through the shared `hex_service_kit.localmodel`
+client (`LOCAL_MODEL_URL`, default `http://127.0.0.1:8001/chat/completions`; `LOCAL_MODEL`,
+default `mlx-community/gemma-4-31b-it-8bit`). Start a server with
+`python -m mlx_vlm.server --model mlx-community/gemma-4-31b-it-8bit --port 8001`. No gate route
+calls the `llm` port today, so evaluation and red-team verdicts under `live` equal `local`'s;
+what changes is the model the banner names and the one the judge port reaches. Tests, CI and
+`make demo` never use it.
+
 ### 4.2 `onprem` profile: the fail-fast migration target
 
 The `onprem` profile binds every port to a placeholder adapter that raises

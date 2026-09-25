@@ -15,6 +15,7 @@ from __future__ import annotations
 import dataclasses
 
 import pytest
+from hex_service_kit.localmodel import DEFAULT_LOCAL_MODEL
 
 from model_quality_gate.config import Settings
 
@@ -28,7 +29,13 @@ def settings() -> Settings:
 
 @pytest.mark.parametrize(
     ("profile", "expected"),
-    [("local", "local"), ("gcp", "gcp"), ("platform", "gcp"), ("onprem", "local")],
+    [
+        ("local", "local"),
+        ("live", "local"),
+        ("gcp", "gcp"),
+        ("platform", "gcp"),
+        ("onprem", "local"),
+    ],
 )
 def test_the_runtime_says_where_the_process_runs_not_whose_model_it_calls(
     settings: Settings, profile: str, expected: str
@@ -45,12 +52,22 @@ def test_the_runtime_says_where_the_process_runs_not_whose_model_it_calls(
     ("profile", "expected"),
     [
         ("local", "deterministic-offline-stub"),
+        ("live", DEFAULT_LOCAL_MODEL),
         ("gcp", "gemini-3.5-flash"),
         ("platform", "gemini-3.5-flash"),
         ("onprem", "onprem-not-implemented"),
     ],
 )
 def test_the_model_answers_what_the_profile_actually_binds(
-    settings: Settings, profile: str, expected: str
+    settings: Settings, profile: str, expected: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    monkeypatch.delenv("LOCAL_MODEL", raising=False)
     assert dataclasses.replace(settings, profile=profile).generator_model == expected
+
+
+def test_the_live_banner_names_the_model_the_operator_pointed_it_at(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The live half is read from the same LOCAL_MODEL the adapter reads, not a constant."""
+    monkeypatch.setenv("LOCAL_MODEL", "some-other-local-model")
+    assert dataclasses.replace(settings, profile="live").generator_model == "some-other-local-model"

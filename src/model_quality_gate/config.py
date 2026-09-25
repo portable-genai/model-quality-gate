@@ -41,7 +41,16 @@ _PROFILE_ENV = "AI_QUALITY_PROFILE"
 
 #: Every profile that binds an adapter family. The comparison against it is EXACT and
 #: case-sensitive, so ``Local`` is a typo that refuses rather than a silent choice.
-RUNTIME_PROFILES = frozenset({"gcp", "local", "platform", "onprem"})
+RUNTIME_PROFILES = frozenset({"gcp", "local", "live", "platform", "onprem"})
+
+#: The laptop profiles. ``local`` binds the deterministic offline judge and ``live`` binds the
+#: one local open-weight model through the shared ``hex_service_kit.localmodel`` client; every
+#: other port binds the same in-process adapter in both. They share ONE posture, which is the
+#: ``local`` posture: loopback bind, seeded personas, the localhost CORS fallback, the S2S
+#: zero-secret opening and no HSTS. ``live`` only changes which model answers, never who may ask.
+LAPTOP_PROFILES = frozenset({"local", "live"})
+#: The posture string every laptop profile presents to the shared guards, which match it exactly.
+LAPTOP_POSTURE = "local"
 
 #: The profile string handed to every posture RELAXATION when no profile was ever named. It is
 #: deliberately NOT a member of :data:`RUNTIME_PROFILES` and never reaches a :class:`Container`
@@ -98,17 +107,23 @@ class ProfileChoice:
         the localhost CORS dev-origin fallback, and the omission of HSTS. An unconsented run
         must NOT look like ``local`` for any of them, so it gets :data:`UNCONSENTED_PROFILE`:
         no dev origins, HSTS on, and an unset shared secret is a refusal rather than consent.
+        ``live`` presents as ``local``: it is the same laptop, answered by a different model.
         """
-        return self.profile if self.explicit else UNCONSENTED_PROFILE
+        if not self.explicit:
+            return UNCONSENTED_PROFILE
+        return LAPTOP_POSTURE if self.profile in LAPTOP_PROFILES else self.profile
 
     @property
     def bind_profile(self) -> str:
         """The profile the bind guard keys off, where ``local`` is the RESTRICTIVE case.
 
         ``resolve_bind_host`` confines ``local`` to loopback and lets fronted profiles take
-        ``0.0.0.0``, so here an unconsented run must look like ``local`` and stay on loopback.
+        ``0.0.0.0``, so here an unconsented run must look like ``local`` and stay on loopback,
+        and so must ``live``, which serves the same seeded personas.
         """
-        return self.profile if self.explicit else "local"
+        if not self.explicit or self.profile in LAPTOP_PROFILES:
+            return LAPTOP_POSTURE
+        return self.profile
 
     @property
     def service_auth_configured(self) -> bool:
@@ -267,7 +282,7 @@ class LocalSettings:
 class Settings:
     project_id: str = "your-gcp-project"
     region: str = DEFAULT_GCP_REGION
-    # local (default when AI_QUALITY_PROFILE unset) | gcp | platform | onprem
+    # local (default when AI_QUALITY_PROFILE unset) | live | gcp | platform | onprem
     profile: str = "local"
     kms_key: str = ""  # projects/.../cryptoKeys/... (regional)
     models: ModelSettings = field(default_factory=ModelSettings)
@@ -332,6 +347,12 @@ class Settings:
         if class_name == "GeminiLLMAdapter":
             models = self.models
             return models.hard_reasoning if models.use_hard_reasoning else models.reasoning
+        if class_name == "LocalModelLLMAdapter":
+            # The id the laptop's model server is asked for (LOCAL_MODEL, three-state), the same
+            # read the adapter makes, so the banner names the model the live profile calls.
+            from hex_service_kit.localmodel import LocalModelSettings
+
+            return LocalModelSettings.from_env().model
         if class_name == "OnPremLLMAdapter":
             # The on-prem adapter is a fail-fast migration placeholder: it raises rather
             # than generating. Naming a model here would advertise one that never answers.

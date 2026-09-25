@@ -1,11 +1,14 @@
 # model-quality-gate (AI Quality & Model-Risk Platform) : runtime configuration.
 #
-# Four deployment profiles, selected by AI_QUALITY_PROFILE (or profile: below):
+# Five deployment profiles, selected by AI_QUALITY_PROFILE (or profile: below):
 #   gcp    : Google Cloud managed services (lazy SDK imports). Production sets
 #            AI_QUALITY_PROFILE=gcp explicitly (e.g. in the Dockerfile / runbook).
 #   local  : a WORKING offline laptop stack (SQLite FTS5 + deterministic scorer / judge,
 #            SDK-free, no API key, no emulator required). What dev / test / CI name
 #            explicitly (Makefile, ci.yaml).
+#   live   : the local stack with the llm port on the laptop's local open-weight model, through
+#            the shared hex_service_kit.localmodel client (LOCAL_MODEL_URL / LOCAL_MODEL). Same
+#            laptop posture as local; needs a running model server, so tests and CI never use it.
 #   platform: thin HTTP clients to the sibling horizontal-platform services (enterprise-knowledge-base, agent-registry, agent-observability).
 #   onprem : fail-fast Google Distributed Cloud migration placeholders.
 # Nothing in src/model_quality_gate/domain changes between profiles.
@@ -17,7 +20,7 @@
 
 project_id: ${GOOGLE_CLOUD_PROJECT:-your-gcp-project}
 region: ${GCP_REGION:-asia-southeast1}     # selected at deploy; must match Terraform
-profile: ${AI_QUALITY_PROFILE:-}       # gcp | local | platform | onprem; unset = nobody chose
+profile: ${AI_QUALITY_PROFILE:-}       # gcp | local | live | platform | onprem; unset = nobody chose
 kms_key: ${AI_QUALITY_KMS_KEY:-}       # regional Cloud KMS key for CMEK
 
 # Residency allowlist (P-03). The SAME list as infra/terraform var.allowed_regions, enforced
@@ -127,6 +130,7 @@ local:
 # (SQLite FTS5 retrieval, deterministic scorer / judge, heuristic red-team), so the
 # whole gate runs offline. Platform-client ports (knowledge_base, registry) use
 # in-process local implementations, NOT HTTP to siblings (a laptop runs one app).
+# 'live' binds exactly what 'local' binds except llm, which calls the local model server.
 # ----------------------------------------------------------------------------- #
 adapters:
   # End-user identity (authentication). local = seeded dev personas, NO IdP/AD/LDAP, so
@@ -138,16 +142,19 @@ adapters:
     gcp: model_quality_gate.adapters.gcp.iap_identity:IapIdentityAdapter
     platform: model_quality_gate.adapters.gcp.iap_identity:IapIdentityAdapter
     local: model_quality_gate.adapters.local.identity:LocalPersonaIdentityAdapter
+    live: model_quality_gate.adapters.local.identity:LocalPersonaIdentityAdapter
     onprem: model_quality_gate.adapters.onprem.identity:OnPremIdentityAdapter
   evaluation:
     gcp: model_quality_gate.adapters.gcp.genai_eval:GenAiEvalAdapter
     platform: model_quality_gate.adapters.gcp.genai_eval:GenAiEvalAdapter
     local: model_quality_gate.adapters.local.evaluation:LocalDeterministicEvalAdapter
+    live: model_quality_gate.adapters.local.evaluation:LocalDeterministicEvalAdapter
     onprem: model_quality_gate.adapters.onprem.evaluation:OnPremEvalAdapter
   redteam:
     gcp: model_quality_gate.adapters.gcp.gemini_redteam:GeminiRedTeamAdapter
     platform: model_quality_gate.adapters.gcp.gemini_redteam:GeminiRedTeamAdapter
     local: model_quality_gate.adapters.local.redteam:LocalHeuristicRedTeamAdapter
+    live: model_quality_gate.adapters.local.redteam:LocalHeuristicRedTeamAdapter
     onprem: model_quality_gate.adapters.onprem.redteam:OnPremRedTeamAdapter
   # Golden-dataset ingest/resolve store (DatasetStorePort). gcp = CMEK Cloud Storage golden
   # bucket; local = SQLite; onprem = placeholder. Lets a caller publish a golden set
@@ -156,49 +163,59 @@ adapters:
     gcp: model_quality_gate.adapters.gcp.gcs_datasets:GcsDatasetStoreAdapter
     platform: model_quality_gate.adapters.gcp.gcs_datasets:GcsDatasetStoreAdapter
     local: model_quality_gate.adapters.local.dataset_store:LocalDatasetStoreAdapter
+    live: model_quality_gate.adapters.local.dataset_store:LocalDatasetStoreAdapter
     onprem: model_quality_gate.adapters.onprem.dataset_store:OnPremDatasetStoreAdapter
   prompt_registry:
     gcp: model_quality_gate.adapters.gcp.bigquery_prompts:BigQueryPromptRegistryAdapter
     platform: model_quality_gate.adapters.gcp.bigquery_prompts:BigQueryPromptRegistryAdapter
     local: model_quality_gate.adapters.local.prompt_registry:LocalPromptRegistryAdapter
+    live: model_quality_gate.adapters.local.prompt_registry:LocalPromptRegistryAdapter
     onprem: model_quality_gate.adapters.onprem.prompt_registry:OnPremPromptRegistryAdapter
   model_card_store:
     gcp: model_quality_gate.adapters.gcp.gcs_model_cards:GcsModelCardStoreAdapter
     platform: model_quality_gate.adapters.gcp.gcs_model_cards:GcsModelCardStoreAdapter
     local: model_quality_gate.adapters.local.model_card_store:LocalModelCardStoreAdapter
+    live: model_quality_gate.adapters.local.model_card_store:LocalModelCardStoreAdapter
     onprem: model_quality_gate.adapters.onprem.model_card_store:OnPremModelCardStoreAdapter
   metrics_store:
     gcp: model_quality_gate.adapters.gcp.bigquery_metrics:BigQueryMetricsStoreAdapter
     platform: model_quality_gate.adapters.gcp.bigquery_metrics:BigQueryMetricsStoreAdapter
     local: model_quality_gate.adapters.local.metrics_store:LocalMetricsStoreAdapter
+    live: model_quality_gate.adapters.local.metrics_store:LocalMetricsStoreAdapter
     onprem: model_quality_gate.adapters.onprem.metrics_store:OnPremMetricsStoreAdapter
   knowledge_base:
     gcp: model_quality_gate.adapters.platform.remote_knowledge_base:RemoteKnowledgeBaseAdapter
     platform: model_quality_gate.adapters.platform.remote_knowledge_base:RemoteKnowledgeBaseAdapter
     local: model_quality_gate.adapters.local.knowledge_base:LocalFtsKnowledgeBaseAdapter
+    live: model_quality_gate.adapters.local.knowledge_base:LocalFtsKnowledgeBaseAdapter
     onprem: model_quality_gate.adapters.onprem.knowledge_base:OnPremKnowledgeBaseAdapter
   llm:
     gcp: model_quality_gate.adapters.gcp.gemini_llm:GeminiLLMAdapter
     platform: model_quality_gate.adapters.gcp.gemini_llm:GeminiLLMAdapter
     local: model_quality_gate.adapters.local.llm:LocalDeterministicLLMAdapter
+    live: model_quality_gate.adapters.live.llm:LocalModelLLMAdapter
     onprem: model_quality_gate.adapters.onprem.llm:OnPremLLMAdapter
   audit:
     gcp: model_quality_gate.adapters.gcp.cloud_logging_audit:CloudLoggingAuditAdapter
     platform: model_quality_gate.adapters.platform.remote_audit:RemoteAuditAdapter
     local: model_quality_gate.adapters.local.audit:LocalAppendOnlyAuditAdapter
+    live: model_quality_gate.adapters.local.audit:LocalAppendOnlyAuditAdapter
     onprem: model_quality_gate.adapters.onprem.audit:OnPremAuditAdapter
   tracer:
     gcp: model_quality_gate.adapters.gcp.cloud_trace_tracer:CloudTraceTracerAdapter
     platform: model_quality_gate.adapters.gcp.cloud_trace_tracer:CloudTraceTracerAdapter
     local: model_quality_gate.adapters.local.tracer:LocalNoopTracerAdapter
+    live: model_quality_gate.adapters.local.tracer:LocalNoopTracerAdapter
     onprem: model_quality_gate.adapters.onprem.tracer:OnPremTracerAdapter
   registry:
     gcp: model_quality_gate.adapters.gcp.a2a_registry:A2ARegistryAdapter
     platform: model_quality_gate.adapters.platform.remote_registry:RemoteRegistryAdapter
     local: model_quality_gate.adapters.local.registry:LocalRegistryAdapter
+    live: model_quality_gate.adapters.local.registry:LocalRegistryAdapter
     onprem: model_quality_gate.adapters.onprem.registry:OnPremRegistryAdapter
   tool_catalog:
     gcp: model_quality_gate.adapters.gcp.mcp_tool_catalog:McpToolCatalogAdapter
     platform: model_quality_gate.adapters.gcp.mcp_tool_catalog:McpToolCatalogAdapter
     local: model_quality_gate.adapters.local.tool_catalog:LocalToolCatalogAdapter
+    live: model_quality_gate.adapters.local.tool_catalog:LocalToolCatalogAdapter
     onprem: model_quality_gate.adapters.onprem.tool_catalog:OnPremToolCatalogAdapter

@@ -40,7 +40,7 @@ from hex_service_kit.capabilities import (
 )
 from hex_service_kit.web import add_loopback_exposure_guard, add_security_headers
 
-from ..config import end_user_auth_kind
+from ..config import LAPTOP_PROFILES, end_user_auth_kind
 from ..domain.errors import EmptyDatasetError, UnknownMetricError
 from ..domain.models import PromptVersion
 from ..domain.serialization import mrm_evidence_jsonable
@@ -581,7 +581,9 @@ def capabilities() -> CapabilityManifestModel:
 
 def _capability_manifest() -> CapabilityManifestModel:
     settings = deps.get_settings()
-    demo_only = settings.profile == "local"
+    # Both laptop profiles are demo-only: ``live`` swaps the model that answers, not the
+    # in-process stores or the deterministic evaluator, so neither is promotion evidence.
+    demo_only = settings.profile in LAPTOP_PROFILES
     managed = settings.profile in {"gcp", "platform"}
     mode = (
         CapabilityMode.LOCAL
