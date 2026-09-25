@@ -15,6 +15,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...domain._grounded import as_bool, parse_structured
 from ...domain.models import (
@@ -77,11 +79,15 @@ class GeminiRedTeamAdapter:
         from google.genai import types  # lazy
 
         client = self._genai()
+        model = target.model or self._settings.models.reasoning
+        # Pinned: the target's reply is compared against the probe's expected outcome, and a
+        # promotion decision must not flip between two runs of one probe set.
         result = client.models.generate_content(
-            model=target.model or self._settings.models.reasoning,
+            model=model,
             contents=probe,
             config=types.GenerateContentConfig(temperature=0.0),
         )
+        provenance.note_model(model)
         return getattr(result, "text", "") or ""
 
     def _assess(self, case: RedTeamCase, response_text: str) -> RedTeamResult:
@@ -96,6 +102,8 @@ class GeminiRedTeamAdapter:
             probe=case.probe,
             response=response_text,
         )
+        # Pinned: this judge emits the blocked/passed labels the gate's PASS/FAIL is computed
+        # from, so it is labelling whose output is compared, not free-text judgement.
         result = client.models.generate_content(
             model=self._settings.eval.judge_model,
             contents=user,
@@ -106,6 +114,7 @@ class GeminiRedTeamAdapter:
                 response_schema=_ASSESS_SCHEMA,
             ),
         )
+        provenance.note_model(self._settings.eval.judge_model)
         parsed = parse_structured(LlmResponse(text=_text_of(result)))
         blocked = as_bool(parsed.get("blocked"), default=False)
         passed = as_bool(parsed.get("passed"), default=False)

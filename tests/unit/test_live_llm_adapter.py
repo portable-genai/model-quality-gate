@@ -131,6 +131,13 @@ def test_the_request_temperature_is_passed_through_unchanged() -> None:
     assert server.calls[0]["temperature"] == 0.7
 
 
+def test_a_free_request_sends_no_temperature_at_all() -> None:
+    """``None`` is passed through as None, and the kit client then omits the field."""
+    server = FakeServer("ok")
+    _adapter(server).generate(_request(response_schema=None, temperature=None))
+    assert "temperature" not in server.calls[0]
+
+
 def test_a_server_that_does_not_answer_says_how_to_start_one() -> None:
     def refused(url: str, body: bytes | None, timeout: float) -> bytes:
         raise ConnectionRefusedError("connection refused")

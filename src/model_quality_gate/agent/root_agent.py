@@ -78,9 +78,10 @@ def build_root_agent(settings: Settings | None = None) -> LlmAgent:
 
     tools: list[Any] = list(build_function_tools())
 
-    # thinking=high for the reasoning model (gemini-3.5-flash) per SPEC §3.
+    # thinking=high for the reasoning model (gemini-3.5-flash) per SPEC §3. No temperature:
+    # the agent narrates what its tools return, and every score and PASS/FAIL comes from those
+    # tools, so its sampling is left free (omitted, never 1.0: some models reject it).
     generate_content_config = types.GenerateContentConfig(
-        temperature=0.0,
         thinking_config=types.ThinkingConfig(thinking_budget=-1),
     )
 

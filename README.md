@@ -212,7 +212,8 @@ client (`LOCAL_MODEL_URL`, default `http://127.0.0.1:8001/chat/completions`; `LO
 default `mlx-community/gemma-4-31b-it-8bit`). Start a server with
 `python -m mlx_vlm.server --model mlx-community/gemma-4-31b-it-8bit --port 8001`. No gate route
 calls the `llm` port today, so evaluation and red-team verdicts under `live` equal `local`'s;
-what changes is the model the banner names and the one the judge port reaches. Tests, CI and
+what changes is the model the pill first names and the one the judge port reaches; once a
+verdict comes back, the pill names the offline stub that answered it. Tests, CI and
 `make demo` never use it.
 
 ### 4.2 `onprem` profile: the fail-fast migration target

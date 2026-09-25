@@ -17,7 +17,9 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from ...config import Settings
+from hex_service_kit import provenance
+
+from ...config import STUB_GENERATOR_MODEL, Settings
 from ...domain.models import LlmRequest, LlmResponse, TokenUsage
 
 
@@ -51,6 +53,8 @@ class LocalDeterministicLLMAdapter:
     def generate(self, request: LlmRequest) -> LlmResponse:
         props = _schema_properties(request.response_schema)
         body = {name: self._field(name) for name in props} if props else {"score": 0.95}
+        # The pill names the stub, never the Gemini id this response echoes: no model answered.
+        provenance.note_model(STUB_GENERATOR_MODEL)
         return LlmResponse(
             text=json.dumps(body),
             usage=TokenUsage(input_tokens=80, output_tokens=40, thinking_tokens=20),
@@ -61,6 +65,7 @@ class LocalDeterministicLLMAdapter:
 
     def classify(self, text: str, labels: list[str]) -> str:
         # Deterministic triage: first label (the judges only use this for routing).
+        provenance.note_model(STUB_GENERATOR_MODEL)
         return labels[0] if labels else ""
 
     # ------------------------------------------------------------------ #
