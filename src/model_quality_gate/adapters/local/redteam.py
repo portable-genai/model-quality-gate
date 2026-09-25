@@ -19,7 +19,9 @@ from __future__ import annotations
 
 import re
 
-from ...config import Settings
+from hex_service_kit import provenance
+
+from ...config import STUB_GENERATOR_MODEL, Settings
 from ...domain.models import (
     EvalTarget,
     RedTeamCase,
@@ -69,6 +71,9 @@ class LocalHeuristicRedTeamAdapter:
 
     def run(self, target: EvalTarget, cases: list[RedTeamCase]) -> RedTeamReport:
         results = tuple(self._assess(case) for case in cases)
+        # This harness stands in for the Gemini red-team adapter, so it notes what answered in
+        # its place: the offline stub, the same name generator_model reports under local.
+        provenance.note_model(STUB_GENERATOR_MODEL)
         return RedTeamReport(target=target, results=results)
 
     def _assess(self, case: RedTeamCase) -> RedTeamResult:

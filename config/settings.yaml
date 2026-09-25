@@ -76,8 +76,6 @@ models:
   location: ${AI_QUALITY_MODEL_LOCATION:-asia-southeast1}
   reasoning: gemini-3.5-flash          # GA : judge / reasoning model (thinking=high)
   triage: gemini-3.5-flash        # GA : routing / cheap triage
-  hard_reasoning: gemini-3.5-flash  # in-region SG commitment; no Gemini 3 PRO tier serves any location
-  use_hard_reasoning: false
 
 eval:
   location: ${GCP_REGION:-asia-southeast1}

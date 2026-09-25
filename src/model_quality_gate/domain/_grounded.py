@@ -112,14 +112,15 @@ def build_llm_request(
     model: str | None,
     response_schema: dict | None,
     thinking: ThinkingLevel = ThinkingLevel.HIGH,
-    temperature: float = 0.0,
+    temperature: float | None = None,
     max_output_tokens: int = 2048,
 ) -> LlmRequest:
     """Assemble an ``LlmRequest`` with a single user message and a system prompt.
 
     ``model=None`` lets the adapter pick its configured default (the reasoning / judge
-    model, ``gemini-3.5-flash``); thinking defaults to HIGH and temperature to 0.0 for
-    a deterministic, reproducible judgement.
+    model, ``gemini-3.5-flash``); thinking defaults to HIGH. ``temperature=None`` sends none
+    (the model's own sampling), so a caller whose output is extracted, classified, scored or
+    compared passes 0.0 explicitly where it builds the request.
     """
     return LlmRequest(
         messages=(LlmMessage(role="user", content=user_content),),

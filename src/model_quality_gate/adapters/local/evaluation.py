@@ -23,7 +23,9 @@ from __future__ import annotations
 
 import re
 
-from ...config import Settings
+from hex_service_kit import provenance
+
+from ...config import STUB_GENERATOR_MODEL, Settings
 from ...domain.models import Citation, EvalDataset, EvalTarget
 
 _TOKEN_RE = re.compile(r"[A-Za-z0-9]+")
@@ -92,6 +94,9 @@ class LocalDeterministicEvalAdapter:
         # default (1.0), citation-family metrics take citation coverage, and everything
         # else (groundedness / accuracy / recall / precision families) takes expected-point
         # coverage.
+        # This scorer stands in for the Gen AI evaluation service, so it notes what answered in
+        # its place: the offline stub, the same name generator_model reports under local.
+        provenance.note_model(STUB_GENERATOR_MODEL)
         return {m: round(self._score_for(m, scores, grounded, citation), 4) for m in metrics}
 
     @staticmethod

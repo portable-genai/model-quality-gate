@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...domain.models import (
     EvalDataset,
@@ -61,10 +63,11 @@ class GenAiEvalAdapter:
         # verify: the current SDK pattern is run_inference(...) to materialise model
         # responses over the dataset, then evaluate(...) with a metric list to score them.
         # https://cloud.google.com/vertex-ai/generative-ai/docs/models/run-evaluation
-        inference = evals.run_inference(
-            model=target.model or self._settings.eval.judge_model,
-            src=self._dataset_src(dataset),
-        )
+        model = target.model or self._settings.eval.judge_model
+        inference = evals.run_inference(model=model, src=self._dataset_src(dataset))
+        # The model that answered the golden set, for the console's model pill. The managed
+        # autorater that scores it is the service's, and this adapter never names it.
+        provenance.note_model(model)
         result = evals.evaluate(traces=inference, metrics=metric_objs)
         return EvaluationOutcome(
             scores=_extract_summary_scores(result, metrics),

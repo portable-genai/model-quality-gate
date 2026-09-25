@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...domain.models import (
     LlmRequest,
@@ -55,18 +57,25 @@ class GeminiLLMAdapter:
 
         client = self._genai()
         model = request.model or self._settings.models.reasoning
+        # Temperature is omitted, not defaulted, when the caller left sampling free: some
+        # models reject the parameter outright, so "free" must mean absent rather than 1.0.
+        sampling: dict[str, Any] = (
+            {} if request.temperature is None else {"temperature": request.temperature}
+        )
         config = types.GenerateContentConfig(
             system_instruction=request.system_instruction,
-            temperature=request.temperature,
             max_output_tokens=request.max_output_tokens,
             thinking_config=types.ThinkingConfig(
                 thinking_budget=_THINKING_BUDGET.get(request.thinking, 8192)
             ),
             response_mime_type=("application/json" if request.response_schema else None),
             response_schema=request.response_schema,
+            **sampling,
         )
         contents = [m.content for m in request.messages if m.role == "user"]
         result = client.models.generate_content(model=model, contents=contents, config=config)
+        # What answered, for the console's model pill (X-Answered-By): the id this call used.
+        provenance.note_model(model)
         return LlmResponse(
             text=getattr(result, "text", "") or "",
             usage=_usage_of(result),
@@ -84,6 +93,7 @@ class GeminiLLMAdapter:
             contents=prompt,
             config=types.GenerateContentConfig(temperature=0.0),
         )
+        provenance.note_model(self._settings.models.triage)
         answer = (getattr(result, "text", "") or "").strip()
         for label in labels:
             if label.lower() in answer.lower():

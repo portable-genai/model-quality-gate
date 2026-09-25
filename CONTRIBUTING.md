@@ -48,6 +48,17 @@ mandatory. `mypy` and the eval gate should also pass.
 - **Add a port the right way.** A new port is a `@runtime_checkable` `Protocol` re-exported
   from `ports/__init__.py`, with `gcp` + `onprem` (and `platform` if a sibling backs it)
   bindings in `config/settings.yaml`, plus an entry in the contract test.
+- **A model adapter notes what answered, and samples per call.** After a successful call a
+  `gcp` adapter calls `hex_service_kit.provenance.note_model(<the model id it actually
+  called>)`, and `provenance.note_search()` only when an online search tool was attached to
+  THAT call; a `local` stand-in notes `STUB_GENERATOR_MODEL`, and the `live` adapter needs
+  nothing (the kit client notes itself). `api/app.py` turns the notes into `X-Answered-By` /
+  `X-Search-Used`, which the console's model pills show. `LlmRequest.temperature` is
+  `float | None = None` and an adapter OMITS it when `None` (Opus 5 and Fable 5 reject it, so
+  free means absent, never `1.0`). Pin `0.0` where the output is extracted, classified, scored
+  or compared, which in this gate is almost every call; leave narration free. No flag may swap
+  in a model the adapter does not call: `generator_model` is the model the adapter calls
+  (`tests/unit/test_answer_provenance.py`, `tests/unit/test_sampling_per_call.py`).
 - **No vacuous PASS.** The gate must never wave a target through unevaluated: an empty
   dataset is a hard error, and a backend failure is a failing report.
 
