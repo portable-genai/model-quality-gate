@@ -17,7 +17,7 @@ model cards + MRM evidence.
 | Catalog id | `model-quality-gate` |
 | Package | `src/model_quality_gate/` |
 | Profile variable | `AI_QUALITY_PROFILE` |
-| Adapter families | `gcp`, `local`, `onprem`, `platform` |
+| Adapter families | `gcp`, `local`, `live`, `onprem`, `platform` |
 | Gate | `make check` |
 
 That variable is read in one module and resolved in three states: unset is no choice,
