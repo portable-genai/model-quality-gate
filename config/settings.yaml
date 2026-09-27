@@ -200,8 +200,8 @@ adapters:
     live: model_quality_gate.adapters.local.audit:LocalAppendOnlyAuditAdapter
     onprem: model_quality_gate.adapters.onprem.audit:OnPremAuditAdapter
   tracer:
-    gcp: model_quality_gate.adapters.gcp.cloud_trace_tracer:CloudTraceTracerAdapter
-    platform: model_quality_gate.adapters.gcp.cloud_trace_tracer:CloudTraceTracerAdapter
+    gcp: model_quality_gate.adapters.gcp.tracer:CloudTracerAdapter
+    platform: model_quality_gate.adapters.gcp.tracer:CloudTracerAdapter
     local: model_quality_gate.adapters.local.tracer:LocalNoopTracerAdapter
     live: model_quality_gate.adapters.local.tracer:LocalNoopTracerAdapter
     onprem: model_quality_gate.adapters.onprem.tracer:OnPremTracerAdapter

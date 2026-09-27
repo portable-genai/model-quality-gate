@@ -109,7 +109,7 @@ Twelve ports:
 | `KnowledgeBaseClientPort` | `enterprise-knowledge-base` reference context | `remote_knowledge_base` | `knowledge_base:LocalFtsKnowledgeBaseAdapter` | `remote_knowledge_base` | `knowledge_base:OnPremKnowledgeBaseAdapter` |
 | `LLMPort` | Judge model | `gemini_llm:GeminiLLMAdapter` | `llm:LocalDeterministicLLMAdapter` | n/a | `llm:OnPremLLMAdapter` |
 | `AuditSinkPort` | WORM audit (`agent-observability`) | `cloud_logging_audit:CloudLoggingAuditAdapter` | `audit:LocalAppendOnlyAuditAdapter` | `remote_audit:RemoteAuditAdapter` | `audit:OnPremAuditAdapter` |
-| `ObservabilityTracerPort` | Tracing (`agent-observability`) | `cloud_trace_tracer:CloudTraceTracerAdapter` | `tracer:LocalNoopTracerAdapter` | n/a | `tracer:OnPremTracerAdapter` |
+| `ObservabilityTracerPort` | Tracing (`agent-observability`) | `tracer:CloudTracerAdapter` | `tracer:LocalNoopTracerAdapter` | n/a | `tracer:OnPremTracerAdapter` |
 | `AgentRegistryPort` | A2A registry (`agent-registry`) | `a2a_registry:A2ARegistryAdapter` | `registry:LocalRegistryAdapter` | `remote_registry:RemoteRegistryAdapter` | `registry:OnPremRegistryAdapter` |
 | `ToolCatalogPort` | Governed MCP tools | `mcp_tool_catalog:McpToolCatalogAdapter` | `tool_catalog:LocalToolCatalogAdapter` | n/a | `tool_catalog:OnPremToolCatalogAdapter` |
 
