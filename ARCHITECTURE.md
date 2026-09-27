@@ -80,7 +80,7 @@ Cloud : no third-party product is named).
 | 6 | `KnowledgeBaseClientPort` | `ports/knowledge.py` | `platform.remote_knowledge_base:RemoteKnowledgeBaseAdapter` | `local.knowledge_base:LocalFtsKnowledgeBaseAdapter` | `platform.remote_knowledge_base:RemoteKnowledgeBaseAdapter` | `onprem.knowledge_base:OnPremKnowledgeBaseAdapter` |
 | 7 | `LLMPort` | `ports/generation.py` | `gcp.gemini_llm:GeminiLLMAdapter` | `local.llm:LocalDeterministicLLMAdapter` | n/a | `onprem.llm:OnPremLLMAdapter` |
 | 8 | `AuditSinkPort` | `ports/observability.py` | `gcp.cloud_logging_audit:CloudLoggingAuditAdapter` | `local.audit:LocalAppendOnlyAuditAdapter` | `platform.remote_audit:RemoteAuditAdapter` | `onprem.audit:OnPremAuditAdapter` |
-| 9 | `ObservabilityTracerPort` | `ports/observability.py` | `gcp.cloud_trace_tracer:CloudTraceTracerAdapter` | `local.tracer:LocalNoopTracerAdapter` | n/a | `onprem.tracer:OnPremTracerAdapter` |
+| 9 | `ObservabilityTracerPort` | `ports/observability.py` | `gcp.tracer:CloudTracerAdapter` | `local.tracer:LocalNoopTracerAdapter` | n/a | `onprem.tracer:OnPremTracerAdapter` |
 | 10 | `AgentRegistryPort` | `ports/governance.py` | `gcp.a2a_registry:A2ARegistryAdapter` | `local.registry:LocalRegistryAdapter` | `platform.remote_registry:RemoteRegistryAdapter` | `onprem.registry:OnPremRegistryAdapter` |
 | 11 | `ToolCatalogPort` | `ports/governance.py` | `gcp.mcp_tool_catalog:McpToolCatalogAdapter` | `local.tool_catalog:LocalToolCatalogAdapter` | n/a | `onprem.tool_catalog:OnPremToolCatalogAdapter` |
 | 12 | `DatasetStorePort` | `ports/dataset_store.py` | `gcp.gcs_datasets:GcsDatasetStoreAdapter` | `local.dataset_store:LocalDatasetStoreAdapter` | n/a | `onprem.dataset_store:OnPremDatasetStoreAdapter` |
