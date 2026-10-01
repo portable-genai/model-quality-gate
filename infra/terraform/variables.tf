@@ -131,9 +131,12 @@ variable "enable_org_policy" {
     Apply the project-level Org Policy constraints (gcp.resourceLocations residency
     allowlist, iam.disableServiceAccountKeyCreation). Requires the caller to hold
     orgpolicy.policyAdmin; set false only for a sandbox where that is not granted.
+
+    Off by default since 2026-10-02 (slice 7 of the posture rule: a control that is not
+    irreversible defaults off in code); terraform.tfvars.example states the production form.
   EOT
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "alert_notification_channels" {
